@@ -1,0 +1,324 @@
+{
+  "@@locale": "am",
+  "@@last_modified": "2026-09-24",
+
+  "appName": "ዬን ቨሪፋይ",
+
+  "taglinePrimary": "ማንኛውንም የኢትዮጵያ ባንክ ክፍያ ያረጋግጡ። በሰከንዶች።",
+
+  "taglineShort": "ያረጋግጡ። ይምኑ። ያድጉ።",
+
+  "continueLabel": "ቀጥል",
+
+  "cancelLabel": "ሰርዝ",
+
+  "confirmLabel": "አረጋግጥ",
+
+  "saveLabel": "አስቀምጥ",
+
+  "deleteLabel": "ሰርዝ",
+
+  "retryLabel": "እንደገና ሞክር",
+
+  "okLabel": "እሺ",
+
+  "closeLabel": "ዝጋ",
+
+  "backLabel": "ተመለስ",
+
+  "doneLabel": "ተጠናቀቀ",
+
+  "loadingLabel": "በመጫን ላይ…",
+
+  "requiredField": "ይህ መስክ ያስፈልጋል",
+
+  "genericError": "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
+
+  "networkError": "የኢንተርኔት ግንኙነት የለም። ኔትወርክዎን ያረጋግጡ።",
+
+  "sessionExpired": "ክፍለ ጊዜዎ ጊዜው አልፏል። እንደገና ይግቡ።",
+
+  "phoneNumber": "ስልክ ቁጥር",
+
+  "phoneHint": "+251 9XX XXX XXX",
+
+  "phoneInvalid": "የሚሰራ የኢትዮጵያ ስልክ ቁጥር ያስገቡ",
+
+  "otpTitle": "የማረጋገጫ ኮድ ያስገቡ",
+
+  "otpSubtitle": "ወደ {phone} 6 አሃዝ ኮድ ልከናል",
+
+  "otpResend": "ኮድ እንደገና ላክ",
+
+  "otpResendIn": "በ{seconds} ሰከንድ ውስጥ እንደገና ላክ",
+
+  "otpInvalid": "ኮዱ ትክክል አይደለም። እባክዎ እንደገና ይሞክሩ።",
+
+  "otpExpired": "ኮዱ ጊዜው አልፏል። አዲስ ይጠይቁ።",
+
+  "otpMaxAttempts": "ብዙ ሙከራዎች። ከጥቂት ጊዜ በኋላ እንደገና ይሞክሩ።",
+
+  "pinTitle": "PIN ያቀናብሩ",
+
+  "pinSubtitle": "መለያዎን ለመጠበቅ {length} አሃዝ PIN ይምረጡ",
+
+  "pinConfirmTitle": "PIN ያረጋግጡ",
+
+  "pinMismatch": "PINs አይዛመዱም። እንደገና ይሞክሩ።",
+
+  "pinWrong": "PIN ትክክል አይደለም። {attemptsLeft} ሙከራ ቀርቷል።",
+
+  "enterPin": "PINዎን ያስገቡ",
+
+  "biometricTitle": "ባዮሜትሪክ መክፈቻ አንቃ",
+
+  "biometricSubtitle": "በፍጥነት እና ደህንነቱ በተጠበቀ ሁኔታ ለመክፈት የጣት አሻራ ወይም Face ID ይጠቀሙ።",
+
+  "biometricEnable": "ባዮሜትሪክ አንቃ",
+
+  "biometricSkip": "አሁን ዝለል",
+
+  "biometricPrompt": "ማንነትዎን ያረጋግጡ",
+
+  "biometricFailed": "ባዮሜትሪክ ማረጋገጥ አልተሳካም። PINዎን ይጠቀሙ።",
+
+  "verifyTitle": "ክፍያ ያረጋግጡ",
+
+  "verifySubtitle": "የደንበኛውን የክፍያ ማረጋገጫ ፎቶ ያንሱ ወይም ይስቀሉ።",
+
+  "takePhoto": "ፎቶ አንሳ",
+
+  "uploadImage": "ምስል ስቀል",
+
+  "choosePhotoSource": "የደረሰኝ ፎቶ አክል",
+
+  "takePhotoDescription": "የክፍያ ማረጋገጫ ስክሪኑን ያንሱ",
+
+  "uploadImageDescription": "ከማዕከለ-ስዕሎት ያለ ፎቶ ይምረጡ",
+
+  "verificationPending": "በማረጋገጥ ላይ…",
+
+  "verificationPendingDetail": "ደረሰኙን ከ{bank} ጋር እየፈተሽን ነው። ይህ ከ10 ሰከንድ ያነሰ ጊዜ ይወስዳል።",
+
+  "verdictVerified": "ተረጋግጧል",
+
+  "verdictFake": "ውሸት",
+
+  "verdictDuplicate": "ተባዝቷል",
+
+  "verdictPending": "በጥበቃ ላይ",
+
+  "verdictNeedsReview": "ግምገማ",
+
+  "verdictError": "ስህተት",
+
+  "verdictVerifiedMessage": "ይህ ደረሰኝ ትክክለኛ ነው።",
+
+  "verdictFakeMessage": "ይህ ደረሰኝ ሊረጋገጥ አልቻለም። ሐሰተኛ ሊሆን ይችላል።",
+
+  "verdictDuplicateMessage": "ይህ ደረሰኝ ቀደም ሲል {date} ተረጋግጧል።",
+
+  "verdictErrorMessage": "አሁን ወደ {bank} ማዳረስ አልተቻለም። እንደገና ይሞክሩ።",
+
+  "transactionReference": "የግብይት ማጣቀሻ",
+
+  "transactionAmount": "መጠን",
+
+  "transactionDate": "ቀን",
+
+  "transactionBank": "ባንክ",
+
+  "transactionSender": "ላኪ",
+
+  "transactionReceiver": "ተቀባይ",
+
+  "transactionsTitle": "ግብይቶች",
+
+  "noTransactionsTitle": "ምንም ማረጋገጫ የለም",
+
+  "noTransactionsBody": "የተረጋገጡ ክፍያዎች እዚህ ይታያሉ።",
+
+  "verifyFirst": "ክፍያ ያረጋግጡ",
+
+  "homeTitle": "መነሻ",
+
+  "analyticsTitle": "ትንታኔ",
+
+  "profileTitle": "መገለጫ",
+
+  "settingsTitle": "ቅንብሮች",
+
+  "historyTitle": "ታሪክ",
+
+  "subMerchantsTitle": "ቡድን",
+
+  "addSubMerchant": "የቡድን አባል አክል",
+
+  "noSubMerchantsTitle": "ምንም የቡድን አባላት የሉም",
+
+  "noSubMerchantsBody": "ካሽ ሰጭዎችን ወይም ቅርንጫፍ ሰራተኞችን ክፍያ ለማረጋገጥ ያክሉ።",
+
+  "creditsRemaining": "{count} ክሬዲቶች ቀርተዋል",
+
+  "creditsLow": "ትንሽ ክሬዲቶች ብቻ ቀርተዋል ({count})። ጥቅሉን ያድሱ።",
+
+  "creditsEmpty": "ደረሰኞችን ማረጋገጥ ለመቀጠል ጥቅሉን ያድሱ።",
+
+  "creditsUnlimited": "ያልተገደበ",
+
+  "renewPackage": "ጥቅሉን አድስ",
+
+  "billingTitle": "ደንበኝነት",
+
+  "billingCurrentPlan": "አሁን ያለው እቅድ",
+
+  "billingPaymentInstructions": "{amount} ወደ ታች ወዳለው መለያ ያስተላልፉ፣ ከዚያም የክፍያ ስክሪን ፎቶ ይስቀሉ።",
+
+  "billingUploadProof": "የክፍያ ማረጋገጫ ስቀል",
+
+  "billingVerifying": "ክፍያዎን እያረጋገጥን…",
+
+  "billingSuccess": "ክፍያ ተረጋግጧል። እቅድዎ አሁን ነቅቷል።",
+
+  "billingFailed": "ክፍያ ሊረጋገጥ አልቻለም። ድጋፍ ያግኙ።",
+
+  "billingNeedsReview": "ክፍያዎ በግምገማ ላይ ነው። በቅርቡ እናሳውቅዎታለን።",
+
+  "planFree": "ነፃ",
+
+  "planPremium": "ፕሪሚየም",
+
+  "planBusiness": "ቢዝነስ",
+
+  "planBusinessPro": "ቢዝነስ ፕሮ",
+
+  "planApiIntegration": "API ውህደት",
+
+  "planVerificationsPerMonth": "{count} ማረጋገጫዎች / ወር",
+
+  "planUnlimitedVerifications": "ያልተገደበ ማረጋገጫዎች",
+
+  "notificationsTitle": "ማሳወቂያዎች",
+
+  "noNotificationsTitle": "ሁሉም ወቅታዊ ነው",
+
+  "noNotificationsBody": "አዲስ ማሳወቂያዎች የሉም።",
+
+  "logoutLabel": "ውጣ",
+
+  "logoutConfirmTitle": "ይወጡ?",
+
+  "logoutConfirmBody": "ለመግባት ማንነትዎን ማረጋገጥ ያስፈልግዎታል።",
+
+  "devicesTitle": "የታመኑ መሳሪያዎች",
+
+  "deviceThisDevice": "ይህ መሳሪያ",
+
+  "deviceRevoke": "መሳሪያ አስወግድ",
+
+  "deviceRevokeConfirm": "ይህን መሳሪያ ያስወግዱ? ዳግም ማረጋገጥ ያስፈልጋል።",
+
+  "businessName": "የንግድ ስም",
+
+  "businessType": "የንግድ ዓይነት",
+
+  "fullName": "ሙሉ ስም",
+
+  "language": "ቋንቋ",
+
+  "languageEnglish": "English",
+
+  "languageAmharic": "አማርኛ",
+
+  "darkMode": "ጨለማ ሁነታ",
+
+  "appVersion": "ስሪት {version}",
+
+  "copyReference": "ማጣቀሻ ቅዳ",
+
+  "copied": "ተቀድቷል!",
+
+  "shareLabel": "አጋራ",
+
+  "exportLabel": "ወደ ውጭ ላክ",
+
+  "filterLabel": "አጣራ",
+
+  "searchLabel": "ፈልግ",
+
+  "searchHint": "ግብይቶችን ፈልግ…",
+
+  "noSearchResults": "ለ\"{query}\" ምንም ውጤት የለም",
+
+  "dateRangeLabel": "የቀን ክልል",
+
+  "bankLabel": "ባንክ",
+
+  "allBanks": "ሁሉም ባንኮች",
+
+  "bankCbe": "የኢትዮጵያ ንግድ ባንክ",
+
+  "bankTelebirr": "ቴሌብር",
+
+  "bankAwash": "ዓዋሽ ባንክ",
+
+  "bankDashen": "ዳሸን ባንክ",
+
+  "bankAbyssinia": "አቢሲኒያ ባንክ",
+
+  "bankMpesa": "M-Pesa",
+
+  "bankZemen": "ዘመን ባንክ",
+
+  "insightsTitle": "ግንዛቤዎች",
+
+  "insightBestProducts": "ምርጥ ሸቀጦች",
+
+  "insightPeakHours": "ከፍተኛ ሰዓቶች",
+
+  "insightBestDays": "ምርጥ ቀናት",
+
+  "insightTrend": "አዝማሚያ",
+
+  "insightRecommendations": "ምክሮች",
+
+  "insightAnomalies": "ያልተለመዱ ሁኔታዎች",
+
+  "noInsightsTitle": "በቂ ዳታ የለም",
+
+  "noInsightsBody": "ግንዛቤዎችን ለማግኘት ተጨማሪ ማረጋገጫዎችን ያጠናቅቁ።",
+
+  "trendUp": "+{percent}% ካለፈው {period} ጋር ሲነጻጸር",
+
+  "trendDown": "-{percent}% ካለፈው {period} ጋር ሲነጻጸር",
+
+  "periodWeek": "ሳምንት",
+
+  "periodMonth": "ወር",
+
+  "auditLogTitle": "የኦዲት ምዝገባ",
+
+  "permissionCameraTitle": "የካሜራ ፈቃድ ያስፈልጋል",
+
+  "permissionCameraBody": "ዬን ቨሪፋይ የክፍያ ፎቶዎችን ለማንሳት የካሜራ ፈቃድ ያስፈልገዋል።",
+
+  "permissionGalleryTitle": "የፎቶ ማዕከለ-ስዕሎት ፈቃድ ያስፈልጋል",
+
+  "permissionGalleryBody": "ዬን ቨሪፋይ ፎቶዎችን ለመስቀል የፎቶ ማዕከለ-ስዕሎት ፈቃድ ያስፈልገዋል።",
+
+  "permissionOpenSettings": "ቅንብሮች ክፈት",
+
+  "onboardingStep1Title": "ክፍያዎችን ወዲያውኑ ያረጋግጡ",
+
+  "onboardingStep1Body": "ማንኛውንም የኢትዮጵያ ባንክ ደረሰኝ ፎቶ ያንሱ እና ውጤቱን በ10 ሰከንድ ያነሰ ጊዜ ያግኙ።",
+
+  "onboardingStep2Title": "የክፍያ ማጭበርበርን ያስቁ",
+
+  "onboardingStep2Body": "ተመሳሳይ ደረሰኝ ሁለት ጊዜ ጥቅም ላይ ከዋለ ቢዝነስዎን የሚከላከለው የድብልቅ ደረሰኝ ፍለጋ።",
+
+  "onboardingStep3Title": "በግንዛቤዎች ያድጉ",
+
+  "onboardingStep3Body": "ከፍተኛ ሰዓቶችዎን፣ ምርጥ ምርቶችዎን እና የሽያጭ አዝማሚያዎችዎን ያውቁ።",
+
+  "getStarted": "ጀምር"
+}

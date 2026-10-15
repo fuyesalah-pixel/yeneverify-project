@@ -1,0 +1,29 @@
+# ============================================================
+# Yene Verify — CODEOWNERS
+# Fuad is the sole owner on a solo project.
+# This file is structured for future team growth.
+# ============================================================
+
+# Default owner for everything
+* @fuad
+
+# Backend — Kiro agent commits under Fuad's account
+/backend/                   @fuad
+/docker/                    @fuad
+/docs/architecture/         @fuad
+/docs/api/                  @fuad
+/docs/ops/                  @fuad
+
+# Mobile — OpenCode agent commits under Fuad's account
+/mobile/                    @fuad
+/docs/brand/                @fuad
+/docs/product/              @fuad
+
+# Shared — co-owned, both agents read, Fuad arbitrates changes
+/shared/                    @fuad
+
+# Scripts — Fuad reviews all automation
+/scripts/                   @fuad
+
+# CI — Fuad reviews all workflow changes
+/.github/workflows/         @fuad

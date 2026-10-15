@@ -1,0 +1,10 @@
+# Gitleaks configuration for the repository.
+# The committed examples contain only obvious placeholder markers. Suppress
+# only findings whose matched text contains one of those markers; do not
+# allowlist an entire path, so a real value in an example still fails.
+[allowlist]
+description = "Obvious documented placeholders only"
+regexTarget = "match"
+regexes = [
+  '''(?i)(change_me|replace_me|replace-me|placeholder|xxxxxxxx)''',
+]

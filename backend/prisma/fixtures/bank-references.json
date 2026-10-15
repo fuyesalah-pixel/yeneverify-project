@@ -1,0 +1,101 @@
+{
+  "_meta": {
+    "description": "Sample bank transaction references used by seed modules and adapter unit tests. All values are fake but format-correct for each bank. Never use real transaction references here.",
+    "lastUpdated": "2026-09-24",
+    "usage": "Imported by verifications.seed.ts and adapter unit tests via: import refs from '../fixtures/bank-references.json'"
+  },
+
+  "CBE": [
+    {
+      "reference": "FT26195DBK5W81465291",
+      "amount": 55000,
+      "currency": "ETB",
+      "sender": "Abebe Kebede",
+      "receiver": "Selam Coffee",
+      "date": "2026-07-14T14:08:00Z",
+      "notes": "format: FT + 18 alphanumeric chars"
+    },
+    {
+      "reference": "FT26196AAK1X22334455",
+      "amount": 12000,
+      "currency": "ETB",
+      "sender": "Meron Tadesse",
+      "receiver": "Selam Coffee",
+      "date": "2026-07-15T09:22:00Z",
+      "notes": "second CBE fixture for duplicate test"
+    }
+  ],
+
+  "TELEBIRR": [
+    {
+      "reference": "DEV6HKJX7K",
+      "amount": 25000,
+      "currency": "ETB",
+      "sender": "Yonas Alemu",
+      "receiver": "Selam Coffee",
+      "date": "2026-07-15T11:00:00Z",
+      "notes": "format: DEV + 7 alphanumeric chars (uppercase)"
+    }
+  ],
+
+  "AWASH": [
+    {
+      "reference": "2KEX10DJ7F-575JQI",
+      "amount": 35000,
+      "currency": "ETB",
+      "sender": "Hiwot Bekele",
+      "receiver": "Selam Coffee",
+      "date": "2026-07-16T13:40:00Z",
+      "notes": "format: 10chars-6chars with hyphen separator"
+    }
+  ],
+
+  "DASHEN": [
+    {
+      "reference": "DSH-TXN-20260717-0001",
+      "amount": 80000,
+      "currency": "ETB",
+      "sender": "Kalkidan Assefa",
+      "receiver": "Dawit Electronics",
+      "date": "2026-07-17T10:15:00Z",
+      "notes": "Dashen format varies — using their common pattern"
+    }
+  ],
+
+  "ABYSSINIA": [
+    {
+      "reference": "FT26201XYZ123456789012",
+      "amount": 60000,
+      "currency": "ETB",
+      "sender": "Tigist Haile",
+      "receiver": "Dawit Electronics",
+      "date": "2026-07-18T16:20:00Z",
+      "accountSuffix": "12345",
+      "notes": "format: FT + 12 alphanumeric chars; accountSuffix = last 5 digits of sender account"
+    }
+  ],
+
+  "MPESA": [
+    {
+      "reference": "MPX1234ABCD",
+      "amount": 15000,
+      "currency": "ETB",
+      "sender": "Sara Mekonnen",
+      "receiver": "Selam Coffee",
+      "date": "2026-07-19T08:45:00Z",
+      "notes": "format: 10 uppercase alphanumeric chars"
+    }
+  ],
+
+  "ZEMEN": [
+    {
+      "reference": "108IBET252931385",
+      "amount": 45000,
+      "currency": "ETB",
+      "sender": "Dawit Tesfaye",
+      "receiver": "Dawit Electronics",
+      "date": "2026-07-20T12:30:00Z",
+      "notes": "format: 3 digits + 4 uppercase letters + 9 digits"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+# ============================================================
+# Yene Verify — root .gitignore
+# Covers: OS, editors, Node, Flutter/Dart, Docker, secrets
+# ============================================================
+
+# ── OS ───────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Editors ──────────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+.fleet/
+# Keep committed VS Code settings
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+# ── Environment / secrets ─────────────────────────────────────
+# Ignore env files at any depth, but keep the documented examples.
+.env
+**/.env
+**/.env.*
+!**/.env.example
+!**/*.env.example
+!**/*.example
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+.sentryclirc
+
+# File-backed local secrets (only the directory marker/documentation live in Git).
+docker/secrets/*
+!docker/secrets/.gitkeep
+
+# Mobile build defines may contain future public configuration; examples stay tracked.
+mobile/dart_defines.*.json
+!mobile/dart_defines.example.json
+
+# ── Firebase (only .example versions committed) ───────────────
+google-services.json
+GoogleService-Info.plist
+
+# ── Node ──────────────────────────────────────────────────────
+node_modules/
+dist/
+dist-scripts/
+build/
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ── Flutter / Dart ────────────────────────────────────────────
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+mobile/build/
+mobile/.dart_tool/
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/key.properties
+# Generated code — kept in repo so CI doesn't need to regenerate
+# Uncomment to exclude if you prefer regenerating in CI:
+# mobile/lib/api/generated/
+# *.g.dart
+# *.freezed.dart
+
+# ── Prisma ────────────────────────────────────────────────────
+backend/prisma/*.db
+backend/prisma/*.db-journal
+
+# ── Docker volumes ────────────────────────────────────────────
+docker/volumes/
+
+# ── Kiro / AI agents ──────────────────────────────────────────
+.kiro/
+.freebuff/
+
+# ── Local tooling scratch ──────────────────────────────────────
+# Portable Postgres/Redis dropped outside docker/ during setup.
+_pg/
+redis/
+pg/
+*.local/
+
+# Empty stray clone (github.com/fuyesalah-pixel/yene-verifyrr) — unrelated
+# to this project; kept on disk but not part of the repo.
+yene-verifyrr/
+
+# ── Misc ──────────────────────────────────────────────────────
+*.swp
+*.swo
+*~
+.cache/
+tmp/
+temp/

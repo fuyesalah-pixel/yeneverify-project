@@ -1,0 +1,167 @@
+# ============================================================
+# Yene Verify — Production Docker Compose
+#
+# This file deliberately does not start PostgreSQL or Redis locally:
+# staging and production use Hostinger-managed services. Secrets are
+# supplied by the Hostinger environment panel (or a protected env file
+# passed with --env-file), never by a committed file.
+#
+# Required deployment preparation:
+#   1. Set the panel variables, or pass a protected PROD_ENV_FILE.
+#   2. Place the Vision service-account JSON at VISION_CREDENTIALS_HOST_FILE.
+#   3. Run `npx prisma migrate deploy` before traffic is enabled.
+# ============================================================
+
+name: yene-verify-prod
+
+volumes:
+  nginx_certs:
+    driver: local
+
+networks:
+  yene_public:
+    driver: bridge
+
+secrets:
+  gcp-vision:
+    file: ${VISION_CREDENTIALS_HOST_FILE:-./secrets/gcp-vision.json}
+  fcm-private-key:
+    file: ${FCM_PRIVATE_KEY_HOST_FILE:-./secrets/fcm-private-key.txt}
+
+services:
+  # ── NestJS API ───────────────────────────────────────────────────────────
+  api:
+    image: ${API_IMAGE:?Set API_IMAGE to an immutable deployed image tag.}
+    container_name: yene_api_prod
+    restart: always
+    # Panel mode: the ${...} mappings below inherit the Hostinger process
+    # environment. File mode: pass --env-file "$PROD_ENV_FILE" to Compose.
+    # /dev/null keeps panel mode valid when no env file is supplied.
+    env_file:
+      - ${PROD_ENV_FILE:-/dev/null}
+    networks:
+      - yene_public
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      HOST: ${HOST:-0.0.0.0}
+      TZ: ${TZ:-Africa/Addis_Ababa}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+      API_PREFIX: ${API_PREFIX:-api}
+      API_VERSION: ${API_VERSION:-v1}
+      APP_NAME: ${APP_NAME:-Yene Verify}
+      APP_URL: ${APP_URL:?APP_URL is required}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Africa/Addis_Ababa}
+      APP_CURRENCY: ${APP_CURRENCY:-ETB}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      DATABASE_POOL_MIN: ${DATABASE_POOL_MIN:-2}
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-20}
+      DATABASE_STATEMENT_TIMEOUT_MS: ${DATABASE_STATEMENT_TIMEOUT_MS:-15000}
+      REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
+      REDIS_PREFIX: ${REDIS_PREFIX:-yene:}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-30d}
+      JWT_ISSUER: ${JWT_ISSUER:-yene-verify}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-yene-verify-mobile}
+      JWT_ACCESS_PREVIOUS_SECRET: ${JWT_ACCESS_PREVIOUS_SECRET:-}
+      JWT_REFRESH_PREVIOUS_SECRET: ${JWT_REFRESH_PREVIOUS_SECRET:-}
+      JWT_ACCESS_KID: ${JWT_ACCESS_KID:-access-v1}
+      JWT_REFRESH_KID: ${JWT_REFRESH_KID:-refresh-v1}
+      JWT_ACCESS_PREVIOUS_KID: ${JWT_ACCESS_PREVIOUS_KID:-}
+      JWT_REFRESH_PREVIOUS_KID: ${JWT_REFRESH_PREVIOUS_KID:-}
+      OTP_LENGTH: ${OTP_LENGTH:-6}
+      OTP_TTL_SECONDS: ${OTP_TTL_SECONDS:-300}
+      OTP_MAX_ATTEMPTS: ${OTP_MAX_ATTEMPTS:-5}
+      OTP_LOCKOUT_SECONDS: ${OTP_LOCKOUT_SECONDS:-900}
+      OTP_HASH_ROUNDS: ${OTP_HASH_ROUNDS:-10}
+      PHONE_DEFAULT_COUNTRY: ${PHONE_DEFAULT_COUNTRY:-ET}
+      PHONE_DEFAULT_PREFIX: ${PHONE_DEFAULT_PREFIX:-+251}
+      AFROMESSAGE_BASE_URL: ${AFROMESSAGE_BASE_URL:-https://api.afromessage.com/api}
+      AFROMESSAGE_API_KEY: ${AFROMESSAGE_API_KEY:?AFROMESSAGE_API_KEY is required}
+      AFROMESSAGE_SENDER_ID: ${AFROMESSAGE_SENDER_ID:-YENEVRF}
+      AFROMESSAGE_TIMEOUT_MS: ${AFROMESSAGE_TIMEOUT_MS:-8000}
+      AFROMESSAGE_MOCK: ${AFROMESSAGE_MOCK:-false}
+      VISION_PROJECT_ID: ${VISION_PROJECT_ID:?VISION_PROJECT_ID is required}
+      VISION_CREDENTIALS_JSON: /run/secrets/gcp-vision.json
+      VISION_TIMEOUT_MS: ${VISION_TIMEOUT_MS:-15000}
+      VISION_MAX_IMAGE_BYTES: ${VISION_MAX_IMAGE_BYTES:-5242880}
+      VISION_MOCK: ${VISION_MOCK:-false}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:?R2_ACCOUNT_ID is required}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:?R2_ACCESS_KEY_ID is required}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:?R2_SECRET_ACCESS_KEY is required}
+      R2_BUCKET: ${R2_BUCKET:-yene-verify-receipts}
+      R2_REGION: ${R2_REGION:-auto}
+      R2_ENDPOINT: ${R2_ENDPOINT:?R2_ENDPOINT is required}
+      R2_PUBLIC_BASE_URL: ${R2_PUBLIC_BASE_URL:?R2_PUBLIC_BASE_URL is required}
+      R2_PRESIGN_TTL_SECONDS: ${R2_PRESIGN_TTL_SECONDS:-300}
+      R2_MAX_UPLOAD_MB: ${R2_MAX_UPLOAD_MB:-8}
+      R2_USE_MINIO: ${R2_USE_MINIO:-false}
+      FCM_PROJECT_ID: ${FCM_PROJECT_ID:?FCM_PROJECT_ID is required}
+      FCM_CLIENT_EMAIL: ${FCM_CLIENT_EMAIL:?FCM_CLIENT_EMAIL is required}
+      FCM_PRIVATE_KEY: ${FCM_PRIVATE_KEY:-}
+      FCM_PRIVATE_KEY_FILE: ${FCM_PRIVATE_KEY_FILE:-}
+      FCM_MOCK: ${FCM_MOCK:-false}
+      SMTP_HOST: ${SMTP_HOST:-localhost}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-Yene Verify <no-reply@yeneverify.com>}
+      SENTRY_DSN: ${SENTRY_DSN:?SENTRY_DSN is required}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.1}
+      THROTTLE_TTL: ${THROTTLE_TTL:-60}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-100}
+      THROTTLE_OTP_TTL: ${THROTTLE_OTP_TTL:-60}
+      THROTTLE_OTP_LIMIT: ${THROTTLE_OTP_LIMIT:-5}
+      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required}
+      FF_MANUAL_REVIEW_ENABLED: ${FF_MANUAL_REVIEW_ENABLED:-true}
+      FF_BILLING_VERIFICATION_ENABLED: ${FF_BILLING_VERIFICATION_ENABLED:-true}
+      FF_ML_INSIGHTS_ENABLED: ${FF_ML_INSIGHTS_ENABLED:-false}
+      BANK_ADAPTER_TIMEOUT_MS: ${BANK_ADAPTER_TIMEOUT_MS:-12000}
+      BANK_ADAPTER_RETRIES: ${BANK_ADAPTER_RETRIES:-2}
+      BANK_ADAPTER_HEADLESS_POOL_SIZE: ${BANK_ADAPTER_HEADLESS_POOL_SIZE:-2}
+      BANK_SCRAPE_USER_AGENT: ${BANK_SCRAPE_USER_AGENT:-YeneVerify/1.0 (+https://yeneverify.com/bot)}
+      BANK_ADAPTER_MOCK: ${BANK_ADAPTER_MOCK:-false}
+      QUEUE_VERIFICATION_CONCURRENCY: ${QUEUE_VERIFICATION_CONCURRENCY:-4}
+      QUEUE_NOTIFICATION_CONCURRENCY: ${QUEUE_NOTIFICATION_CONCURRENCY:-8}
+      QUEUE_EXPORT_CONCURRENCY: ${QUEUE_EXPORT_CONCURRENCY:-2}
+      QUEUE_JOB_ATTEMPTS: ${QUEUE_JOB_ATTEMPTS:-3}
+      QUEUE_BACKOFF_MS: ${QUEUE_BACKOFF_MS:-2000}
+      ADMIN_BOOTSTRAP_NAME: ${ADMIN_BOOTSTRAP_NAME:-Fuad}
+    secrets:
+      - source: gcp-vision
+        target: gcp-vision.json
+        mode: 0400
+      - source: fcm-private-key
+        target: fcm-private-key.txt
+        mode: 0400
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+
+  # ── Nginx (reverse proxy + TLS) ───────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: yene_nginx_prod
+    restart: always
+    networks:
+      - yene_public
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_certs:/etc/nginx/certs:ro
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 60s
+      timeout: 10s
+      retries: 3

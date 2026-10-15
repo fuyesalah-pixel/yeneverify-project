@@ -1,0 +1,13 @@
+{
+  "APP_ENV": "development",
+  "API_BASE_URL": "http://10.0.2.2:3000/api/v1",
+  "API_TIMEOUT_MS": "20000",
+  "SENTRY_DSN": "",
+  "ENABLE_ANALYTICS_LOGS": "true",
+  "ENABLE_BIOMETRIC": "true",
+  "ENABLE_DEV_TOOLS": "true",
+  "BUILD_FLAVOR": "dev",
+  "PIN_MIN_LENGTH": "4",
+  "PIN_MAX_LENGTH": "6",
+  "STEP_UP_TOKEN_TTL_SECONDS": "120"
+}

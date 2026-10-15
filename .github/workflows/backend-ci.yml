@@ -1,0 +1,189 @@
+name: Backend CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - "shared/**"
+      - "docker/**"
+      - "scripts/**"
+      - "docs/ops/**"
+      - ".gitleaks.toml"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/backend-ci.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "shared/**"
+      - "docker/**"
+      - "scripts/**"
+      - "docs/ops/**"
+      - ".gitleaks.toml"
+      - ".pre-commit-config.yaml"
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Lint & type-check ─────────────────────────────────────────────────────
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: --redact --no-banner
+
+      - name: Check backend environment/schema sync
+        run: |
+          chmod +x ../scripts/check-env-sync.sh
+          ../scripts/check-env-sync.sh
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+  # ── Unit tests ────────────────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-22.04
+    needs: lint
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+
+  # ── Build + Prisma validate ───────────────────────────────────────────────
+  build:
+    name: Build & Prisma Validate
+    runs-on: ubuntu-22.04
+    needs: lint
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: yeneverify
+          POSTGRES_PASSWORD: yeneverify_test
+          POSTGRES_DB: yeneverify_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Prisma validate schema
+        run: npx prisma validate
+
+      - name: Prisma migrate (CI DB)
+        env:
+          DATABASE_URL: postgresql://yeneverify:yeneverify_test@localhost:5432/yeneverify_test
+        run: npx prisma migrate deploy
+
+  # ── Contract sync check ───────────────────────────────────────────────────
+  contracts:
+    name: OpenAPI Contract Sync
+    runs-on: ubuntu-22.04
+    needs: build
+    # Skip until backend Swagger is wired up
+    if: false
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Export OpenAPI spec
+        env:
+          DATABASE_URL: postgresql://placeholder/placeholder
+        run: npm run swagger:export
+
+      - name: Check for contract drift
+        run: |
+          if ! git diff --exit-code shared/contracts/openapi.yaml; then
+            echo "❌ openapi.yaml is out of sync. Run 'npm run swagger:export' and commit."
+            exit 1
+          fi
+          echo "✅ openapi.yaml is in sync."

@@ -1,0 +1,38 @@
+{
+  "recommendations": [
+    // ── Dart / Flutter ───────────────────────────────────────────────────
+    "dart-code.dart-code",
+    "dart-code.flutter",
+
+    // ── TypeScript / NestJS ──────────────────────────────────────────────
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+
+    // ── Prisma ───────────────────────────────────────────────────────────
+    "prisma.prisma",
+
+    // ── Docker ───────────────────────────────────────────────────────────
+    "ms-azuretools.vscode-docker",
+
+    // ── YAML / OpenAPI ────────────────────────────────────────────────────
+    "redhat.vscode-yaml",
+    "42crunch.vscode-openapi",
+
+    // ── Git ───────────────────────────────────────────────────────────────
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+
+    // ── Spell check ───────────────────────────────────────────────────────
+    "streetsidesoftware.code-spell-checker",
+
+    // ── Markdown ──────────────────────────────────────────────────────────
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+
+    // ── Utils ─────────────────────────────────────────────────────────────
+    "editorconfig.editorconfig",
+    "wayou.vscode-todo-highlight",
+    "gruntfuggly.todo-tree"
+  ]
+}

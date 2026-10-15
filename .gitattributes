@@ -1,0 +1,50 @@
+# ============================================================
+# Yene Verify — .gitattributes
+# Enforce consistent line endings and binary detection
+# ============================================================
+
+# Default: normalize all text files to LF
+* text=auto eol=lf
+
+# Explicitly text files
+*.ts        text eol=lf
+*.js        text eol=lf
+*.json      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.md        text eol=lf
+*.sh        text eol=lf
+*.dart      text eol=lf
+*.html      text eol=lf
+*.css       text eol=lf
+*.sql       text eol=lf
+*.prisma    text eol=lf
+*.env       text eol=lf
+*.env.*     text eol=lf
+*.arb       text eol=lf
+*.conf      text eol=lf
+Dockerfile  text eol=lf
+Makefile    text eol=lf
+
+# Binary files — never diff or merge
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.webp      binary
+*.ico       binary
+*.pdf       binary
+*.ttf       binary
+*.otf       binary
+*.woff      binary
+*.woff2     binary
+*.eot       binary
+*.zip       binary
+*.tar.gz    binary
+*.keystore  binary
+*.jks       binary
+*.p12       binary
+*.pem       binary
+
+# Shell scripts — mark executable
+*.sh        text eol=lf

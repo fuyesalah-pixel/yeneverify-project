@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "description": "Sample OCR text per bank, used by the mock OCR service in dev (VISION_MOCK=true) and by bank adapter unit tests. Text matches the bank-references.json fixtures.",
+    "lastUpdated": "2026-09-24",
+    "usage": "Loaded by OcrService mock when APP_ENV=development"
+  },
+
+  "CBE": {
+    "reference": "FT26195DBK5W81465291",
+    "rawText": "Commercial Bank of Ethiopia\nOnline Banking Receipt\n\nTransaction Reference: FT26195DBK5W81465291\nTransaction Type: Interbank Transfer\nAmount: ETB 550.00\nFrom Account: Abebe Kebede\nTo Account: Selam Coffee\nDate: 14 Jul 2026  2:08 PM\nStatus: Successful\n\nThis receipt is system generated and does not require a signature."
+  },
+
+  "TELEBIRR": {
+    "reference": "DEV6HKJX7K",
+    "rawText": "Telebirr\nPayment Confirmation\n\nTransaction ID: DEV6HKJX7K\nPaid To: Selam Coffee\nAmount: ETB 250.00\nFrom: Yonas Alemu (+251933333331)\nDate: 15 Jul 2026  11:00 AM\nFee: ETB 0.00\nStatus: SUCCESS\n\nThank you for using Telebirr."
+  },
+
+  "AWASH": {
+    "reference": "2KEX10DJ7F-575JQI",
+    "rawText": "Awash Bank\nInterBank Transfer Receipt\n\nRef No: 2KEX10DJ7F-575JQI\nSender: Hiwot Bekele\nBeneficiary: Selam Coffee\nAmount: ETB 350.00\nValue Date: 16-Jul-2026 01:40 PM\nTransaction Status: COMPLETED"
+  },
+
+  "DASHEN": {
+    "reference": "DSH-TXN-20260717-0001",
+    "rawText": "Dashen Bank\nTransaction Receipt\n\nReference: DSH-TXN-20260717-0001\nSender Name: Kalkidan Assefa\nRecipient: Dawit Electronics\nAmount: ETB 800.00\nDate: 17/07/2026  10:15 AM\nStatus: Successful"
+  },
+
+  "ABYSSINIA": {
+    "reference": "FT26201XYZ123456789012",
+    "rawText": "Bank of Abyssinia\nFund Transfer Receipt\n\nTransaction Ref: FT26201XYZ123456789012\nSender: Tigist Haile\nAccount (Last 5): 12345\nBeneficiary: Dawit Electronics\nAmount: ETB 600.00\nDate: 18 July 2026  4:20 PM\nStatus: SUCCESS"
+  },
+
+  "MPESA": {
+    "reference": "MPX1234ABCD",
+    "rawText": "M-PESA\nTransaction Confirmation\n\nTransaction ID: MPX1234ABCD\nPaid To: Selam Coffee\nAmount: ETB 150.00\nFrom: Sara Mekonnen\nDate: 19-07-2026  08:45 AM\nCharge: ETB 0.00\nNew Balance: ETB 1,200.00\nStatus: Completed"
+  },
+
+  "ZEMEN": {
+    "reference": "108IBET252931385",
+    "rawText": "Zemen Bank\nPayment Receipt\n\nTransaction Reference: 108IBET252931385\nSender: Dawit Tesfaye\nReceiver: Dawit Electronics\nAmount: ETB 450.00\nDate: 20/07/2026  12:30\nStatus: SUCCESS\n\nZemen Bank S.C."
+  }
+}

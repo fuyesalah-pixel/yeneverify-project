@@ -1,0 +1,60 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // ── Flutter — development ─────────────────────────────────────────────
+    {
+      "name": "Flutter (dev)",
+      "request": "launch",
+      "type": "dart",
+      "program": "mobile/lib/main.dart",
+      "cwd": "${workspaceFolder}/mobile",
+      "args": [
+        "--dart-define=ENV=development",
+        "--dart-define=API_BASE_URL=http://10.0.2.2:3000"
+      ]
+    },
+    // ── Flutter — staging ─────────────────────────────────────────────────
+    {
+      "name": "Flutter (staging)",
+      "request": "launch",
+      "type": "dart",
+      "program": "mobile/lib/main.dart",
+      "cwd": "${workspaceFolder}/mobile",
+      "args": [
+        "--dart-define=ENV=staging",
+        "--dart-define=API_BASE_URL=https://staging-api.yeneverify.com"
+      ]
+    },
+    // ── NestJS — debug ────────────────────────────────────────────────────
+    {
+      "name": "NestJS (debug)",
+      "request": "launch",
+      "type": "node",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--nolazy",
+        "-r",
+        "ts-node/register",
+        "-r",
+        "tsconfig-paths/register"
+      ],
+      "args": ["${workspaceFolder}/backend/src/main.ts"],
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/backend/.env",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/backend/dist/**/*.js"]
+    },
+    // ── NestJS — attach debugger ──────────────────────────────────────────
+    {
+      "name": "NestJS (attach)",
+      "request": "attach",
+      "type": "node",
+      "port": 9229,
+      "restart": true,
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}/backend",
+      "outFiles": ["${workspaceFolder}/backend/dist/**/*.js"]
+    }
+  ]
+}

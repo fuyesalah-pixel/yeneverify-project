@@ -1,0 +1,18 @@
+[
+  {
+    "_comment": "MVP: Ethiopia only. This file exists to scaffold multi-country support without breaking anything.",
+    "code": "ET",
+    "name": "Ethiopia",
+    "nameAm": "ኢትዮጵያ",
+    "currency": "ETB",
+    "currencyName": "Ethiopian Birr",
+    "currencyNameAm": "ብር",
+    "currencyMinorUnit": "santim",
+    "currencyMinorUnitAm": "ሳንቲም",
+    "phonePrefix": "+251",
+    "phoneRegex": "^\\+251[79]\\d{8}$",
+    "timezone": "Africa/Addis_Ababa",
+    "locale": "am-ET",
+    "active": true
+  }
+]

@@ -1,0 +1,543 @@
+# AUTO-GENERATED — do not hand-edit this file.
+# Source: backend NestJS Swagger module.
+# Regenerate: cd backend && npm run openapi:export
+# Consumed by: scripts/gen-api-client.sh → mobile/lib/api/generated/
+#
+openapi: 3.0.0
+paths:
+  /version:
+    get:
+      operationId: VersionController_version
+      summary: App version info
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Health
+  /health:
+    get:
+      operationId: HealthController_liveness
+      summary: Liveness probe
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags: &ref_3
+        - Health
+  /health/ready:
+    get:
+      operationId: HealthController_readiness
+      summary: Readiness probe
+      parameters: []
+      responses:
+        '200':
+          description: The Health Check is successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  info:
+                    type: object
+                    example: &ref_0
+                      database: &ref_1
+                        status: up
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+                    nullable: true
+                  error:
+                    type: object
+                    example: {}
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+                    nullable: true
+                  details:
+                    type: object
+                    example: *ref_0
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+        '503':
+          description: The Health Check is not successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  info:
+                    type: object
+                    example: *ref_0
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+                    nullable: true
+                  error:
+                    type: object
+                    example:
+                      redis: &ref_2
+                        status: down
+                        message: Could not connect
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+                    nullable: true
+                  details:
+                    type: object
+                    example:
+                      database: *ref_1
+                      redis: *ref_2
+                    additionalProperties:
+                      type: object
+                      required:
+                        - status
+                      properties:
+                        status:
+                          type: string
+                      additionalProperties: true
+      tags: *ref_3
+  /auth/request-otp:
+    post:
+      operationId: AuthController_requestOtp
+      summary: Request OTP for phone verification
+      parameters: []
+      responses:
+        '200':
+          description: OTP sent successfully
+        '429':
+          description: Rate limited
+      tags: &ref_4
+        - Auth
+  /auth/verify-otp:
+    post:
+      operationId: AuthController_verifyOtp
+      summary: Verify OTP and get tokens
+      parameters: []
+      responses:
+        '200':
+          description: Tokens issued
+        '400':
+          description: Invalid or expired OTP
+        '429':
+          description: Rate limited or locked out
+      tags: *ref_4
+  /auth/refresh:
+    post:
+      operationId: AuthController_refresh
+      summary: Refresh access token
+      parameters: []
+      responses:
+        '200':
+          description: New tokens issued
+        '401':
+          description: Invalid or expired refresh token
+      tags: *ref_4
+  /auth/logout:
+    post:
+      operationId: AuthController_logout
+      summary: Logout current session
+      parameters: []
+      responses:
+        '204':
+          description: Logged out
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/logout-all:
+    post:
+      operationId: AuthController_logoutAll
+      summary: Logout all sessions
+      parameters: []
+      responses:
+        '204':
+          description: All sessions revoked
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/devices:
+    get:
+      operationId: AuthController_listDevices
+      summary: List active devices
+      parameters: []
+      responses:
+        '200':
+          description: List of active devices
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/devices/{id}:
+    delete:
+      operationId: AuthController_revokeDevice
+      summary: Revoke a device
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Device revoked
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/me:
+    get:
+      operationId: AuthController_me
+      summary: Get current user profile
+      parameters: []
+      responses:
+        '200':
+          description: Current user profile
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/me/language:
+    patch:
+      operationId: AuthController_updateLanguage
+      summary: Update preferred language
+      parameters: []
+      responses:
+        '200':
+          description: Language updated
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/pin/set:
+    post:
+      operationId: AuthController_setPin
+      summary: Set PIN (first time)
+      parameters: []
+      responses:
+        '200':
+          description: PIN set successfully
+        '400':
+          description: PIN already set or weak PIN
+        '429':
+          description: Rate limited or token too old
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/pin/verify:
+    post:
+      operationId: AuthController_verifyPin
+      summary: Verify PIN (returns step-up token)
+      parameters: []
+      responses:
+        '200':
+          description: Step-up token issued
+        '400':
+          description: Invalid or expired PIN
+        '429':
+          description: Locked out
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/pin/change:
+    post:
+      operationId: AuthController_changePin
+      summary: Change PIN (requires step-up)
+      parameters:
+        - name: X-Step-Up-Token
+          in: header
+          description: Step-up token from PIN verify or biometric step-up
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PIN changed, other sessions revoked
+        '401':
+          description: Invalid current PIN or missing step-up
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/pin/reset:
+    post:
+      operationId: AuthController_resetPin
+      summary: Reset PIN via OTP (forgot PIN)
+      parameters: []
+      responses:
+        '200':
+          description: PIN reset, all sessions revoked
+        '400':
+          description: Invalid OTP
+      tags: *ref_4
+  /auth/biometric/enable:
+    post:
+      operationId: AuthController_enableBiometric
+      summary: Enable biometric unlock for a device
+      parameters:
+        - name: X-Step-Up-Token
+          in: header
+          description: Step-up token from PIN verify
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Biometric enabled
+        '401':
+          description: Missing or invalid step-up token
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/biometric/disable:
+    post:
+      operationId: AuthController_disableBiometric
+      summary: Disable biometric unlock for a device
+      parameters:
+        - name: X-Step-Up-Token
+          in: header
+          description: Step-up token from PIN verify
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Biometric disabled
+        '401':
+          description: Missing or invalid step-up token
+      tags: *ref_4
+      security:
+        - access-token: []
+  /auth/step-up/biometric:
+    post:
+      operationId: AuthController_biometricStepUp
+      summary: Get step-up token after biometric unlock
+      parameters: []
+      responses:
+        '200':
+          description: Step-up token issued
+        '401':
+          description: Invalid refresh token or device mismatch
+      tags: *ref_4
+  /auth/unlock:
+    post:
+      operationId: AuthController_unlock
+      summary: Unlock session (refresh + device verification)
+      parameters: []
+      responses:
+        '200':
+          description: New tokens issued
+        '401':
+          description: Invalid token, device mismatch, or no PIN
+      tags: *ref_4
+  /onboarding/status:
+    get:
+      operationId: OnboardingController_getStatus
+      summary: Get onboarding status for current user
+      parameters: []
+      responses:
+        '200':
+          description: Onboarding status for the current user
+      tags: &ref_5
+        - Onboarding
+      security:
+        - access-token: []
+  /onboarding/merchant:
+    post:
+      operationId: OnboardingController_createMerchant
+      summary: Create merchant profile (onboarding)
+      parameters: []
+      responses:
+        '201':
+          description: Merchant created successfully
+        '400':
+          description: Validation failed
+        '409':
+          description: Merchant already onboarded
+      tags: *ref_5
+  /sub-merchants/invite:
+    post:
+      operationId: SubMerchantsController_invite
+      summary: Invite a sub-merchant (team member)
+      parameters: []
+      responses:
+        '201':
+          description: Invite created and delivered
+        '403':
+          description: Plan limit reached
+        '409':
+          description: Sub-merchant already exists
+      tags: &ref_6
+        - Sub-Merchants
+      security:
+        - access-token: []
+  /sub-merchants:
+    get:
+      operationId: SubMerchantsController_list
+      summary: List sub-merchants and pending invites
+      parameters: []
+      responses:
+        '200':
+          description: Paginated list (phones masked)
+      tags: *ref_6
+      security:
+        - access-token: []
+  /sub-merchants/{id}:
+    get:
+      operationId: SubMerchantsController_getById
+      summary: Get sub-merchant or invite detail
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detail (phone masked)
+        '404':
+          description: Not found
+      tags: *ref_6
+      security:
+        - access-token: []
+    patch:
+      operationId: SubMerchantsController_update
+      summary: Update sub-merchant (branch label)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated
+        '404':
+          description: Not found
+      tags: *ref_6
+      security:
+        - access-token: []
+    delete:
+      operationId: SubMerchantsController_remove
+      summary: Remove sub-merchant or revoke pending invite
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Removed
+        '404':
+          description: Not found
+      tags: *ref_6
+      security:
+        - access-token: []
+  /sub-merchants/invites/{id}/resend:
+    post:
+      operationId: SubMerchantsController_resendInvite
+      summary: Resend an invite (new token, extended expiry)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invite resent
+        '403':
+          description: Max resends reached
+        '404':
+          description: Invite not found
+      tags: *ref_6
+      security:
+        - access-token: []
+  /sub-merchants/accept:
+    post:
+      operationId: SubMerchantsController_accept
+      summary: Accept a sub-merchant invite (phone must match)
+      parameters: []
+      responses:
+        '200':
+          description: Invite accepted; role changed to SUB_MERCHANT
+        '400':
+          description: Invalid/expired invite or phone mismatch
+        '409':
+          description: Invite already used
+      tags: *ref_6
+      security:
+        - access-token: []
+  /sub-merchants/decline:
+    post:
+      operationId: SubMerchantsController_decline
+      summary: Decline a sub-merchant invite (token-only, idempotent)
+      parameters: []
+      responses:
+        '200':
+          description: Invite declined
+        '400':
+          description: Invalid or expired invite
+        '409':
+          description: Invite already accepted
+      tags: *ref_6
+  /merchants/me:
+    get:
+      operationId: MerchantsController_getMe
+      summary: Get current merchant profile
+      parameters: []
+      responses:
+        '200':
+          description: Merchant profile
+      tags: &ref_7
+        - Merchants
+      security:
+        - access-token: []
+    patch:
+      operationId: MerchantsController_updateMe
+      summary: Update merchant profile
+      parameters: []
+      responses:
+        '200':
+          description: Profile updated
+      tags: *ref_7
+      security:
+        - access-token: []
+info:
+  title: Yene Verify API
+  description: Payment receipt verification for Ethiopian banks
+  version: 1.0.0
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    access-token:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas: {}

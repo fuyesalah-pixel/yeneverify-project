@@ -1,0 +1,110 @@
+{
+  "_meta": {
+    "description": "Role definitions and permission matrix for Yene Verify. Source of truth for both backend guards and mobile UI permission checks. Mirror of MASTER_CONTEXT.md §4.",
+    "lastUpdated": "2026-09-24",
+    "version": "1.0.0"
+  },
+
+  "roles": {
+    "ADMIN": {
+      "code": "ADMIN",
+      "level": 100,
+      "mobileAccess": false,
+      "description": "Platform owner (Fuad). Web dashboard only — NOT in the mobile app."
+    },
+    "MERCHANT": {
+      "code": "MERCHANT",
+      "level": 50,
+      "mobileAccess": true,
+      "description": "Business owner. Full control of own data and sub-merchants."
+    },
+    "SUB_MERCHANT": {
+      "code": "SUB_MERCHANT",
+      "level": 10,
+      "mobileAccess": true,
+      "description": "Employee/cashier. Verifies on behalf of merchant. Limited view."
+    }
+  },
+
+  "permissions": {
+    "VERIFY_PAYMENT": {
+      "description": "Submit a receipt image for verification",
+      "ADMIN": true,
+      "MERCHANT": true,
+      "SUB_MERCHANT": true
+    },
+    "VIEW_OWN_VERIFICATIONS": {
+      "description": "View verifications initiated by the current user",
+      "ADMIN": true,
+      "MERCHANT": true,
+      "SUB_MERCHANT": true
+    },
+    "VIEW_ALL_BRANCH_DATA": {
+      "description": "View all verifications across all branches/sub-merchants",
+      "ADMIN": true,
+      "MERCHANT": true,
+      "SUB_MERCHANT": false
+    },
+    "CREATE_SUB_MERCHANTS": {
+      "description": "Add new team members (sub-merchants)",
+      "ADMIN": true,
+      "MERCHANT": true,
+      "SUB_MERCHANT": false
+    },
+    "MANAGE_SUB_MERCHANT_PERMISSIONS": {
+      "description": "Change permissions for team members",
+      "ADMIN": true,
+      "MERCHANT": true,
+      "SUB_MERCHANT": false
+    },
+    "VIEW_ANALYTICS": {
+      "description": "Access AI/rule-based business insights",
+      "ADMIN": true,
+      "MERCHANT": true,
+      "SUB_MERCHANT": false
+    },
+    "EXPORT_REPORTS": {
+      "description": "Export transaction reports as PDF or CSV",
+      "ADMIN": true,
+      "MERCHANT": true,
+      "SUB_MERCHANT": false
+    },
+    "MANAGE_SUBSCRIPTION": {
+      "description": "Select packages and upload payment proof",
+      "ADMIN": true,
+      "MERCHANT": true,
+      "SUB_MERCHANT": false
+    },
+    "VIEW_ALL_MERCHANTS": {
+      "description": "See all merchants on the platform (admin only)",
+      "ADMIN": true,
+      "MERCHANT": false,
+      "SUB_MERCHANT": false
+    },
+    "MANAGE_BANKS_AND_APIS": {
+      "description": "Configure bank adapters and API settings (admin only)",
+      "ADMIN": true,
+      "MERCHANT": false,
+      "SUB_MERCHANT": false
+    },
+    "BAN_USERS_HANDLE_FRAUD": {
+      "description": "Suspend accounts and handle fraud cases (admin only)",
+      "ADMIN": true,
+      "MERCHANT": false,
+      "SUB_MERCHANT": false
+    },
+    "VIEW_OWN_AUDIT_LOG": {
+      "description": "View the audit log for own account",
+      "ADMIN": true,
+      "MERCHANT": true,
+      "SUB_MERCHANT": true
+    }
+  },
+
+  "tenancy": {
+    "rule": "A user belongs to exactly ONE merchant OR is the merchant. Never multiple.",
+    "rlsPolicy": "current_setting('app.current_merchant_id') — set per request by TenantGuard",
+    "crossTenantAccess": false,
+    "adminBypass": "Admin bypasses RLS via superuser context (web dashboard only)"
+  }
+}

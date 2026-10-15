@@ -1,0 +1,202 @@
+name: Mobile CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "mobile/**"
+      - "shared/contracts/**"
+      - "scripts/**"
+      - ".gitleaks.toml"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/mobile-ci.yml"
+  pull_request:
+    paths:
+      - "mobile/**"
+      - "shared/contracts/**"
+      - "scripts/**"
+      - ".gitleaks.toml"
+      - ".pre-commit-config.yaml"
+
+concurrency:
+  group: mobile-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Analyze & format ──────────────────────────────────────────────────────
+  analyze:
+    name: Analyze & Format
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: --redact --no-banner
+
+      - name: Validate public mobile defines
+        run: |
+          chmod +x ../scripts/check-dart-defines-safe.sh
+          ../scripts/check-dart-defines-safe.sh
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate l10n
+        run: flutter gen-l10n
+
+      - name: Check dart format
+        run: dart format --set-exit-if-changed .
+
+      - name: Flutter analyze
+        run: flutter analyze --fatal-infos
+
+  # ── Guard: no hardcoded colors ────────────────────────────────────────────
+  guard-colors:
+    name: Guard — No Hardcoded Colors
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check no hardcoded hex colors outside theme
+        run: |
+          chmod +x scripts/check-no-hardcoded-colors.sh
+          ./scripts/check-no-hardcoded-colors.sh
+
+  # ── Guard: no hardcoded strings ───────────────────────────────────────────
+  guard-strings:
+    name: Guard — No Hardcoded Strings
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check no hardcoded user-facing strings
+        run: |
+          chmod +x scripts/check-no-hardcoded-strings.sh
+          ./scripts/check-no-hardcoded-strings.sh
+
+  # ── Tests ─────────────────────────────────────────────────────────────────
+  test:
+    name: Unit & Widget Tests
+    runs-on: ubuntu-22.04
+    needs: analyze
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate l10n
+        run: flutter gen-l10n
+
+      - name: Run tests
+        run: flutter test --coverage
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-coverage
+          path: mobile/coverage/
+
+  # ── API client sync check ─────────────────────────────────────────────────
+  api-client-sync:
+    name: API Client Sync Check
+    runs-on: ubuntu-22.04
+    needs: analyze
+    # Skip until OpenAPI spec is stable
+    if: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Setup Java (required by openapi-generator)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Regenerate API client
+        run: |
+          chmod +x scripts/gen-api-client.sh
+          ./scripts/gen-api-client.sh
+
+      - name: Check for client drift
+        run: |
+          if ! git diff --exit-code mobile/lib/api/generated/; then
+            echo "❌ API client is out of sync. Run './scripts/gen-api-client.sh' and commit."
+            exit 1
+          fi
+          echo "✅ API client is in sync."
+
+  # ── Debug APK smoke build ─────────────────────────────────────────────────
+  build-apk:
+    name: Build Debug APK
+    runs-on: ubuntu-22.04
+    needs: [analyze, test]
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate l10n
+        run: flutter gen-l10n
+
+      - name: Build debug APK
+        run: |
+          flutter build apk --debug \
+            --dart-define=APP_ENV=development \
+            --dart-define=API_BASE_URL=http://10.0.2.2:3000/api/v1 \
+            --dart-define=API_TIMEOUT_MS=20000 \
+            --dart-define=BUILD_FLAVOR=dev \
+            --dart-define=ENABLE_DEV_TOOLS=true \
+            --dart-define=ENABLE_ANALYTICS_LOGS=false
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7

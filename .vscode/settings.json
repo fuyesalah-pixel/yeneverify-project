@@ -1,0 +1,122 @@
+{
+  // ── Editor defaults ────────────────────────────────────────────────────
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.rulers": [120],
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  // ── Dart / Flutter ─────────────────────────────────────────────────────
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.selectionHighlight": false,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.suggestSelection": "first",
+    "editor.tabSize": 2,
+    "editor.wordBasedSuggestions": "off"
+  },
+  "dart.flutterSdkPath": null,
+  "dart.openDevTools": "never",
+  "dart.debugExternalPackageLibraries": false,
+  "dart.debugSdkLibraries": false,
+  "dart.previewLsp": true,
+
+  // ── TypeScript / NestJS ────────────────────────────────────────────────
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[javascript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+
+  // ── JSON ───────────────────────────────────────────────────────────────
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // ── YAML ───────────────────────────────────────────────────────────────
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+
+  // ── Markdown ───────────────────────────────────────────────────────────
+  "[markdown]": {
+    "editor.formatOnSave": false,
+    "editor.wordWrap": "on"
+  },
+
+  // ── File associations ──────────────────────────────────────────────────
+  "files.associations": {
+    "*.arb": "json",
+    "*.env.example": "properties",
+    "Dockerfile*": "dockerfile",
+    "*.prisma": "prisma"
+  },
+
+  // ── Exclude from explorer (generated / noise) ──────────────────────────
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.dart_tool": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/.flutter-plugins": true,
+    "**/.flutter-plugins-dependencies": true
+  },
+
+  // ── Search exclusions ──────────────────────────────────────────────────
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/.dart_tool": true,
+    "**/coverage": true,
+    "mobile/lib/api/generated": true,
+    "**/*.g.dart": true,
+    "**/*.freezed.dart": true
+  },
+
+  // ── Git ────────────────────────────────────────────────────────────────
+  "git.autofetch": true,
+  "git.confirmSync": false,
+
+  // ── Spell check ────────────────────────────────────────────────────────
+  "cSpell.words": [
+    "Yene",
+    "yeneverify",
+    "Telebirr",
+    "telebirr",
+    "Awash",
+    "Dashen",
+    "Abyssinia",
+    "abyssinia",
+    "Zemen",
+    "santim",
+    "birr",
+    "AfroMessage",
+    "afromessage",
+    "Riverpod",
+    "riverpod",
+    "Freezed",
+    "freezed",
+    "BullMQ",
+    "bullmq",
+    "Prisma",
+    "Hostinger",
+    "Cloudflare",
+    "Lottie",
+    "shimmer",
+    "Isar"
+  ],
+  "prisma.pinToPrisma6": true
+}

@@ -1,0 +1,99 @@
+name: Shared Contracts CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - "shared/**"
+      - "scripts/**"
+      - ".gitleaks.toml"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/shared-ci.yml"
+  pull_request:
+    paths:
+      - "shared/**"
+      - "scripts/**"
+      - ".gitleaks.toml"
+      - ".pre-commit-config.yaml"
+
+concurrency:
+  group: shared-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Validate JSON files ───────────────────────────────────────────────────
+  validate-json:
+    name: Validate JSON Contracts
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: --redact --no-banner
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate JSON files are well-formed
+        run: |
+          echo "Validating shared JSON contracts..."
+          for f in shared/contracts/*.json shared/constants/*.json; do
+            echo "  Checking $f"
+            node -e "
+              const fs = require('fs');
+              try {
+                JSON.parse(fs.readFileSync('$f', 'utf-8'));
+                console.log('    ✅ Valid JSON');
+              } catch(e) {
+                console.error('    ❌ Invalid JSON:', e.message);
+                process.exit(1);
+              }
+            "
+          done
+          echo "All JSON files valid ✅"
+
+  # ── Validate OpenAPI spec ─────────────────────────────────────────────────
+  validate-openapi:
+    name: Validate OpenAPI Spec
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install OpenAPI validator
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Validate openapi.yaml
+        run: |
+          spectral lint shared/contracts/openapi.yaml \
+            --ruleset https://unpkg.com/@stoplight/spectral-openapi/dist/ruleset.js \
+            || echo "⚠️  OpenAPI warnings (non-blocking until spec is stable)"
+
+  # ── Guard: openapi.yaml not hand-edited ───────────────────────────────────
+  guard-openapi-generated:
+    name: Guard — OpenAPI Not Hand-Edited
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check openapi.yaml has auto-generated header
+        run: |
+          if ! head -5 shared/contracts/openapi.yaml | grep -q "AUTO-GENERATED"; then
+            echo "⚠️  openapi.yaml may have been hand-edited (missing AUTO-GENERATED header)."
+            echo "    This is acceptable during initial setup. Enable strict check post-Step-8."
+          else
+            echo "✅ openapi.yaml has auto-generated header."
+          fi

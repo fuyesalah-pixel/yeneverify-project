@@ -1,0 +1,111 @@
+{
+  "_meta": {
+    "description": "Canonical error codes for Yene Verify. Source of truth: backend/src/common/constants/error-codes.ts. Do not add codes here without adding them there first.",
+    "generatedFrom": "backend/src/common/constants/error-codes.ts",
+    "lastUpdated": "2026-09-26",
+    "version": "1.1.0"
+  },
+
+  "AUTH": {
+    "AUTH_PHONE_INVALID": "Phone number is not a valid Ethiopian number (+251 format).",
+    "AUTH_OTP_SENT": "OTP sent successfully.",
+    "AUTH_OTP_INVALID": "The OTP entered is incorrect.",
+    "AUTH_OTP_EXPIRED": "The OTP has expired. Please request a new one.",
+    "AUTH_OTP_MAX_ATTEMPTS": "Too many incorrect OTP attempts. Please wait before trying again.",
+    "AUTH_OTP_RATE_LIMITED": "Too many OTP requests. Please wait before requesting again.",
+    "AUTH_TOKEN_INVALID": "Access token is invalid or expired.",
+    "AUTH_TOKEN_EXPIRED": "Access token has expired. Please refresh.",
+    "AUTH_REFRESH_INVALID": "Refresh token is invalid or has been revoked.",
+    "AUTH_REFRESH_EXPIRED": "Refresh token has expired. Please log in again.",
+    "AUTH_PIN_INVALID": "Incorrect PIN.",
+    "AUTH_PIN_ALREADY_SET": "PIN is already set. Use change PIN instead.",
+    "AUTH_PIN_NOT_SET": "PIN has not been set for this account.",
+    "AUTH_PIN_LOCKED": "Too many incorrect PIN attempts. Please wait before trying again.",
+    "AUTH_TOKEN_TOO_OLD": "Access token is too old. Please provide a fresh OTP.",
+    "AUTH_STEP_UP_REQUIRED": "Step-up authentication required.",
+    "AUTH_DEVICE_NOT_FOUND": "Device not found or already revoked.",
+    "AUTH_DEVICE_LIMIT_REACHED": "Maximum number of trusted devices reached (3). Please remove an existing device.",
+    "AUTH_DEVICE_MISMATCH": "Device fingerprint does not match.",
+    "AUTH_BIOMETRIC_FAILED": "Biometric authentication failed.",
+    "AUTH_BIOMETRIC_NOT_ENABLED": "Biometric unlock is not enabled.",
+    "AUTH_SESSION_EXPIRED": "Session has expired. Please log in again."
+  },
+
+  "VERIFICATION": {
+    "VERIFICATION_NOT_FOUND": "Verification record not found.",
+    "VERIFICATION_PENDING": "Verification is still in progress.",
+    "VERIFICATION_DUPLICATE": "This receipt has already been verified.",
+    "VERIFICATION_FAKE": "Receipt could not be verified against bank records.",
+    "VERIFICATION_BANK_UNREACHABLE": "Could not reach the bank's verification endpoint. Please try again.",
+    "VERIFICATION_OCR_FAILED": "Could not extract text from the receipt image. Please upload a clearer photo.",
+    "VERIFICATION_BANK_NOT_DETECTED": "Could not identify the bank from the receipt. Supported banks: CBE, Telebirr, Awash, Dashen, Abyssinia, M-Pesa, Zemen.",
+    "VERIFICATION_REFERENCE_NOT_FOUND": "Transaction reference not found in bank records.",
+    "VERIFICATION_AMOUNT_MISMATCH": "Receipt amount does not match bank records.",
+    "VERIFICATION_NO_CREDITS": "No verification credits remaining. Please renew your package.",
+    "VERIFICATION_UPLOAD_URL_EXPIRED": "The upload URL has expired. Please request a new one.",
+    "VERIFICATION_IMAGE_TOO_LARGE": "Receipt image is too large. Maximum size is 10MB.",
+    "VERIFICATION_IMAGE_INVALID_FORMAT": "Invalid image format. Please upload a JPEG image."
+  },
+
+  "BILLING": {
+    "BILLING_PAYMENT_NOT_VERIFIED": "Payment receipt could not be verified.",
+    "BILLING_AMOUNT_MISMATCH": "Payment amount does not match the selected package price.",
+    "BILLING_RECEIPT_ALREADY_USED": "This payment receipt has already been used for a subscription.",
+    "BILLING_PACKAGE_NOT_FOUND": "Subscription package not found.",
+    "BILLING_SUBSCRIPTION_ACTIVE": "You already have an active subscription for this package.",
+    "BILLING_MANUAL_REVIEW_REQUIRED": "Your payment is under manual review. You will be notified once approved."
+  },
+
+  "CREDITS": {
+    "CREDITS_INSUFFICIENT": "Insufficient verification credits.",
+    "CREDITS_LEDGER_ERROR": "An error occurred while processing credits. No charges were made."
+  },
+
+  "MERCHANT": {
+    "MERCHANT_NOT_FOUND": "Merchant not found.",
+    "MERCHANT_SUSPENDED": "This merchant account has been suspended.",
+    "MERCHANT_PROFILE_INCOMPLETE": "Please complete your merchant profile before proceeding.",
+    "MERCHANT_ALREADY_ONBOARDED": "Merchant is already onboarded."
+  },
+
+  "SUB_MERCHANT": {
+    "SUB_MERCHANT_NOT_FOUND": "Team member not found.",
+    "SUB_MERCHANT_ALREADY_EXISTS": "A team member with this phone number already exists.",
+    "SUB_MERCHANT_LIMIT_REACHED": "Maximum number of team members reached for your plan.",
+    "SUB_MERCHANT_PERMISSION_DENIED": "You do not have permission to manage team members.",
+    "SUB_MERCHANT_NOT_ACTIVE": "Sub-merchant profile is not active."
+  },
+
+  "ONBOARDING": {
+    "ONBOARDING_REQUIRED": "Onboarding required to access this resource.",
+    "MERCHANT_ALREADY_ONBOARDED": "Merchant is already onboarded.",
+    "SUB_MERCHANT_EXISTS": "A team member with this phone number already exists.",
+    "SUB_MERCHANT_NOT_ACTIVE": "Sub-merchant profile is not active.",
+    "AUTH_INVITE_EXPIRED": "The invite token has expired. Please request a new invite.",
+    "AUTH_INVITE_CONSUMED": "This invite has already been used.",
+    "AUTH_INVITE_INVALID": "Invalid invite token.",
+    "PLAN_LIMIT_SUB_MERCHANTS": "Your current plan does not allow more team members."
+  },
+
+  "ANALYTICS": {
+    "ANALYTICS_INSUFFICIENT_DATA": "Not enough verified transactions to generate insights.",
+    "ANALYTICS_PERMISSION_DENIED": "Analytics are only available to merchants, not team members."
+  },
+
+  "EXPORT": {
+    "EXPORT_NO_DATA": "No data available for the selected period.",
+    "EXPORT_GENERATING": "Report is being generated. You will be notified when it is ready.",
+    "EXPORT_FAILED": "Report generation failed. Please try again."
+  },
+
+  "GENERAL": {
+    "VALIDATION_ERROR": "One or more fields failed validation.",
+    "NOT_FOUND": "The requested resource was not found.",
+    "FORBIDDEN": "You do not have permission to perform this action.",
+    "UNAUTHORIZED": "Authentication is required.",
+    "RATE_LIMITED": "Too many requests. Please slow down.",
+    "INTERNAL_ERROR": "An unexpected error occurred. Our team has been notified.",
+    "SERVICE_UNAVAILABLE": "The service is temporarily unavailable. Please try again later.",
+    "TENANT_ISOLATION_VIOLATION": "Access denied. You can only access your own data."
+  }
+}

@@ -1,0 +1,546 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2026-09-24",
+
+  "appName": "Yene Verify",
+  "@appName": { "description": "Application name" },
+
+  "taglinePrimary": "Verify any Ethiopian bank payment. In seconds.",
+  "@taglinePrimary": { "description": "Primary marketing tagline" },
+
+  "taglineShort": "Verify. Trust. Grow.",
+  "@taglineShort": { "description": "Short marketing tagline" },
+
+  "continueLabel": "Continue",
+  "@continueLabel": {},
+
+  "cancelLabel": "Cancel",
+  "@cancelLabel": {},
+
+  "confirmLabel": "Confirm",
+  "@confirmLabel": {},
+
+  "saveLabel": "Save",
+  "@saveLabel": {},
+
+  "deleteLabel": "Delete",
+  "@deleteLabel": {},
+
+  "retryLabel": "Try again",
+  "@retryLabel": {},
+
+  "okLabel": "OK",
+  "@okLabel": {},
+
+  "closeLabel": "Close",
+  "@closeLabel": {},
+
+  "backLabel": "Back",
+  "@backLabel": {},
+
+  "doneLabel": "Done",
+  "@doneLabel": {},
+
+  "loadingLabel": "Loading…",
+  "@loadingLabel": {},
+
+  "requiredField": "This field is required",
+  "@requiredField": {},
+
+  "genericError": "Something went wrong. Please try again.",
+  "@genericError": {},
+
+  "networkError": "No internet connection. Please check your network.",
+  "@networkError": {},
+
+  "sessionExpired": "Your session has expired. Please log in again.",
+  "@sessionExpired": {},
+
+  "phoneNumber": "Phone number",
+  "@phoneNumber": {},
+
+  "phoneHint": "+251 9XX XXX XXX",
+  "@phoneHint": {},
+
+  "phoneInvalid": "Enter a valid Ethiopian phone number",
+  "@phoneInvalid": {},
+
+  "otpTitle": "Enter verification code",
+  "@otpTitle": {},
+
+  "otpSubtitle": "We sent a 6-digit code to {phone}",
+  "@otpSubtitle": {
+    "placeholders": {
+      "phone": { "type": "String", "example": "+251912345678" }
+    }
+  },
+
+  "otpResend": "Resend code",
+  "@otpResend": {},
+
+  "otpResendIn": "Resend in {seconds}s",
+  "@otpResendIn": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+
+  "otpInvalid": "Invalid code. Please try again.",
+  "@otpInvalid": {},
+
+  "otpExpired": "Code has expired. Request a new one.",
+  "@otpExpired": {},
+
+  "otpMaxAttempts": "Too many attempts. Please wait before trying again.",
+  "@otpMaxAttempts": {},
+
+  "pinTitle": "Set your PIN",
+  "@pinTitle": {},
+
+  "pinSubtitle": "Choose a {length}-digit PIN to secure your account",
+  "@pinSubtitle": {
+    "placeholders": {
+      "length": { "type": "int" }
+    }
+  },
+
+  "pinConfirmTitle": "Confirm your PIN",
+  "@pinConfirmTitle": {},
+
+  "pinMismatch": "PINs don't match. Try again.",
+  "@pinMismatch": {},
+
+  "pinWrong": "Incorrect PIN. {attemptsLeft} attempts left.",
+  "@pinWrong": {
+    "placeholders": {
+      "attemptsLeft": { "type": "int" }
+    }
+  },
+
+  "enterPin": "Enter your PIN",
+  "@enterPin": {},
+
+  "biometricTitle": "Enable biometric unlock",
+  "@biometricTitle": {},
+
+  "biometricSubtitle": "Use fingerprint or Face ID to unlock quickly and securely.",
+  "@biometricSubtitle": {},
+
+  "biometricEnable": "Enable biometrics",
+  "@biometricEnable": {},
+
+  "biometricSkip": "Skip for now",
+  "@biometricSkip": {},
+
+  "biometricPrompt": "Verify your identity",
+  "@biometricPrompt": {},
+
+  "biometricFailed": "Biometric authentication failed. Use your PIN.",
+  "@biometricFailed": {},
+
+  "verifyTitle": "Verify Payment",
+  "@verifyTitle": {},
+
+  "verifySubtitle": "Take or upload a photo of the customer's payment confirmation.",
+  "@verifySubtitle": {},
+
+  "takePhoto": "Take Photo",
+  "@takePhoto": { "description": "Camera capture option label" },
+
+  "uploadImage": "Upload Image",
+  "@uploadImage": { "description": "Gallery picker option label" },
+
+  "choosePhotoSource": "Add receipt photo",
+  "@choosePhotoSource": {},
+
+  "takePhotoDescription": "Capture the payment confirmation screen",
+  "@takePhotoDescription": {},
+
+  "uploadImageDescription": "Choose an existing photo from your gallery",
+  "@uploadImageDescription": {},
+
+  "verificationPending": "Verifying…",
+  "@verificationPending": {},
+
+  "verificationPendingDetail": "Checking the receipt with {bank}. This usually takes under 10 seconds.",
+  "@verificationPendingDetail": {
+    "placeholders": {
+      "bank": { "type": "String" }
+    }
+  },
+
+  "verdictVerified": "VERIFIED",
+  "@verdictVerified": {},
+
+  "verdictFake": "FAKE",
+  "@verdictFake": {},
+
+  "verdictDuplicate": "DUPLICATE",
+  "@verdictDuplicate": {},
+
+  "verdictPending": "PENDING",
+  "@verdictPending": {},
+
+  "verdictNeedsReview": "REVIEW",
+  "@verdictNeedsReview": {},
+
+  "verdictError": "ERROR",
+  "@verdictError": {},
+
+  "verdictVerifiedMessage": "This receipt is genuine and verified.",
+  "@verdictVerifiedMessage": {},
+
+  "verdictFakeMessage": "This receipt could not be verified. It may be fake.",
+  "@verdictFakeMessage": {},
+
+  "verdictDuplicateMessage": "This receipt has already been verified on {date}.",
+  "@verdictDuplicateMessage": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+
+  "verdictErrorMessage": "Could not reach {bank} at this time. Please try again.",
+  "@verdictErrorMessage": {
+    "placeholders": {
+      "bank": { "type": "String" }
+    }
+  },
+
+  "transactionReference": "Transaction Reference",
+  "@transactionReference": {},
+
+  "transactionAmount": "Amount",
+  "@transactionAmount": {},
+
+  "transactionDate": "Date",
+  "@transactionDate": {},
+
+  "transactionBank": "Bank",
+  "@transactionBank": {},
+
+  "transactionSender": "Sender",
+  "@transactionSender": {},
+
+  "transactionReceiver": "Receiver",
+  "@transactionReceiver": {},
+
+  "transactionsTitle": "Transactions",
+  "@transactionsTitle": {},
+
+  "noTransactionsTitle": "No verifications yet",
+  "@noTransactionsTitle": {},
+
+  "noTransactionsBody": "Verified payments will appear here.",
+  "@noTransactionsBody": {},
+
+  "verifyFirst": "Verify a payment",
+  "@verifyFirst": {},
+
+  "homeTitle": "Home",
+  "@homeTitle": {},
+
+  "analyticsTitle": "Analytics",
+  "@analyticsTitle": {},
+
+  "profileTitle": "Profile",
+  "@profileTitle": {},
+
+  "settingsTitle": "Settings",
+  "@settingsTitle": {},
+
+  "historyTitle": "History",
+  "@historyTitle": {},
+
+  "subMerchantsTitle": "Team",
+  "@subMerchantsTitle": {},
+
+  "addSubMerchant": "Add team member",
+  "@addSubMerchant": {},
+
+  "noSubMerchantsTitle": "No team members yet",
+  "@noSubMerchantsTitle": {},
+
+  "noSubMerchantsBody": "Add cashiers or branch staff to verify payments on your behalf.",
+  "@noSubMerchantsBody": {},
+
+  "creditsRemaining": "{count} credits remaining",
+  "@creditsRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "creditsLow": "Only {count} credits left. Renew your package.",
+  "@creditsLow": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "creditsEmpty": "Please renew your package to continue verifying receipts.",
+  "@creditsEmpty": {},
+
+  "creditsUnlimited": "Unlimited",
+  "@creditsUnlimited": {},
+
+  "renewPackage": "Renew package",
+  "@renewPackage": {},
+
+  "billingTitle": "Subscription",
+  "@billingTitle": {},
+
+  "billingCurrentPlan": "Current plan",
+  "@billingCurrentPlan": {},
+
+  "billingPaymentInstructions": "Transfer {amount} to the account below, then upload your payment screenshot.",
+  "@billingPaymentInstructions": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+
+  "billingUploadProof": "Upload payment proof",
+  "@billingUploadProof": {},
+
+  "billingVerifying": "Verifying your payment…",
+  "@billingVerifying": {},
+
+  "billingSuccess": "Payment verified. Your plan is now active.",
+  "@billingSuccess": {},
+
+  "billingFailed": "Payment could not be verified. Please contact support.",
+  "@billingFailed": {},
+
+  "billingNeedsReview": "Your payment is under review. We'll notify you shortly.",
+  "@billingNeedsReview": {},
+
+  "planFree": "Free",
+  "@planFree": {},
+
+  "planPremium": "Premium",
+  "@planPremium": {},
+
+  "planBusiness": "Business",
+  "@planBusiness": {},
+
+  "planBusinessPro": "Business Pro",
+  "@planBusinessPro": {},
+
+  "planApiIntegration": "API Integration",
+  "@planApiIntegration": {},
+
+  "planVerificationsPerMonth": "{count} verifications / month",
+  "@planVerificationsPerMonth": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "planUnlimitedVerifications": "Unlimited verifications",
+  "@planUnlimitedVerifications": {},
+
+  "notificationsTitle": "Notifications",
+  "@notificationsTitle": {},
+
+  "noNotificationsTitle": "All caught up",
+  "@noNotificationsTitle": {},
+
+  "noNotificationsBody": "You have no new notifications.",
+  "@noNotificationsBody": {},
+
+  "logoutLabel": "Log out",
+  "@logoutLabel": {},
+
+  "logoutConfirmTitle": "Log out?",
+  "@logoutConfirmTitle": {},
+
+  "logoutConfirmBody": "You will need to verify your identity to log back in.",
+  "@logoutConfirmBody": {},
+
+  "devicesTitle": "Trusted devices",
+  "@devicesTitle": {},
+
+  "deviceThisDevice": "This device",
+  "@deviceThisDevice": {},
+
+  "deviceRevoke": "Remove device",
+  "@deviceRevoke": {},
+
+  "deviceRevokeConfirm": "Remove this device? You will need to re-authenticate on it.",
+  "@deviceRevokeConfirm": {},
+
+  "businessName": "Business name",
+  "@businessName": {},
+
+  "businessType": "Business type",
+  "@businessType": {},
+
+  "fullName": "Full name",
+  "@fullName": {},
+
+  "language": "Language",
+  "@language": {},
+
+  "languageEnglish": "English",
+  "@languageEnglish": {},
+
+  "languageAmharic": "አማርኛ",
+  "@languageAmharic": {},
+
+  "darkMode": "Dark mode",
+  "@darkMode": {},
+
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+
+  "copyReference": "Copy reference",
+  "@copyReference": {},
+
+  "copied": "Copied!",
+  "@copied": {},
+
+  "shareLabel": "Share",
+  "@shareLabel": {},
+
+  "exportLabel": "Export",
+  "@exportLabel": {},
+
+  "filterLabel": "Filter",
+  "@filterLabel": {},
+
+  "searchLabel": "Search",
+  "@searchLabel": {},
+
+  "searchHint": "Search transactions…",
+  "@searchHint": {},
+
+  "noSearchResults": "No results for \"{query}\"",
+  "@noSearchResults": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+
+  "dateRangeLabel": "Date range",
+  "@dateRangeLabel": {},
+
+  "bankLabel": "Bank",
+  "@bankLabel": {},
+
+  "allBanks": "All banks",
+  "@allBanks": {},
+
+  "bankCbe": "Commercial Bank of Ethiopia",
+  "@bankCbe": {},
+
+  "bankTelebirr": "Telebirr",
+  "@bankTelebirr": {},
+
+  "bankAwash": "Awash Bank",
+  "@bankAwash": {},
+
+  "bankDashen": "Dashen Bank",
+  "@bankDashen": {},
+
+  "bankAbyssinia": "Bank of Abyssinia",
+  "@bankAbyssinia": {},
+
+  "bankMpesa": "M-Pesa",
+  "@bankMpesa": {},
+
+  "bankZemen": "Zemen Bank",
+  "@bankZemen": {},
+
+  "insightsTitle": "Insights",
+  "@insightsTitle": {},
+
+  "insightBestProducts": "Best selling products",
+  "@insightBestProducts": {},
+
+  "insightPeakHours": "Peak hours",
+  "@insightPeakHours": {},
+
+  "insightBestDays": "Best days",
+  "@insightBestDays": {},
+
+  "insightTrend": "Trend",
+  "@insightTrend": {},
+
+  "insightRecommendations": "Recommendations",
+  "@insightRecommendations": {},
+
+  "insightAnomalies": "Anomalies",
+  "@insightAnomalies": {},
+
+  "noInsightsTitle": "Not enough data yet",
+  "@noInsightsTitle": {},
+
+  "noInsightsBody": "Complete more verifications to unlock insights.",
+  "@noInsightsBody": {},
+
+  "trendUp": "+{percent}% vs last {period}",
+  "@trendUp": {
+    "placeholders": {
+      "percent": { "type": "String" },
+      "period": { "type": "String" }
+    }
+  },
+
+  "trendDown": "-{percent}% vs last {period}",
+  "@trendDown": {
+    "placeholders": {
+      "percent": { "type": "String" },
+      "period": { "type": "String" }
+    }
+  },
+
+  "periodWeek": "week",
+  "@periodWeek": {},
+
+  "periodMonth": "month",
+  "@periodMonth": {},
+
+  "auditLogTitle": "Audit log",
+  "@auditLogTitle": {},
+
+  "permissionCameraTitle": "Camera access needed",
+  "@permissionCameraTitle": {},
+
+  "permissionCameraBody": "Yene Verify needs camera access to capture payment screenshots.",
+  "@permissionCameraBody": {},
+
+  "permissionGalleryTitle": "Photo library access needed",
+  "@permissionGalleryTitle": {},
+
+  "permissionGalleryBody": "Yene Verify needs photo library access to upload payment screenshots.",
+  "@permissionGalleryBody": {},
+
+  "permissionOpenSettings": "Open settings",
+  "@permissionOpenSettings": {},
+
+  "onboardingStep1Title": "Verify payments instantly",
+  "@onboardingStep1Title": {},
+
+  "onboardingStep1Body": "Take a photo of any Ethiopian bank receipt and get a verified result in under 10 seconds.",
+  "@onboardingStep1Body": {},
+
+  "onboardingStep2Title": "Stop payment fraud",
+  "@onboardingStep2Title": {},
+
+  "onboardingStep2Body": "Duplicate receipt detection protects your business from the same receipt being used twice.",
+  "@onboardingStep2Body": {},
+
+  "onboardingStep3Title": "Grow with insights",
+  "@onboardingStep3Title": {},
+
+  "onboardingStep3Body": "Understand your peak hours, best products, and sales trends — all from your verified transactions.",
+  "@onboardingStep3Body": {},
+
+  "getStarted": "Get started",
+  "@getStarted": {}
+}

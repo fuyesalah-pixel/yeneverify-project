@@ -1,0 +1,18 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "..",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/src/$1",
+    "^@keyv/redis$": "<rootDir>/node_modules/@keyv/redis/dist/index.cjs",
+    "^@nestjs/cache-manager$": "<rootDir>/node_modules/@nestjs/cache-manager/dist/index.js"
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(?:\\.pnpm/)?(keyv|@keyv|hookified|@redis|redis-parser|redis-errors|cluster-key-slot|denque|@nestjs/cache-manager|cache-manager))"
+  ],
+  "testTimeout": 30000
+}

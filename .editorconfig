@@ -1,0 +1,46 @@
+root = true
+
+# ── All files ─────────────────────────────────────────────────
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# ── Dart ──────────────────────────────────────────────────────
+[*.dart]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# ── TypeScript / JavaScript ───────────────────────────────────
+[*.{ts,js,mjs,cjs}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# ── JSON ──────────────────────────────────────────────────────
+[*.json]
+indent_style = space
+indent_size = 2
+
+# ── YAML ──────────────────────────────────────────────────────
+[*.{yaml,yml}]
+indent_style = space
+indent_size = 2
+
+# ── Markdown ──────────────────────────────────────────────────
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# ── Shell scripts ─────────────────────────────────────────────
+[*.sh]
+indent_style = space
+indent_size = 2
+
+# ── Makefile — tabs required ──────────────────────────────────
+[Makefile]
+indent_style = tab

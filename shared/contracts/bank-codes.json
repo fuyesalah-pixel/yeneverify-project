@@ -1,0 +1,105 @@
+{
+  "_meta": {
+    "description": "Canonical bank list for Yene Verify. Both backend adapters and mobile UI read from this. Add a new bank here ONLY after the adapter is implemented in backend/src/verification/adapters/.",
+    "lastUpdated": "2026-09-24",
+    "version": "1.0.0"
+  },
+
+  "CBE": {
+    "code": "CBE",
+    "name": "Commercial Bank of Ethiopia",
+    "nameAm": "የኢትዮጵያ ንግድ ባንክ",
+    "short": "CBE",
+    "referenceFormat": "FT followed by digits (e.g. FT24305983477)",
+    "referenceRegex": "^FT\\d{11,}$",
+    "verificationMethod": "HTML_SCRAPE",
+    "adapterStatus": "FULL",
+    "fallbackColor": "#7A2E8E",
+    "assetFile": "assets/banks/cbe.png",
+    "notes": "Fetch official receipt page. Reference in FT... format."
+  },
+
+  "TELEBIRR": {
+    "code": "TELEBIRR",
+    "name": "Telebirr",
+    "nameAm": "ቴሌብር",
+    "short": "Telebirr",
+    "referenceFormat": "DEV followed by 7 chars (e.g. DEV1234567)",
+    "referenceRegex": "^DEV[A-Z0-9]{7}$",
+    "verificationMethod": "HEADLESS_BROWSER",
+    "adapterStatus": "FULL",
+    "fallbackColor": "#00A0E1",
+    "assetFile": "assets/banks/telebirr.png",
+    "notes": "JS-rendered page requires Puppeteer headless browser."
+  },
+
+  "AWASH": {
+    "code": "AWASH",
+    "name": "Awash Bank",
+    "nameAm": "ዓዋሽ ባንክ",
+    "short": "Awash",
+    "referenceFormat": "e.g. 2KEX10DJ7F-575JQI",
+    "referenceRegex": "^[A-Z0-9]{10}-[A-Z0-9]{6}$",
+    "verificationMethod": "HTML_TABLE",
+    "adapterStatus": "FULL",
+    "fallbackColor": "#F5A623",
+    "assetFile": "assets/banks/awash.png",
+    "notes": "HTML table parse via URL pattern."
+  },
+
+  "DASHEN": {
+    "code": "DASHEN",
+    "name": "Dashen Bank",
+    "nameAm": "ዳሸን ባንክ",
+    "short": "Dashen",
+    "referenceFormat": "varies",
+    "referenceRegex": null,
+    "verificationMethod": "ENDPOINT_UNSTABLE",
+    "adapterStatus": "PARTIAL",
+    "fallbackColor": "#1E3A8A",
+    "assetFile": "assets/banks/dashen.png",
+    "notes": "Endpoint unstable. Partial implementation — may fall to NEEDS_REVIEW."
+  },
+
+  "ABYSSINIA": {
+    "code": "ABYSSINIA",
+    "name": "Bank of Abyssinia",
+    "nameAm": "አቢሲኒያ ባንክ",
+    "short": "BOA",
+    "referenceFormat": "FT followed by 12 chars (e.g. FT243059834AB)",
+    "referenceRegex": "^FT[A-Z0-9]{12}$",
+    "verificationMethod": "HTML_SCRAPE",
+    "adapterStatus": "PARTIAL",
+    "fallbackColor": "#8B0000",
+    "assetFile": "assets/banks/abyssinia.png",
+    "notes": "Requires last 5 digits of account number. Partial — account digits from OCR."
+  },
+
+  "MPESA": {
+    "code": "MPESA",
+    "name": "M-Pesa Ethiopia",
+    "nameAm": "M-Pesa",
+    "short": "M-Pesa",
+    "referenceFormat": "10-char alphanumeric (e.g. SBC12345XY)",
+    "referenceRegex": "^[A-Z0-9]{10}$",
+    "verificationMethod": "SAFARICOM_API_PDF",
+    "adapterStatus": "FULL",
+    "fallbackColor": "#E60000",
+    "assetFile": "assets/banks/mpesa.png",
+    "notes": "Safaricom API → Base64 PDF → parse. Full implementation."
+  },
+
+  "ZEMEN": {
+    "code": "ZEMEN",
+    "name": "Zemen Bank",
+    "nameAm": "ዘመን ባንክ",
+    "short": "Zemen",
+    "referenceFormat": "e.g. 108IBET252931385",
+    "referenceRegex": "^[0-9]{3}[A-Z]{4}[0-9]{9}$",
+    "verificationMethod": "PDF_FETCH",
+    "adapterStatus": "FULL",
+    "fallbackColor": "#006B54",
+    "assetFile": "assets/banks/zemen.png",
+    "notes": "PDF URL fetch + parse. Reference starts with 3 digits + 4 letters."
+  }
+}

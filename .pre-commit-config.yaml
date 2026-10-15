@@ -1,0 +1,30 @@
+# Install with: pre-commit install
+# Both scanners run on every commit. Do not use --no-verify.
+default_stages: [pre-commit]
+minimum_pre_commit_version: "3.0.0"
+
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.3
+    hooks:
+      - id: gitleaks
+        name: gitleaks — block committed secrets
+        args: [--config=.gitleaks.toml]
+
+  # Trufflehog does not publish a stable pre-commit hook id; invoke the
+  # installed scanner directly so every commit still runs it.
+  - repo: local
+    hooks:
+      - id: trufflehog
+        name: trufflehog — verify repository secrets
+        entry: bash scripts/run-trufflehog.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: mobile-defines
+        name: mobile defines — allow public configuration only
+        entry: bash scripts/check-dart-defines-safe.sh
+        language: system
+        pass_filenames: false
+        files: ^mobile/.*dart_defines.*\.json$
