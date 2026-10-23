@@ -46,6 +46,7 @@ export class AppConfigService {
       afroMessage: this.afroMessage,
       vision: this.vision,
       r2: this.r2,
+      storage: this.storage,
       fcm: this.fcm,
       smtp: this.smtp,
       sentry: this.sentry,
@@ -191,6 +192,14 @@ export class AppConfigService {
       minioEndpoint: this.value('MINIO_ENDPOINT'),
       minioAccessKey: this.value('MINIO_ACCESS_KEY'),
       minioSecretKey: this.value('MINIO_SECRET_KEY'),
+    } as const;
+  }
+
+  // ── Storage driver selection ─────────────────────────────────────────────
+  get storage() {
+    return {
+      driver: this.value('STORAGE_DRIVER'),
+      localPath: this.value('STORAGE_LOCAL_PATH'),
     } as const;
   }
 

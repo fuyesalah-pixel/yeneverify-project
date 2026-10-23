@@ -259,6 +259,14 @@ export const envSchema = z
     MINIO_ACCESS_KEY: z.string().optional().default(''),
     MINIO_SECRET_KEY: z.string().optional().default(''),
 
+    // ── Storage driver selection ─────────────────────────────────────────
+    STORAGE_DRIVER: z
+      .enum(['local', 'r2'], {
+        errorMap: () => ({ message: 'must be local or r2.' }),
+      })
+      .default('local'),
+    STORAGE_LOCAL_PATH: z.string().min(1, 'must not be empty.').default('./.storage/receipts'),
+
     // ── Firebase Cloud Messaging ─────────────────────────────────────────
     FCM_PROJECT_ID: z.string().optional().default(''),
     FCM_CLIENT_EMAIL: optionalEmail,
@@ -475,6 +483,15 @@ export const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ['REDIS_URL'],
         message: 'must not point at localhost outside development.',
+      });
+    }
+    // This block only runs outside development/test, so the local disk
+    // driver is never acceptable in a hosted environment.
+    if (env.STORAGE_DRIVER !== 'r2') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['STORAGE_DRIVER'],
+        message: 'must be r2 outside development.',
       });
     }
     if (

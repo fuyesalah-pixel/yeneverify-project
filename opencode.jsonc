@@ -1,22 +1,4 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  // Custom OpenAI-compatible provider -> Clean APIs.
-  // NOTE: baseURL MUST include https:// and the /v1 suffix; opencode appends
-  // /chat/completions itself. Plain http://cleanapis.com returns 404s.
-  "provider": {
-    "clean-apis": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Clean APIs",
-      "options": {
-        "baseURL": "https://cleanapis.com/v1",
-        "apiKey": "cc_sZOEnR6EMFCCEShPgN3UfgZjE0Hpgy2T6YOJ13Am2PRy4For"
-      },
-      "models": {
-        "gpt-5.6-luna": {
-          "name": "GPT 5.6 Luna"
-        }
-      }
-    }
-  },
-  "model": "clean-apis/gpt-5.6-luna"
+  "model": "opencode/big-pickle"
 }

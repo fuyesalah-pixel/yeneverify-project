@@ -527,6 +527,55 @@ paths:
       tags: *ref_7
       security:
         - access-token: []
+  /receipts/presign:
+    post:
+      operationId: ReceiptsController_presign
+      summary: Reserve a storage key and get an upload URL
+      parameters: []
+      responses:
+        '200':
+          description: Upload URL issued
+        '400':
+          description: Unsupported mimeType or oversized file
+      tags: &ref_8
+        - Receipts
+      security:
+        - access-token: []
+  /receipts/complete:
+    post:
+      operationId: ReceiptsController_complete
+      summary: Confirm the upload and create the receipt
+      parameters: []
+      responses:
+        '201':
+          description: Receipt created
+        '400':
+          description: Checksum mismatch or invalid object
+        '404':
+          description: No uploaded object for that key
+      tags: *ref_8
+      security:
+        - access-token: []
+  /receipts/{id}:
+    get:
+      operationId: ReceiptsController_getById
+      summary: Get receipt metadata with a download URL
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Receipt metadata
+        '403':
+          description: Sub-merchant reading another uploader’s receipt
+        '404':
+          description: Receipt not found in this tenant
+      tags: *ref_8
+      security:
+        - access-token: []
 info:
   title: Yene Verify API
   description: Payment receipt verification for Ethiopian banks

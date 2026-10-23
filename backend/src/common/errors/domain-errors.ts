@@ -136,6 +136,66 @@ export class BiometricNotEnabledError extends AppError {
   }
 }
 
+export class ReceiptNotUploadedError extends AppError {
+  constructor(details?: Record<string, unknown>) {
+    super(
+      ERROR_CODES.RECEIPT_NOT_UPLOADED,
+      'No uploaded file was found for this key. Upload the image before completing.',
+      404,
+      details,
+    );
+  }
+}
+
+export class ReceiptTooLargeError extends AppError {
+  constructor(maxBytes?: number) {
+    super(
+      ERROR_CODES.RECEIPT_TOO_LARGE,
+      'The uploaded file exceeds the maximum allowed size.',
+      400,
+      maxBytes ? { maxBytes } : undefined,
+    );
+  }
+}
+
+export class ReceiptInvalidTypeError extends AppError {
+  constructor(mimeType?: string) {
+    super(
+      ERROR_CODES.RECEIPT_INVALID_TYPE,
+      'Only JPEG, PNG, and WebP receipt images are accepted.',
+      400,
+      mimeType ? { mimeType } : undefined,
+    );
+  }
+}
+
+export class ReceiptHashMismatchError extends AppError {
+  constructor() {
+    super(
+      ERROR_CODES.RECEIPT_HASH_MISMATCH,
+      'The uploaded file does not match the sha256 checksum you provided.',
+      400,
+    );
+  }
+}
+
+export class ReceiptNotFoundError extends AppError {
+  constructor() {
+    super(ERROR_CODES.RECEIPT_NOT_FOUND, 'Receipt not found.', 404);
+  }
+}
+
+export class StorageDriverError extends AppError {
+  constructor(driver: string, reason?: string) {
+    super(
+      ERROR_CODES.STORAGE_DRIVER_ERROR,
+      'The storage backend could not complete this request.',
+      502,
+      reason ? { driver, reason } : { driver },
+    );
+  }
+}
+
 export class OnboardingRequiredError extends AppError {
   readonly step: string;
   readonly pendingInvite?: { id: string; merchantName: string; branchLabel?: string };

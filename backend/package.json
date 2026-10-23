@@ -112,6 +112,9 @@
       "ts"
     ],
     "rootDir": "src",
+    "setupFiles": [
+      "../test/setup-env.js"
+    ],
     "testRegex": ".*\\.spec\\.ts$",
     "passWithNoTests": true,
     "transform": {
