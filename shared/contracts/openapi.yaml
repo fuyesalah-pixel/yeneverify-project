@@ -556,6 +556,30 @@ paths:
       tags: *ref_8
       security:
         - access-token: []
+  /receipts/{id}/ocr:
+    post:
+      operationId: ReceiptsController_runOcr
+      summary: Run OCR on a stored receipt image
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Extracted OCR text
+        '403':
+          description: Sub-merchant reading another uploader’s receipt
+        '404':
+          description: Receipt not found in this tenant
+        '422':
+          description: OCR provider returned no text
+        '502':
+          description: OCR provider failure
+      tags: *ref_8
+      security:
+        - access-token: []
   /receipts/{id}:
     get:
       operationId: ReceiptsController_getById

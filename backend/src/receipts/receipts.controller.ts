@@ -59,6 +59,19 @@ export class ReceiptsController {
     return this.service.complete(user, dto);
   }
 
+  @Post(':id/ocr')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Run OCR on a stored receipt image' })
+  @ApiResponse({ status: 200, description: 'Extracted OCR text' })
+  @ApiResponse({ status: 403, description: 'Sub-merchant reading another uploader’s receipt' })
+  @ApiResponse({ status: 404, description: 'Receipt not found in this tenant' })
+  @ApiResponse({ status: 422, description: 'OCR provider returned no text' })
+  @ApiResponse({ status: 502, description: 'OCR provider failure' })
+  async runOcr(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.service.runOcr(id, user);
+  }
+
   @Get(':id')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get receipt metadata with a download URL' })

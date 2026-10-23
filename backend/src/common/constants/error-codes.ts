@@ -74,6 +74,10 @@ export const ERROR_CODES = {
   RECEIPT_NOT_FOUND: 'RECEIPT_NOT_FOUND',
   STORAGE_DRIVER_ERROR: 'STORAGE_DRIVER_ERROR',
 
+  // ── OCR ──────────────────────────────────────────────────────────────
+  OCR_PROVIDER_ERROR: 'OCR_PROVIDER_ERROR',
+  OCR_EMPTY_RESULT: 'OCR_EMPTY_RESULT',
+
   // ── Merchant ──────────────────────────────────────────────────────────
   MERCHANT_NOT_FOUND: 'MERCHANT_NOT_FOUND',
   MERCHANT_SUSPENDED: 'MERCHANT_SUSPENDED',

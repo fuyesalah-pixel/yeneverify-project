@@ -195,9 +195,9 @@ Backend values are validated at boot by `backend/src/config/env.schema.ts`.
 | Name | Type | Required | Default | Example | Sensitivity | Description |
 |---|---|---|---|---|---|---|
 | `INVITE_TOKEN_TTL_DAYS` | number | no | 7 | 7 | config | Invite token lifetime in days. |
-| `INVITE_MAX_RESENDS` | number | no | 3 | 3 | config | Maximum times an invite can be resent. |
+| `INVITE_MAX_RESENDS` | number | no | 5 | 5 | config | Maximum times an invite can be resent. |
 | `INVITE_SMS_SENDER_ID` | string | no | YENEVRF | YENEVRF | config | SMS sender ID used for invite messages. |
-| `FREE_PLAN_MAX_SUB_MERCHANTS` | number | no | 2 | 2 | config | Maximum active sub-merchants allowed on the free plan. |
+| `FREE_PLAN_MAX_SUB_MERCHANTS` | number | no | 1 | 1 | config | Maximum active sub-merchants allowed on the free plan. |
 
 ## Queue
 
@@ -208,6 +208,19 @@ Backend values are validated at boot by `backend/src/config/env.schema.ts`.
 | `QUEUE_EXPORT_CONCURRENCY` | number | no | 2 | 2 | config | Concurrent export workers. |
 | `QUEUE_JOB_ATTEMPTS` | number | no | 3 | 3 | config | Maximum attempts for a queued job. |
 | `QUEUE_BACKOFF_MS` | number | no | 2000 | 2000 | config | Initial retry backoff in milliseconds. |
+
+## Storage drivers (receipt uploads)
+
+| Name | Type | Required | Default | Example | Sensitivity | Description |
+|---|---|---|---|---|---|---|
+| `STORAGE_DRIVER` | string | yes | local | local | config | Active storage driver: 'local' (dev-only disk driver) or 'r2' (Cloudflare R2 via S3 SDK). Hosted environments require 'r2'. |
+| `STORAGE_LOCAL_PATH` | string | no | ./.storage/receipts | ./.storage/receipts | config | Disk root used only when STORAGE_DRIVER=local. Dev artifact — never used in staging/production. |
+
+## OCR pipeline
+
+| Name | Type | Required | Default | Example | Sensitivity | Description |
+|---|---|---|---|---|---|---|
+| `OCR_PROVIDER` | string | yes | mock | mock | config | Active OCR engine: 'mock' (deterministic dev fixtures) or 'google-vision' (Google Cloud Vision). Hosted environments require 'google-vision'. |
 
 ## Admin bootstrap (development only)
 

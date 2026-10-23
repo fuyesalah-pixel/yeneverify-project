@@ -267,6 +267,13 @@ export const envSchema = z
       .default('local'),
     STORAGE_LOCAL_PATH: z.string().min(1, 'must not be empty.').default('./.storage/receipts'),
 
+    // ── OCR provider selection ───────────────────────────────────────────
+    OCR_PROVIDER: z
+      .enum(['mock', 'google-vision'], {
+        errorMap: () => ({ message: 'must be mock or google-vision.' }),
+      })
+      .default('mock'),
+
     // ── Firebase Cloud Messaging ─────────────────────────────────────────
     FCM_PROJECT_ID: z.string().optional().default(''),
     FCM_CLIENT_EMAIL: optionalEmail,
@@ -492,6 +499,15 @@ export const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ['STORAGE_DRIVER'],
         message: 'must be r2 outside development.',
+      });
+    }
+    // Same rule as the storage driver: the deterministic mock OCR engine is
+    // never acceptable in a hosted environment.
+    if (env.OCR_PROVIDER !== 'google-vision') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['OCR_PROVIDER'],
+        message: 'must be google-vision outside development.',
       });
     }
     if (

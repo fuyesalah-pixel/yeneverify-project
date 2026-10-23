@@ -10,6 +10,7 @@ import { createHash } from 'crypto';
 import type { AuthUser } from '../common/types/auth-user.type';
 import { StorageService } from '../storage/storage.service';
 import { MAX_RECEIPT_BYTES } from '../storage/drivers/storage-driver.interface';
+import { OcrService } from '../ocr/ocr.service';
 import { ReceiptsService } from './receipts.service';
 import { ReceiptsRepository } from './receipts.repository';
 import { AuditService } from '../audit/audit.service';
@@ -63,6 +64,8 @@ describe('ReceiptsService', () => {
         { provide: StorageService, useValue: storage },
         { provide: ReceiptsRepository, useValue: repo },
         { provide: AuditService, useValue: audit },
+        // recognize() is stubbed; the OCR provider contract has its own specs.
+        { provide: OcrService, useValue: { recognize: jest.fn() } },
       ],
     }).compile();
 

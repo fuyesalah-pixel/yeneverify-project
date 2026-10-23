@@ -47,6 +47,7 @@ export class AppConfigService {
       vision: this.vision,
       r2: this.r2,
       storage: this.storage,
+      ocr: this.ocr,
       fcm: this.fcm,
       smtp: this.smtp,
       sentry: this.sentry,
@@ -176,7 +177,14 @@ export class AppConfigService {
     } as const;
   }
 
-  // ── Cloudflare R2 / MinIO ───────────────────────────────────────────────
+  // ── OCR provider selection ──────────────────────────────────────────
+  get ocr() {
+    return {
+      provider: this.value('OCR_PROVIDER'),
+    } as const;
+  }
+
+  // ── Cloudflare R2 / MinIO ───────────────────────────────────────────
   get r2() {
     return {
       accountId: this.value('R2_ACCOUNT_ID'),

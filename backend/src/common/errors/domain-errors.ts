@@ -196,6 +196,25 @@ export class StorageDriverError extends AppError {
   }
 }
 
+export class OcrProviderError extends AppError {
+  constructor(provider: string, reason?: string) {
+    super(
+      ERROR_CODES.OCR_PROVIDER_ERROR,
+      'The OCR provider could not process this image.',
+      502,
+      reason ? { provider, reason } : { provider },
+    );
+  }
+}
+
+export class OcrEmptyResultError extends AppError {
+  constructor(provider: string) {
+    super(ERROR_CODES.OCR_EMPTY_RESULT, 'The OCR provider returned no text for this image.', 422, {
+      provider,
+    });
+  }
+}
+
 export class OnboardingRequiredError extends AppError {
   readonly step: string;
   readonly pendingInvite?: { id: string; merchantName: string; branchLabel?: string };

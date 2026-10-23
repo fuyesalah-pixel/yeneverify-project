@@ -17,6 +17,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { AuthUser } from '../common/types/auth-user.type';
 import {
   ForbiddenError,
+  OcrEmptyResultError,
   ReceiptHashMismatchError,
   ReceiptInvalidTypeError,
   ReceiptNotFoundError,
@@ -33,6 +34,7 @@ import {
   isAllowedMimeType,
   MAX_RECEIPT_BYTES,
 } from '../storage/drivers/storage-driver.interface';
+import { OcrService } from '../ocr/ocr.service';
 import { ReceiptsRepository } from './receipts.repository';
 import type { CompleteUploadDto, PresignUploadDto } from './dto';
 
@@ -53,6 +55,7 @@ export class ReceiptsService {
     private readonly storage: StorageService,
     private readonly repo: ReceiptsRepository,
     private readonly audit: AuditService,
+    private readonly ocr: OcrService,
   ) {}
 
   /**
@@ -206,16 +209,7 @@ export class ReceiptsService {
     expiresAt: string | null;
     downloadUrl: string;
   }> {
-    const merchantId = this.requireMerchantId(user);
-
-    const receipt = await this.repo.findByIdForMerchant(receiptId, merchantId);
-    if (!receipt) {
-      throw new ReceiptNotFoundError();
-    }
-
-    if (user.role === 'SUB_MERCHANT' && receipt.uploadedByUserId !== user.id) {
-      throw new ForbiddenError('You can only access receipts you uploaded.');
-    }
+    const receipt = await this.loadForUser(receiptId, user);
 
     const { downloadUrl } = await this.storage.presignDownload(
       receipt.storageKey,
@@ -237,12 +231,90 @@ export class ReceiptsService {
     };
   }
 
-  // ── internals ───────────────────────────────────────────────────────────
+  /**
+   * Step 4 — run OCR on the stored image.
+   *
+   * Tenant-scoped exactly like getById(): MERCHANT reads any receipt in
+   * their tenant, SUB_MERCHANT only their own uploads. Results are NOT
+   * persisted here — they land in the verifications table (Step 13E) —
+   * so every call re-runs the engine.
+   */
+  async runOcr(
+    receiptId: string,
+    user: AuthUser,
+  ): Promise<{
+    receiptId: string;
+    text: string;
+    confidence: number;
+    provider: string;
+    durationMs: number;
+  }> {
+    const receipt = await this.loadForUser(receiptId, user);
+
+    const image = await this.storage.getObject(receipt.storageKey);
+
+    // Provider transport failures are already typed as OCR_PROVIDER_ERROR
+    // (502) by the provider layer; domain errors (403/404/422) propagate as-is.
+    const result = await this.ocr.recognize(image, receipt.mimeType);
+    if (result.text.trim().length === 0) {
+      throw new OcrEmptyResultError(result.provider);
+    }
+
+    this.audit.log({
+      actorType: 'USER',
+      actorUserId: user.id,
+      action: 'receipt.ocr.run',
+      targetType: 'receipt',
+      targetId: receipt.id,
+      metadata: {
+        merchantId: this.requireMerchantId(user),
+        storageKey: receipt.storageKey,
+        provider: result.provider,
+        durationMs: result.durationMs,
+      },
+    });
+
+    this.logger.log({
+      event: 'receipt.ocr.run',
+      receiptId: receipt.id,
+      provider: result.provider,
+      durationMs: result.durationMs,
+    });
+
+    return {
+      receiptId: receipt.id,
+      text: result.text,
+      confidence: result.confidence,
+      provider: result.provider,
+      durationMs: result.durationMs,
+    };
+  }
+
+  // ── internals ──────────────────────────────────────────────────────────
 
   /**
    * A receipt key is only ever valid for the tenant that reserved it.
    * Anything else is a cross-tenant access attempt.
    */
+  /**
+   * The only receipt lookup path for MERCHANT/SUB_MERCHANT users:
+   * tenant-scoped SQL plus the sub-merchant own-uploads rule.
+   */
+  private async loadForUser(receiptId: string, user: AuthUser) {
+    const merchantId = this.requireMerchantId(user);
+
+    const receipt = await this.repo.findByIdForMerchant(receiptId, merchantId);
+    if (!receipt) {
+      throw new ReceiptNotFoundError();
+    }
+
+    if (user.role === 'SUB_MERCHANT' && receipt.uploadedByUserId !== user.id) {
+      throw new ForbiddenError('You can only access receipts you uploaded.');
+    }
+
+    return receipt;
+  }
+
   private assertTenantKey(storageKey: string, merchantId: string): void {
     if (!storageKey.startsWith(`receipts/${merchantId}/`)) {
       throw new TenantIsolationError();
