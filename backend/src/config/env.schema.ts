@@ -364,6 +364,21 @@ export const envSchema = z
     TELEBIRR_HEADLESS_ENABLED: booleanValue(true),
     BROWSER_POOL_SIZE: integerValue(1, 10).default(2),
     TELEBIRR_MAX_CONCURRENT: integerValue(1, 10).default(4),
+    // Dashen's receipt domain has changed before; CSV of endpoints tried
+    // in order so a domain change is an env update, not a code deploy.
+    DASHEN_ENDPOINTS: z
+      .string()
+      .max(1_000)
+      .refine(
+        (value) =>
+          value.trim() === '' ||
+          value
+            .split(',')
+            .map((part) => part.trim())
+            .every((url) => httpUrl().safeParse(url).success),
+        'must be empty or comma-separated valid URLs.',
+      )
+      .default(''),
 
     // ── Queue ────────────────────────────────────────────────────────────
     QUEUE_VERIFICATION_CONCURRENCY: integerValue(1, 20).default(4),

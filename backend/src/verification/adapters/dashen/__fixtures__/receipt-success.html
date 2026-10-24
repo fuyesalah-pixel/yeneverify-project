@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashen Bank Transaction Receipt</title>
+  <link href="/assets/site.css" rel="stylesheet" />
+</head>
+<body class="receipt-page">
+  <!-- Simplified from a real Dashen receipt page; names/amounts sanitized. -->
+  <nav class="site-nav">
+    <div class="container">
+      <img src="/assets/dashen-logo.png" alt="Dashen Bank" class="bank-logo" />
+      <span class="brand-text">Dashen Bank</span>
+    </div>
+  </nav>
+
+  <div class="container receipt-container">
+    <h3 class="text-center receipt-title">Transaction Receipt</h3>
+
+    <div class="alert alert-info text-center">
+      Keep this page for your records. Generated 16/07/2026 3:12 PM.
+    </div>
+
+    <table class="table table-bordered receipt-details">
+      <tbody>
+        <tr>
+          <th>Reference</th>
+          <td>DSH9021018AB34</td>
+        </tr>
+        <tr>
+          <th>Sender Name</th>
+          <td>Abebe Kebede</td>
+        </tr>
+        <tr>
+          <th>Receiver Name</th>
+          <td>Selam Coffee</td>
+        </tr>
+        <tr>
+          <th>Amount</th>
+          <td>1,750.00 ETB</td>
+        </tr>
+        <tr>
+          <th>Transaction Date</th>
+          <td>16/07/2026 3:12 PM</td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td>Completed</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="row hidden-print">
+      <button type="button" class="btn btn-primary" onclick="window.print();">Print Receipt</button>
+    </div>
+  </div>
+
+  <footer class="site-footer text-center">
+    <p>&copy; 2026 Dashen Bank. All rights reserved.</p>
+  </footer>
+</body>
+</html>

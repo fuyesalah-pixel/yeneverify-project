@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Service Unavailable</title>
+</head>
+<body>
+  <!-- What Dashen's gateway returns when the receipt service goes down:
+       a bare 500 error page, before any receipt lookup happens. The
+       parser must report this as ambiguous (found:false, isDefinitive:false)
+       so the adapter treats it as transient, never as a final verdict. -->
+  <h1 style="font-family: sans-serif;">Internal Server Error</h1>
+  <p style="font-family: sans-serif;">The application has encountered an error. Please try again later.</p>
+</body>
+</html>

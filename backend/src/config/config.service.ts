@@ -292,6 +292,19 @@ export class AppConfigService {
     } as const;
   }
 
+  /**
+   * Dashen receipt endpoints tried in order (CSV in env, array here).
+   * Empty when unset — the adapter then reports unavailable (retryable).
+   */
+  get dashen() {
+    return {
+      endpoints: String(this.value('DASHEN_ENDPOINTS'))
+        .split(',')
+        .map((url) => url.trim())
+        .filter((url) => url.length > 0),
+    } as const;
+  }
+
   // ── Queue ───────────────────────────────────────────────────────────────
   get queue() {
     return {

@@ -6,6 +6,7 @@
 //   CbeAdapter — first real bank (13D.1)
 //   TelebirrAdapter — headless-browser bank (13D.2)
 //   AwashAdapter — HTTP HTML bank (13D.3)
+//   DashenAdapter — flaky-endpoint bank with multi-URL fallback (13D.4)
 //   AdapterRegistry — bank routing (register/get/detectAll/detectBest)
 //   BankAdapterMetrics — Redis counters for adapter outcomes
 //
@@ -24,6 +25,7 @@ import { BrowserPool } from './browser/browser-pool';
 import { CbeAdapter } from './adapters/cbe/cbe.adapter';
 import { TelebirrAdapter } from './adapters/telebirr/telebirr.adapter';
 import { AwashAdapter } from './adapters/awash/awash.adapter';
+import { DashenAdapter } from './adapters/dashen/dashen.adapter';
 
 @Global()
 @Module({
@@ -33,12 +35,17 @@ import { AwashAdapter } from './adapters/awash/awash.adapter';
     CbeAdapter,
     TelebirrAdapter,
     AwashAdapter,
+    DashenAdapter,
     BankAdapterMetrics,
     {
       provide: AdapterRegistry,
-      useFactory: (cbe: CbeAdapter, telebirr: TelebirrAdapter, awash: AwashAdapter) =>
-        new AdapterRegistry(cbe, telebirr, awash),
-      inject: [CbeAdapter, TelebirrAdapter, AwashAdapter],
+      useFactory: (
+        cbe: CbeAdapter,
+        telebirr: TelebirrAdapter,
+        awash: AwashAdapter,
+        dashen: DashenAdapter,
+      ) => new AdapterRegistry(cbe, telebirr, awash, dashen),
+      inject: [CbeAdapter, TelebirrAdapter, AwashAdapter, DashenAdapter],
     },
   ],
   exports: [AdapterRegistry, BankAdapterMetrics],
