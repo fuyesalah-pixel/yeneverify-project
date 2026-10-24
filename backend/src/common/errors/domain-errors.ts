@@ -207,6 +207,66 @@ export class OcrProviderError extends AppError {
   }
 }
 
+export class BankAdapterNotFoundError extends AppError {
+  constructor(bankCode: string) {
+    super(ERROR_CODES.BANK_ADAPTER_NOT_FOUND, 'No bank adapter is registered for this bank.', 400, {
+      bankCode,
+    });
+  }
+}
+
+export class BankAdapterTimeoutError extends AppError {
+  constructor(bankCode: string, timeoutMs?: number) {
+    super(
+      ERROR_CODES.BANK_ADAPTER_TIMEOUT,
+      'The bank adapter did not respond in time.',
+      504,
+      timeoutMs ? { bankCode, timeoutMs } : { bankCode },
+    );
+  }
+}
+
+export class BankAdapterError extends AppError {
+  constructor(bankCode: string, reason?: string) {
+    super(
+      ERROR_CODES.BANK_ADAPTER_ERROR,
+      'The bank adapter failed unexpectedly.',
+      502,
+      reason ? { bankCode, reason } : { bankCode },
+    );
+  }
+}
+
+export class BankAdapterUnavailableError extends AppError {
+  constructor(bankCode: string) {
+    super(ERROR_CODES.BANK_ADAPTER_UNAVAILABLE, 'The bank adapter is currently unavailable.', 503, {
+      bankCode,
+    });
+  }
+}
+
+export class BankReferenceNotFoundError extends AppError {
+  constructor(bankCode: string) {
+    super(
+      ERROR_CODES.BANK_REFERENCE_NOT_FOUND,
+      'No transaction reference could be extracted from this receipt.',
+      422,
+      { bankCode },
+    );
+  }
+}
+
+export class BankReferenceInvalidError extends AppError {
+  constructor(bankCode: string, reference?: string) {
+    super(
+      ERROR_CODES.BANK_REFERENCE_INVALID,
+      "The extracted reference does not match this bank's format.",
+      422,
+      reference ? { bankCode, reference } : { bankCode },
+    );
+  }
+}
+
 export class OcrEmptyResultError extends AppError {
   constructor(provider: string) {
     super(ERROR_CODES.OCR_EMPTY_RESULT, 'The OCR provider returned no text for this image.', 422, {

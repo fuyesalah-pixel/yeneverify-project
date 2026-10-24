@@ -22,6 +22,7 @@ import { AdminOnlyGuard } from './common/guards/admin-only.guard';
 
 import { OnboardedGuard } from './common/guards/onboarded.guard';
 import { OcrModule } from './ocr/ocr.module';
+import { VerificationModule } from './verification/verification.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { SubMerchantsModule } from './sub-merchants/sub-merchants.module';
 import { MerchantsModule } from './merchants/merchants.module';
@@ -75,6 +76,7 @@ import { buildLoggerOptions } from './common/logger/logger.config';
     QueueModule,
     StorageModule,
     OcrModule,
+    VerificationModule,
 
     // ── Feature ───────────────────────────────────────────────────────
     HealthModule,
