@@ -3,7 +3,9 @@
 //
 // Owns the bank verification engine:
 //
-//   CbeAdapter — first real bank (13D.1); more arrive in 13D.2–13D.7
+//   CbeAdapter — first real bank (13D.1)
+//   TelebirrAdapter — headless-browser bank (13D.2)
+//   AwashAdapter — HTTP HTML bank (13D.3)
 //   AdapterRegistry — bank routing (register/get/detectAll/detectBest)
 //   BankAdapterMetrics — Redis counters for adapter outcomes
 //
@@ -21,6 +23,7 @@ import { BankAdapterMetrics } from './adapters/adapter.metrics';
 import { BrowserPool } from './browser/browser-pool';
 import { CbeAdapter } from './adapters/cbe/cbe.adapter';
 import { TelebirrAdapter } from './adapters/telebirr/telebirr.adapter';
+import { AwashAdapter } from './adapters/awash/awash.adapter';
 
 @Global()
 @Module({
@@ -29,12 +32,13 @@ import { TelebirrAdapter } from './adapters/telebirr/telebirr.adapter';
     BrowserPool,
     CbeAdapter,
     TelebirrAdapter,
+    AwashAdapter,
     BankAdapterMetrics,
     {
       provide: AdapterRegistry,
-      useFactory: (cbe: CbeAdapter, telebirr: TelebirrAdapter) =>
-        new AdapterRegistry(cbe, telebirr),
-      inject: [CbeAdapter, TelebirrAdapter],
+      useFactory: (cbe: CbeAdapter, telebirr: TelebirrAdapter, awash: AwashAdapter) =>
+        new AdapterRegistry(cbe, telebirr, awash),
+      inject: [CbeAdapter, TelebirrAdapter, AwashAdapter],
     },
   ],
   exports: [AdapterRegistry, BankAdapterMetrics],

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Awash Bank Transaction Receipt</title>
+  <meta name="generator" content="AwashPay" />
+  <link href="/static/site.css" rel="stylesheet" />
+</head>
+<body class="receipt-page">
+  <!-- Simplified from Awash receipt format; names/amounts sanitized. -->
+  <header class="site-header">
+    <div class="container">
+      <img src="/static/awash-logo.png" alt="Awash Bank" class="bank-logo" />
+      <span class="brand-text">Awash Bank</span>
+    </div>
+  </header>
+
+  <div class="container receipt-container">
+    <h2 class="text-center receipt-title">Transaction Receipt</h2>
+    <p class="text-center receipt-note">
+      This receipt confirms a completed AwashPay transfer. Generated 16/07/2026 1:40 PM.
+    </p>
+
+    <table class="table table-striped receipt-details">
+      <tbody>
+        <tr>
+          <th>Txn Ref</th>
+          <td>2KEX10DJ7F-575JQI</td>
+        </tr>
+        <tr>
+          <th>Payer Name</th>
+          <td>Abebe Kebede</td>
+        </tr>
+        <tr>
+          <th>Payee Name</th>
+          <td>Selam Coffee</td>
+        </tr>
+        <tr>
+          <th>Transferred Amount</th>
+          <td>ETB 350.00</td>
+        </tr>
+        <tr>
+          <th>Date &amp; Time</th>
+          <td>16/07/2026 1:40 PM</td>
+        </tr>
+        <tr>
+          <th>Channel</th>
+          <td>Awash Mobile Banking</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="row actions hidden-print">
+      <button type="button" class="btn btn-default" onclick="window.print();">Print</button>
+    </div>
+  </div>
+
+  <footer class="site-footer text-center">
+    <p>&copy; 2026 Awash Bank. Electronically generated receipt.</p>
+  </footer>
+</body>
+</html>
