@@ -14,7 +14,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import type { AppConfigService } from '../../../config/config.service';
+import { AppConfigService } from '../../../config/config.service';
 import type { BankAdapter, VerifyInput, VerifyResult } from '../adapter.interface';
 import { AdapterBase } from '../adapter.base';
 import { REFERENCE_PATTERNS, normalizeReference } from '../../regex/reference-patterns';

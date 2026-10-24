@@ -18,18 +18,23 @@ import { Global, Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { AdapterRegistry } from './adapters/adapter.registry';
 import { BankAdapterMetrics } from './adapters/adapter.metrics';
+import { BrowserPool } from './browser/browser-pool';
 import { CbeAdapter } from './adapters/cbe/cbe.adapter';
+import { TelebirrAdapter } from './adapters/telebirr/telebirr.adapter';
 
 @Global()
 @Module({
   imports: [HttpModule],
   providers: [
+    BrowserPool,
     CbeAdapter,
+    TelebirrAdapter,
     BankAdapterMetrics,
     {
       provide: AdapterRegistry,
-      useFactory: (cbe: CbeAdapter) => new AdapterRegistry(cbe),
-      inject: [CbeAdapter],
+      useFactory: (cbe: CbeAdapter, telebirr: TelebirrAdapter) =>
+        new AdapterRegistry(cbe, telebirr),
+      inject: [CbeAdapter, TelebirrAdapter],
     },
   ],
   exports: [AdapterRegistry, BankAdapterMetrics],

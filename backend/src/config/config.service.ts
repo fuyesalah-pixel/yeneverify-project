@@ -283,6 +283,15 @@ export class AppConfigService {
     } as const;
   }
 
+  /** Headless-browser settings for JS-rendered bank pages (Telebirr). */
+  get telebirr() {
+    return {
+      headlessEnabled: this.value('TELEBIRR_HEADLESS_ENABLED'),
+      browserPoolSize: this.value('BROWSER_POOL_SIZE'),
+      maxConcurrent: this.value('TELEBIRR_MAX_CONCURRENT'),
+    } as const;
+  }
+
   // ── Queue ───────────────────────────────────────────────────────────────
   get queue() {
     return {

@@ -345,6 +345,9 @@ export const envSchema = z
       .min(1, 'must not be empty.')
       .default('YeneVerify/1.0 (+https://yeneverify.com/bot)'),
     BANK_ADAPTER_MOCK: booleanValue(true),
+    TELEBIRR_HEADLESS_ENABLED: booleanValue(true),
+    BROWSER_POOL_SIZE: integerValue(1, 10).default(2),
+    TELEBIRR_MAX_CONCURRENT: integerValue(1, 10).default(4),
 
     // ── Queue ────────────────────────────────────────────────────────────
     QUEUE_VERIFICATION_CONCURRENCY: integerValue(1, 20).default(4),
