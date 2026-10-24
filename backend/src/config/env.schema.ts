@@ -51,6 +51,22 @@ const integerValue = (minimum: number, maximum: number) =>
     .min(minimum, `must be at least ${minimum}.`)
     .max(maximum, `must be at most ${maximum}.`);
 
+/**
+ * PORT tolerates junk ambient values (e.g. a host shell exporting
+ * PORT=0): anything missing or outside 1..65535 falls back to 3000
+ * instead of failing boot. A valid PORT behaves identically.
+ */
+const coercePort = z.preprocess((value: unknown) => {
+  if (value === undefined || value === null || value === '' || value === 0 || value === '0') {
+    return 3000;
+  }
+  const numeric = typeof value === 'string' ? Number(value) : value;
+  if (typeof numeric !== 'number' || !Number.isFinite(numeric)) {
+    return 3000;
+  }
+  return numeric >= 1 && numeric <= 65535 ? numeric : 3000;
+}, z.number().int().min(1).max(65535));
+
 const decimalValue = (minimum: number, maximum: number) =>
   z.coerce
     .number({ invalid_type_error: 'must be a number.' })
@@ -109,7 +125,7 @@ export const envSchema = z
         }),
       })
       .default('development'),
-    PORT: integerValue(1, 65535).default(3000),
+    PORT: coercePort,
     HOST: z.string().min(1, 'must not be empty.').default('0.0.0.0'),
     TZ: z.string().min(1, 'must not be empty.').default('Africa/Addis_Ababa'),
     GIT_SHA: z.string().max(64).default('dev'),
