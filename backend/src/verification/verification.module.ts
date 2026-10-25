@@ -12,6 +12,7 @@
 //   ZemenAdapter — direct-PDF bank (13D.7)
 //   VerificationsService — pipeline orchestrator (13E.1)
 //   VerdictResolver / DuplicateDetector / TransactionProjector — 13E.1
+//   VerificationQueueService / VerificationProcessor — BullMQ (13E.2)
 //   AdapterRegistry — bank routing (register/get/detectAll/detectBest)
 //   BankAdapterMetrics — Redis counters for adapter outcomes
 //
@@ -38,6 +39,8 @@ import { VerificationsService } from './verifications/verifications.service';
 import { VerificationsRepository } from './verifications/verifications.repository';
 import { DuplicateDetector } from './verifications/duplicate-detector';
 import { TransactionProjector } from './verifications/transaction-projector';
+import { VerificationQueueService } from './queue/verification-queue.service';
+import { VerificationProcessor } from './queue/verification.processor';
 
 @Global()
 @Module({
@@ -55,6 +58,8 @@ import { TransactionProjector } from './verifications/transaction-projector';
     VerificationsService,
     DuplicateDetector,
     TransactionProjector,
+    VerificationQueueService,
+    VerificationProcessor,
     BankAdapterMetrics,
     {
       provide: AdapterRegistry,
@@ -85,6 +90,7 @@ import { TransactionProjector } from './verifications/transaction-projector';
     VerificationsService,
     DuplicateDetector,
     TransactionProjector,
+    VerificationQueueService,
   ],
 })
 export class VerificationModule {}

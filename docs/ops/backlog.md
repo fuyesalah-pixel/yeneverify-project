@@ -46,3 +46,19 @@ they validate the parser logic but not the real-world layout variations
 Once one real M-Pesa or Zemen PDF is available from a live endpoint,
 replace the synthetic fixtures with sanitized real ones and re-run the
 two parser suites.
+
+## 6. Fix `npm run export:error-codes` (13E.1 follow-up)
+
+The script execs `src/scripts/export-error-codes.ts`, which does not
+exist — it has never run. Until it does, the
+[shared/contracts/error-codes.json](../../shared/contracts/error-codes.json)
+mirror is maintained by hand and can silently drift from
+[error-codes.ts](../../backend/src/common/constants/error-codes.ts).
+Small fix: write the script (read ERROR_CODES, group by prefix, write
+the JSON).
+
+## 7. CI check: error-codes.json mirror sync
+
+Depends on item 6. Once the export script exists, add a CI check that
+regenerates the mirror from the TS constants and fails on diff — a
+hand-maintained mirror WILL eventually drift otherwise.

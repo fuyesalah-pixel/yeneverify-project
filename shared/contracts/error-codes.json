@@ -33,6 +33,7 @@
 
   "VERIFICATION": {
     "VERIFICATION_NOT_FOUND": "Verification record not found.",
+    "VERIFICATION_QUEUE_FAILURE": "A queue error occurred on our side. Please retry the verification.",
     "VERIFICATION_NOT_PENDING": "This verification has already been processed.",
     "VERIFICATION_RECEIPT_MISSING": "The receipt for this verification no longer exists.",
     "VERIFICATION_PENDING": "Verification is still in progress.",

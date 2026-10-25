@@ -149,6 +149,29 @@ export class VerificationsRepository {
     });
   }
 
+  /**
+   * Best-effort failure marker for the queue processor: if process()
+   * itself threw, the merchant must not stay PENDING forever. Atomic
+   * updateMany so it never overwrites a verdict another attempt just
+   * wrote. Best-effort: the original error is not masked.
+   */
+  async markErrorIfPending(
+    verificationId: string,
+    errorCode: string,
+    message?: string,
+  ): Promise<void> {
+    await this.prisma.verification.updateMany({
+      where: { id: verificationId, status: 'PENDING' },
+      data: {
+        status: 'ERROR',
+        errorCode,
+        errorMessage: message ?? 'Verification failed in the processing queue.',
+        completedAt: new Date(),
+        adapterMetadata: { queuedFailure: { errorCode, at: new Date().toISOString() } },
+      },
+    });
+  }
+
   /** Reads the source column within the completion transaction. */
   async getSource(tx: Prisma.TransactionClient, verificationId: string): Promise<string | null> {
     const row = await tx.verification.findUnique({
