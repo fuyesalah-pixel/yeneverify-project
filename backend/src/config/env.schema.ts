@@ -397,6 +397,34 @@ export const envSchema = z
     // Client-signal flag, not consumed by any adapter: the API exposes it so
     // the mobile app knows Abyssinia needs extra input (13E surfaces it).
     BANK_SUPPLEMENTARY_REQUIRED_ABYSSINIA: booleanValue(true),
+    // PDF banks (13D.6+7): M-Pesa returns a base64-wrapped JSON PDF; Zemen
+    // streams a PDF directly. CSV lists stay env-driven (13D.4 rule).
+    MPESA_ENDPOINTS: z
+      .string()
+      .max(1_000)
+      .refine(
+        (value) =>
+          value.trim() === '' ||
+          value
+            .split(',')
+            .map((part) => part.trim())
+            .every((url) => httpUrl().safeParse(url).success),
+        'must be empty or comma-separated valid URLs.',
+      )
+      .default(''),
+    ZEMEN_ENDPOINTS: z
+      .string()
+      .max(1_000)
+      .refine(
+        (value) =>
+          value.trim() === '' ||
+          value
+            .split(',')
+            .map((part) => part.trim())
+            .every((url) => httpUrl().safeParse(url).success),
+        'must be empty or comma-separated valid URLs.',
+      )
+      .default(''),
 
     // ── Queue ────────────────────────────────────────────────────────────
     QUEUE_VERIFICATION_CONCURRENCY: integerValue(1, 20).default(4),

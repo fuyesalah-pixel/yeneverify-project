@@ -293,29 +293,39 @@ export class AppConfigService {
   }
 
   /**
-   * Dashen receipt endpoints tried in order (CSV in env, array here).
-   * Empty when unset — the adapter then reports unavailable (retryable).
+   * Bank receipt endpoint lists (CSV in env, arrays here), tried in
+   * order by their adapters. Empty when unset — the adapter then
+   * reports unavailable (retryable). Dashen's domain has changed
+   * before, so retargeting stays an env update, never a code deploy.
    */
+  private csvEndpoints(
+    name: 'DASHEN_ENDPOINTS' | 'ABYSSINIA_ENDPOINTS' | 'MPESA_ENDPOINTS' | 'ZEMEN_ENDPOINTS',
+  ) {
+    return String(this.value(name))
+      .split(',')
+      .map((url) => url.trim())
+      .filter((url) => url.length > 0);
+  }
+
   get dashen() {
-    return {
-      endpoints: String(this.value('DASHEN_ENDPOINTS'))
-        .split(',')
-        .map((url) => url.trim())
-        .filter((url) => url.length > 0),
-    } as const;
+    return { endpoints: this.csvEndpoints('DASHEN_ENDPOINTS') } as const;
+  }
+
+  get abyssinia() {
+    return { endpoints: this.csvEndpoints('ABYSSINIA_ENDPOINTS') } as const;
   }
 
   /**
-   * Abyssinia receipt endpoints tried in order (CSV in env, array here).
-   * Empty when unset — the adapter then reports unavailable (retryable).
+   * M-Pesa receipt endpoints tried in order; Safaricom's public API answers
+   * with either a raw PDF or JSON { pdfBase64 }. Env-driven (13D.4 rule).
    */
-  get abyssinia() {
-    return {
-      endpoints: String(this.value('ABYSSINIA_ENDPOINTS'))
-        .split(',')
-        .map((url) => url.trim())
-        .filter((url) => url.length > 0),
-    } as const;
+  get mpesa() {
+    return { endpoints: this.csvEndpoints('MPESA_ENDPOINTS') } as const;
+  }
+
+  /** Zemen receipt endpoints tried in order; streams a raw PDF. */
+  get zemen() {
+    return { endpoints: this.csvEndpoints('ZEMEN_ENDPOINTS') } as const;
   }
 
   // ── Queue ───────────────────────────────────────────────────────────────

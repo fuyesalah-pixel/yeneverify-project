@@ -103,9 +103,9 @@ describe('AbyssiniaAdapter detect/extract (unit)', () => {
   });
 
   it('extractReference() finds the FT-prefixed reference', () => {
-    expect(
-      adapter.extractReference('BoA transfer FT26201XYZ123456789012 for Selam Coffee'),
-    ).toBe('FT26201XYZ123456789012');
+    expect(adapter.extractReference('BoA transfer FT26201XYZ123456789012 for Selam Coffee')).toBe(
+      'FT26201XYZ123456789012',
+    );
     // A CBE FT shape matches the Abyssinia pattern too — the banks are
     // separated by detect(), not by reference shape. Reject a too-short FT
     // (below the shared pattern's 12-char minimum after FT).

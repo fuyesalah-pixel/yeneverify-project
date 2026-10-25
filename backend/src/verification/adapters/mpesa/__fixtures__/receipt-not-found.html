@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>M-Pesa Ethiopia</title>
+</head>
+<body>
+  <!-- What the M-Pesa web front returns when the bot / misconfigured
+       client hits the receipt URL: an HTML error page where the API
+       contract promises JSON or PDF. fetchPdf must classify this as
+       invalid-response, and the adapter must treat it as retryable —
+       never as a definitive verdict on the reference. -->
+  <h1>Receipt not found</h1>
+  <p>The requested receipt does not exist.</p>
+</body>
+</html>

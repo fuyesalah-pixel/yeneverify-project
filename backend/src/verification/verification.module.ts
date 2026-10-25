@@ -8,6 +8,8 @@
 //   AwashAdapter — HTTP HTML bank (13D.3)
 //   DashenAdapter — flaky-endpoint bank with multi-URL fallback (13D.4)
 //   AbyssiniaAdapter — supplementary account-suffix bank (13D.5)
+//   MpesaAdapter — PDF-via-JSON bank (13D.6)
+//   ZemenAdapter — direct-PDF bank (13D.7)
 //   AdapterRegistry — bank routing (register/get/detectAll/detectBest)
 //   BankAdapterMetrics — Redis counters for adapter outcomes
 //
@@ -28,6 +30,8 @@ import { TelebirrAdapter } from './adapters/telebirr/telebirr.adapter';
 import { AwashAdapter } from './adapters/awash/awash.adapter';
 import { DashenAdapter } from './adapters/dashen/dashen.adapter';
 import { AbyssiniaAdapter } from './adapters/abyssinia/abyssinia.adapter';
+import { MpesaAdapter } from './adapters/mpesa/mpesa.adapter';
+import { ZemenAdapter } from './adapters/zemen/zemen.adapter';
 
 @Global()
 @Module({
@@ -39,6 +43,8 @@ import { AbyssiniaAdapter } from './adapters/abyssinia/abyssinia.adapter';
     AwashAdapter,
     DashenAdapter,
     AbyssiniaAdapter,
+    MpesaAdapter,
+    ZemenAdapter,
     BankAdapterMetrics,
     {
       provide: AdapterRegistry,
@@ -48,8 +54,18 @@ import { AbyssiniaAdapter } from './adapters/abyssinia/abyssinia.adapter';
         awash: AwashAdapter,
         dashen: DashenAdapter,
         abyssinia: AbyssiniaAdapter,
-      ) => new AdapterRegistry(cbe, telebirr, awash, dashen, abyssinia),
-      inject: [CbeAdapter, TelebirrAdapter, AwashAdapter, DashenAdapter, AbyssiniaAdapter],
+        mpesa: MpesaAdapter,
+        zemen: ZemenAdapter,
+      ) => new AdapterRegistry(cbe, telebirr, awash, dashen, abyssinia, mpesa, zemen),
+      inject: [
+        CbeAdapter,
+        TelebirrAdapter,
+        AwashAdapter,
+        DashenAdapter,
+        AbyssiniaAdapter,
+        MpesaAdapter,
+        ZemenAdapter,
+      ],
     },
   ],
   exports: [AdapterRegistry, BankAdapterMetrics],
