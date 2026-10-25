@@ -316,3 +316,34 @@ export class OnboardingRequiredError extends AppError {
     this.pendingInvite = pendingInvite;
   }
 }
+
+/** A verification id was not found. */
+export class VerificationNotFoundError extends AppError {
+  constructor(verificationId: string) {
+    super(ERROR_CODES.VERIFICATION_NOT_FOUND, 'Verification not found.', 404, { verificationId });
+  }
+}
+
+/** process() was called on a verification whose status is not PENDING. */
+export class VerificationNotPendingError extends AppError {
+  constructor(verificationId: string, status?: string) {
+    super(
+      ERROR_CODES.VERIFICATION_NOT_PENDING,
+      'This verification has already been processed.',
+      409,
+      { verificationId, ...(status ? { status } : {}) },
+    );
+  }
+}
+
+/** The receipt backing a pending verification is gone from storage records. */
+export class VerificationReceiptMissingError extends AppError {
+  constructor(verificationId: string, receiptId: string) {
+    super(
+      ERROR_CODES.VERIFICATION_RECEIPT_MISSING,
+      'The receipt for this verification no longer exists.',
+      422,
+      { verificationId, receiptId },
+    );
+  }
+}

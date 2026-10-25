@@ -10,6 +10,8 @@
 //   AbyssiniaAdapter — supplementary account-suffix bank (13D.5)
 //   MpesaAdapter — PDF-via-JSON bank (13D.6)
 //   ZemenAdapter — direct-PDF bank (13D.7)
+//   VerificationsService — pipeline orchestrator (13E.1)
+//   VerdictResolver / DuplicateDetector / TransactionProjector — 13E.1
 //   AdapterRegistry — bank routing (register/get/detectAll/detectBest)
 //   BankAdapterMetrics — Redis counters for adapter outcomes
 //
@@ -32,6 +34,10 @@ import { DashenAdapter } from './adapters/dashen/dashen.adapter';
 import { AbyssiniaAdapter } from './adapters/abyssinia/abyssinia.adapter';
 import { MpesaAdapter } from './adapters/mpesa/mpesa.adapter';
 import { ZemenAdapter } from './adapters/zemen/zemen.adapter';
+import { VerificationsService } from './verifications/verifications.service';
+import { VerificationsRepository } from './verifications/verifications.repository';
+import { DuplicateDetector } from './verifications/duplicate-detector';
+import { TransactionProjector } from './verifications/transaction-projector';
 
 @Global()
 @Module({
@@ -45,6 +51,10 @@ import { ZemenAdapter } from './adapters/zemen/zemen.adapter';
     AbyssiniaAdapter,
     MpesaAdapter,
     ZemenAdapter,
+    VerificationsRepository,
+    VerificationsService,
+    DuplicateDetector,
+    TransactionProjector,
     BankAdapterMetrics,
     {
       provide: AdapterRegistry,
@@ -68,6 +78,13 @@ import { ZemenAdapter } from './adapters/zemen/zemen.adapter';
       ],
     },
   ],
-  exports: [AdapterRegistry, BankAdapterMetrics],
+  exports: [
+    AdapterRegistry,
+    BankAdapterMetrics,
+    VerificationsRepository,
+    VerificationsService,
+    DuplicateDetector,
+    TransactionProjector,
+  ],
 })
 export class VerificationModule {}
