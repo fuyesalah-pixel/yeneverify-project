@@ -379,6 +379,24 @@ export const envSchema = z
         'must be empty or comma-separated valid URLs.',
       )
       .default(''),
+    // Abyssinia's receipt lookup needs reference + account suffix; endpoints
+    // stay env-driven for the same reason as DASHEN_ENDPOINTS.
+    ABYSSINIA_ENDPOINTS: z
+      .string()
+      .max(1_000)
+      .refine(
+        (value) =>
+          value.trim() === '' ||
+          value
+            .split(',')
+            .map((part) => part.trim())
+            .every((url) => httpUrl().safeParse(url).success),
+        'must be empty or comma-separated valid URLs.',
+      )
+      .default(''),
+    // Client-signal flag, not consumed by any adapter: the API exposes it so
+    // the mobile app knows Abyssinia needs extra input (13E surfaces it).
+    BANK_SUPPLEMENTARY_REQUIRED_ABYSSINIA: booleanValue(true),
 
     // ── Queue ────────────────────────────────────────────────────────────
     QUEUE_VERIFICATION_CONCURRENCY: integerValue(1, 20).default(4),

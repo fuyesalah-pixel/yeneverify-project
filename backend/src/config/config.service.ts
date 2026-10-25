@@ -305,6 +305,19 @@ export class AppConfigService {
     } as const;
   }
 
+  /**
+   * Abyssinia receipt endpoints tried in order (CSV in env, array here).
+   * Empty when unset — the adapter then reports unavailable (retryable).
+   */
+  get abyssinia() {
+    return {
+      endpoints: String(this.value('ABYSSINIA_ENDPOINTS'))
+        .split(',')
+        .map((url) => url.trim())
+        .filter((url) => url.length > 0),
+    } as const;
+  }
+
   // ── Queue ───────────────────────────────────────────────────────────────
   get queue() {
     return {

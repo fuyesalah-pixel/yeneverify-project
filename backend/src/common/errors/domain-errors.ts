@@ -267,6 +267,34 @@ export class BankReferenceInvalidError extends AppError {
   }
 }
 
+/**
+ * A bank needs an extra input (e.g. Abyssinia's account suffix) before it
+ * can verify. Non-retryable: the client must PROMPT the user and resubmit
+ * with the field, so it maps to 400 with the field name in details.
+ */
+export class BankSupplementaryRequiredError extends AppError {
+  constructor(bankCode: string, field: string) {
+    super(
+      ERROR_CODES.BANK_SUPPLEMENTARY_REQUIRED,
+      'This bank requires an additional input before verification can run.',
+      400,
+      { bankCode, field },
+    );
+  }
+}
+
+/** The supplementary field was provided but in the wrong shape (e.g. not 5 digits). */
+export class BankSupplementaryInvalidError extends AppError {
+  constructor(bankCode: string, field: string) {
+    super(
+      ERROR_CODES.BANK_SUPPLEMENTARY_INVALID,
+      'The additional bank input has an invalid format.',
+      400,
+      { bankCode, field },
+    );
+  }
+}
+
 export class OcrEmptyResultError extends AppError {
   constructor(provider: string) {
     super(ERROR_CODES.OCR_EMPTY_RESULT, 'The OCR provider returned no text for this image.', 422, {

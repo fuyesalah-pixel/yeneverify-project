@@ -7,6 +7,7 @@
 //   TelebirrAdapter — headless-browser bank (13D.2)
 //   AwashAdapter — HTTP HTML bank (13D.3)
 //   DashenAdapter — flaky-endpoint bank with multi-URL fallback (13D.4)
+//   AbyssiniaAdapter — supplementary account-suffix bank (13D.5)
 //   AdapterRegistry — bank routing (register/get/detectAll/detectBest)
 //   BankAdapterMetrics — Redis counters for adapter outcomes
 //
@@ -26,6 +27,7 @@ import { CbeAdapter } from './adapters/cbe/cbe.adapter';
 import { TelebirrAdapter } from './adapters/telebirr/telebirr.adapter';
 import { AwashAdapter } from './adapters/awash/awash.adapter';
 import { DashenAdapter } from './adapters/dashen/dashen.adapter';
+import { AbyssiniaAdapter } from './adapters/abyssinia/abyssinia.adapter';
 
 @Global()
 @Module({
@@ -36,6 +38,7 @@ import { DashenAdapter } from './adapters/dashen/dashen.adapter';
     TelebirrAdapter,
     AwashAdapter,
     DashenAdapter,
+    AbyssiniaAdapter,
     BankAdapterMetrics,
     {
       provide: AdapterRegistry,
@@ -44,8 +47,9 @@ import { DashenAdapter } from './adapters/dashen/dashen.adapter';
         telebirr: TelebirrAdapter,
         awash: AwashAdapter,
         dashen: DashenAdapter,
-      ) => new AdapterRegistry(cbe, telebirr, awash, dashen),
-      inject: [CbeAdapter, TelebirrAdapter, AwashAdapter, DashenAdapter],
+        abyssinia: AbyssiniaAdapter,
+      ) => new AdapterRegistry(cbe, telebirr, awash, dashen, abyssinia),
+      inject: [CbeAdapter, TelebirrAdapter, AwashAdapter, DashenAdapter, AbyssiniaAdapter],
     },
   ],
   exports: [AdapterRegistry, BankAdapterMetrics],

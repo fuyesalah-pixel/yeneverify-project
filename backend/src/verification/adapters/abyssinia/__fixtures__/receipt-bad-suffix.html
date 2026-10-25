@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account Mismatch | Bank of Abyssinia</title>
+  <link href="/static/app.min.css" rel="stylesheet" />
+</head>
+<body class="cs-route error-view">
+  <!-- What the endpoint shows when the reference exists but the supplied
+       account suffix does not match the destination account. Sanitized. -->
+  <header class="cs-header">
+    <a class="brand" href="/">
+      <img src="/static/boa-logo.svg" alt="Bank of Abyssinia" />
+      <span class="brand-name">Bank of Abyssinia</span>
+    </a>
+  </header>
+
+  <main class="cs-main">
+    <section class="error-card text-center">
+      <h1 class="error-heading">Invalid Account Suffix</h1>
+      <h3>The digits you provided do not line up with the destination account.</h3>
+      <p class="lead">
+        Check the confirmation SMS for the final five digits of the account
+        that received this transfer, then search again.
+      </p>
+      <a href="/" class="btn-back">Back to Search</a>
+    </section>
+  </main>
+
+  <footer class="cs-footer">
+    <p>&copy; 2026 Bank of Abyssinia. All rights reserved.</p>
+  </footer>
+</body>
+</html>

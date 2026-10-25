@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bank of Abyssinia — Transaction Receipt</title>
+  <link href="/static/app.min.css" rel="stylesheet" />
+</head>
+<body class="cs-route receipt-view">
+  <!-- Simplified from the Abyssinia customer-service receipt shape; names/accounts sanitized. -->
+  <header class="cs-header">
+    <a class="brand" href="/">
+      <img src="/static/boa-logo.svg" alt="Bank of Abyssinia" />
+      <span class="brand-name">Bank of Abyssinia</span>
+    </a>
+  </header>
+
+  <main class="cs-main">
+    <section class="receipt-card">
+      <h2 class="receipt-heading">Transfer Receipt</h2>
+      <p class="receipt-intro">Below are the details of the transfer you requested.</p>
+
+      <table class="table receipt-table">
+        <tbody>
+          <tr>
+            <th>Transaction Reference</th>
+            <td>FT26201XYZ123456789012</td>
+          </tr>
+          <tr>
+            <th>Sender Name</th>
+            <td>Abebe Kebede</td>
+          </tr>
+          <tr>
+            <th>Receiver Name</th>
+            <td>Selam Coffee</td>
+          </tr>
+          <tr>
+            <th>Receiver Account</th>
+            <td>10001234567890</td>
+          </tr>
+          <tr>
+            <th>Amount</th>
+            <td>3,200.00 ETB</td>
+          </tr>
+          <tr>
+            <th>Transaction Date</th>
+            <td>18/07/2026 2:45 PM</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td>Successful</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="receipt-actions">
+        <a class="btn-print" onclick="window.print();">Print</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="cs-footer">
+    <p>&copy; 2026 Bank of Abyssinia. All rights reserved.</p>
+  </footer>
+</body>
+</html>
