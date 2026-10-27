@@ -21,9 +21,16 @@ import { StorageService } from '../../storage/storage.service';
 import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
+  ForbiddenError,
+  ReceiptNotFoundError,
   VerificationNotFoundError,
+  VerificationNotReviewableError,
+  VerificationNotRetryableError,
   VerificationReceiptMissingError,
 } from '../../common/errors/domain-errors';
+import type { AuthUser } from '../../common/types/auth-user.type';
+import { VerificationQueueService } from '../queue/verification-queue.service';
+import { ReceiptsRepository } from '../../receipts/receipts.repository';
 import { DuplicateDetector } from './duplicate-detector';
 import { TransactionProjector } from './transaction-projector';
 import { resolveVerdict } from './verdict-resolver';
@@ -34,11 +41,17 @@ import type {
   VerificationResult,
   VerdictOutcome,
 } from './verifications.types';
+import type {
+  CreateVerificationDto,
+  RequestReviewDto,
+  VerificationDetailDto,
+  VerificationListResponseDto,
+} from './dto';
+import { detailFromRow, duplicateReferenceFromMetadata, listFromRows } from './response-mapper';
 
 @Injectable()
 export class VerificationsService {
   private readonly logger = new Logger(VerificationsService.name);
-
   constructor(
     private readonly repo: VerificationsRepository,
     private readonly prisma: PrismaService,
@@ -48,6 +61,8 @@ export class VerificationsService {
     private readonly duplicates: DuplicateDetector,
     private readonly projector: TransactionProjector,
     private readonly audit: AuditService,
+    private readonly queue: VerificationQueueService,
+    private readonly receiptsRepo: ReceiptsRepository,
   ) {}
 
   /**
@@ -194,6 +209,233 @@ export class VerificationsService {
     outcome.bankReference ??= referenceNormalized;
 
     return this.finalize(input, startedAt, outcome, state);
+  }
+
+  // ── 13E.3 — HTTP surface (submit / read / retry / review) ─────────
+
+  /**
+   * Create a PENDING verification row and enqueue it. BILLING source
+   * rows are accepted but the full billing flow (billing_verifications
+   * insert, credit grant, approval) is Step 16.
+   */
+  async submit(input: {
+    user: AuthUser;
+    merchantId: string;
+    dto: CreateVerificationDto;
+    requestId?: string;
+  }): Promise<{ verificationId: string; status: 'PENDING'; createdAt: string }> {
+    const { user, merchantId, dto } = input;
+
+    // Tenant-scoped receipt; a SUB_MERCHANT may only verify their own uploads.
+    const receipt = await this.receiptsRepo.findByIdForMerchant(dto.receiptId, merchantId);
+    if (!receipt) {
+      throw new ReceiptNotFoundError();
+    }
+    if (user.role === 'SUB_MERCHANT' && receipt.uploadedByUserId !== user.id) {
+      throw new ForbiddenError('You can only verify receipts you uploaded.');
+    }
+
+    // TODO Step 16: create the billing_verifications row on BILLING source.
+    const row = await this.repo.createPending({
+      merchantId,
+      verifiedByUserId: user.id,
+      receiptId: dto.receiptId,
+      source: dto.source,
+    });
+
+    this.audit.log({
+      actorType: 'USER',
+      actorUserId: user.id,
+      action: 'verification.submitted',
+      targetType: 'verification',
+      targetId: row.id,
+      requestId: input.requestId,
+      metadata: {
+        merchantId,
+        receiptId: dto.receiptId,
+        source: dto.source,
+        billing:
+          dto.source === 'BILLING' ? { packageCode: dto.billingPackageCode ?? null } : undefined,
+      },
+    });
+
+    await this.queue.enqueue(row.id);
+
+    this.logger.log(`Verification ${row.id} submitted by ${user.id} (source=${dto.source})`);
+
+    return {
+      verificationId: row.id,
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+    };
+  }
+
+  /** GET /verifications/:id — tenant- and sub-merchant-scoped detail. */
+  async findByIdForUser(input: {
+    user: AuthUser;
+    merchantId: string;
+    verificationId: string;
+  }): Promise<VerificationDetailDto> {
+    const subMerchantUserId = input.user.role === 'SUB_MERCHANT' ? input.user.id : null;
+
+    const row = await this.repo.findDetailById(
+      input.verificationId,
+      input.merchantId,
+      subMerchantUserId,
+    );
+    if (!row) {
+      throw new VerificationNotFoundError(input.verificationId);
+    }
+
+    let duplicateOf = null;
+    if (row.status === 'DUPLICATE') {
+      const { verificationId } = duplicateReferenceFromMetadata(
+        (row.adapterMetadata ?? null) as Record<string, unknown> | null,
+      );
+      if (verificationId) {
+        const fingerprintRow = await this.prisma.duplicateFingerprint.findUnique({
+          where: {
+            fingerprint: this.duplicates.computeFingerprint(
+              /** cbe */ row.bankCode as never,
+              row.referenceNormalized as string,
+            ),
+          },
+        });
+        duplicateOf = {
+          verificationId,
+          merchantId: fingerprintRow?.firstMerchantId ?? '',
+        };
+      }
+    }
+
+    return detailFromRow(row, duplicateOf);
+  }
+
+  /** GET /verifications — tenant-scoped, sub-merchant-scoped list. */
+  async list(input: {
+    user: AuthUser;
+    merchantId: string;
+    query: {
+      page: number;
+      pageSize: number;
+      status?: string[];
+      source?: 'TRANSACTION' | 'BILLING';
+      bankCode?: string[];
+      from?: string;
+      to?: string;
+      subMerchantId?: string;
+      search?: string;
+      sortBy: 'createdAt' | 'amountMinor';
+      sortOrder: 'asc' | 'desc';
+    };
+  }): Promise<VerificationListResponseDto> {
+    const { rows, total } = await this.repo.listSummaries({
+      merchantId: input.merchantId,
+      // Hard WHERE scope for SUB_MERCHANT callers; MERCHANT is tenant-wide.
+      verifiedByUserId: input.user.role === 'SUB_MERCHANT' ? input.user.id : null,
+      // MERCHANT drilldown filter; cannot apply with SUB role at once.
+      subMerchantUserId:
+        input.user.role === 'MERCHANT' ? (input.query.subMerchantId ?? null) : null,
+      status: input.query.status ?? null,
+      source: input.query.source ?? null,
+      bankCode: input.query.bankCode ?? null,
+      from: input.query.from ? new Date(input.query.from) : null,
+      to: input.query.to ? new Date(input.query.to) : null,
+      search: input.query.search ?? null,
+      sortBy: input.query.sortBy,
+      sortOrder: input.query.sortOrder,
+      skip: (input.query.page - 1) * input.query.pageSize,
+      take: input.query.pageSize,
+    });
+
+    return listFromRows(rows, total, input.query.page, input.query.pageSize);
+  }
+
+  /**
+   * Retry an ERROR or NEEDS_REVIEW verification. VERIFIED / FAKE /
+   * DUPLICATE are definitive — retrying them would hammer the bank
+   * with a receipt that is already known (fake) or resolved.
+   */
+  async retry(input: {
+    user: AuthUser;
+    merchantId: string;
+    verificationId: string;
+  }): Promise<{ verificationId: string; status: 'PENDING' }> {
+    if (input.user.role === 'SUB_MERCHANT') {
+      throw new ForbiddenError('Only the merchant can retry a verification.');
+    }
+
+    const row = await this.repo.findDetailById(input.verificationId, input.merchantId, null);
+    if (!row) {
+      throw new VerificationNotFoundError(input.verificationId);
+    }
+    if (row.status !== 'ERROR' && row.status !== 'NEEDS_REVIEW') {
+      throw new VerificationNotRetryableError(row.status);
+    }
+
+    await this.repo.resetForRetry(input.verificationId, input.merchantId);
+
+    this.audit.log({
+      actorType: 'USER',
+      actorUserId: input.user.id,
+      action: 'verification.retry_requested',
+      targetType: 'verification',
+      targetId: input.verificationId,
+      metadata: { merchantId: input.merchantId, previousStatus: row.status },
+    });
+
+    await this.queue.retry(input.verificationId);
+
+    return { verificationId: input.verificationId, status: 'PENDING' };
+  }
+
+  /**
+   * Flag a verification for manual review (MERCHANT only, enforced at
+   * the route). VERIFIED / DUPLICATE are terminal — flag them is noise.
+   */
+  async requestReview(input: {
+    user: AuthUser;
+    merchantId: string;
+    verificationId: string;
+    dto: RequestReviewDto;
+  }): Promise<{ verificationId: string; reviewId: string; status: 'NEEDS_REVIEW' }> {
+    const row = await this.repo.findDetailById(input.verificationId, input.merchantId, null);
+    if (!row) {
+      throw new VerificationNotFoundError(input.verificationId);
+    }
+    if (row.status === 'VERIFIED' || row.status === 'DUPLICATE' || row.status === 'PENDING') {
+      throw new VerificationNotReviewableError(row.status);
+    }
+
+    const reviewId = await this.repo.updateStatusToNeedsReview(
+      input.verificationId,
+      input.merchantId,
+      input.user.id,
+      input.dto.reason,
+    );
+    if (!reviewId) {
+      // updateMany raced with a concurrent verdict/terminal write.
+      throw new VerificationNotReviewableError(row.status);
+    }
+
+    this.audit.log({
+      actorType: 'USER',
+      actorUserId: input.user.id,
+      action: 'verification.review_requested',
+      targetType: 'verification',
+      targetId: input.verificationId,
+      metadata: {
+        merchantId: input.merchantId,
+        reviewId,
+        previousStatus: row.status,
+      },
+    });
+
+    return {
+      verificationId: input.verificationId,
+      reviewId,
+      status: 'NEEDS_REVIEW',
+    };
   }
 
   // ── Completion ──────────────────────────────────────────────────────────

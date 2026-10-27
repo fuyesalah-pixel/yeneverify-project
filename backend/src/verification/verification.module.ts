@@ -25,6 +25,8 @@
 
 import { Global, Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
+import { ReceiptsModule } from '../receipts/receipts.module';
+import { OcrModule } from '../ocr/ocr.module';
 import { AdapterRegistry } from './adapters/adapter.registry';
 import { BankAdapterMetrics } from './adapters/adapter.metrics';
 import { BrowserPool } from './browser/browser-pool';
@@ -41,11 +43,15 @@ import { DuplicateDetector } from './verifications/duplicate-detector';
 import { TransactionProjector } from './verifications/transaction-projector';
 import { VerificationQueueService } from './queue/verification-queue.service';
 import { VerificationProcessor } from './queue/verification.processor';
+import { VerificationSubmitRateGuard } from './verifications/verification-submit-rate.guard';
+import { VerificationsController } from './verifications/verifications.controller';
 
 @Global()
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule, ReceiptsModule, OcrModule],
+  controllers: [VerificationsController],
   providers: [
+    VerificationSubmitRateGuard,
     BrowserPool,
     CbeAdapter,
     TelebirrAdapter,

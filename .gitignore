@@ -105,6 +105,7 @@ docker/volumes/
 # Portable Postgres/Redis dropped outside docker/ during setup.
 _pg/
 redis/
+.redis/
 pg/
 *.local/
 

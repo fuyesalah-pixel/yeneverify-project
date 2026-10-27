@@ -62,3 +62,24 @@ the JSON).
 Depends on item 6. Once the export script exists, add a CI check that
 regenerates the mirror from the TS constants and fails on diff — a
 hand-maintained mirror WILL eventually drift otherwise.
+
+## 8. BullMQ dead-letter dashboard / admin retry UI (13E.3 follow-up)
+
+Failed verification jobs stay in Redis for 24h (`removeOnFail: { age: 86400, count: 5000 }`). Until an ops surface exists,
+failed jobs are visible only via Redis tooling, and manual retries go
+through the merchant `/verifications/:id/retry` endpoint (13E.3). For the
+ops dashboard (Step 28): a queue view listing failed jobs with their
+verificationId + errorCode, and a one-click re-enqueue. Trigger: after the
+first real dead-letter batch in production.
+
+## 9. Remaining SET NULL FKs vs immutable-ledger rules (13E.3 finding)
+
+Migration 20261025000000 fixed the two verification-facing FKs on
+`credit_transactions` (SET NULL → RESTRICT): `ON DELETE SET NULL` FK
+actions issue UPDATEs that the `credit_tx_no_update` rule rewrites, making
+EVERY parent-row delete abort even with zero referencing rows. The same
+trap still exists for the other SET NULL FKs into rule-protected tables:
+`credit_transactions.subscription_id`, `credit_transactions.actor_user_id`,
+and any FK pointing at `audit_logs`. Decision needed when subscription or
+user hard-delete flows land (users are soft-deleted today): convert the
+FKs to RESTRICT, or accept that referenced rows are hard-delete-immutable.

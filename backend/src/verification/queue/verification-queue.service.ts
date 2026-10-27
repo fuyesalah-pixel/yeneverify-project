@@ -16,7 +16,10 @@ import { QUEUE_NAMES } from '../../queue/queue.constants';
 import { AppConfigService } from '../../config/config.service';
 
 export const VERIFICATION_JOB_NAME = 'process-verification';
-export const VERIFICATION_JOB_ID_PREFIX = 'verification:';
+// BullMQ forbids ':' inside custom job ids (Custom Id cannot contain
+// ':'), so the dedup prefix uses a dash instead of the natural
+// 'verification:<uuid>' colon form.
+export const VERIFICATION_JOB_ID_PREFIX = 'verification-';
 
 @Injectable()
 export class VerificationQueueService {
@@ -48,13 +51,29 @@ export class VerificationQueueService {
   }
 
   /**
-   * Manual retry (admin/merchant driven in 13E.3). A completed or fully
-   * failed job with this jobId no longer blocks re-adding, so this is a
-   * fresh attempt — and process() itself replays finalized rows without
-   * redoing work (proven in 13E.1).
+   * Manual retry (admin/merchant driven in 13E.3).
+   *
+   * BullMQ ADD script dedups on custom jobId against a job hash that exists
+   * in ANY state — including retained completed/failed jobs (removeOnComplete
+   * keeps them for 1h). A bare re-add is therefore a silent no-op after a
+   * terminal attempt. Only an ACTIVE/WAITING job may legitimately block a
+   * retry, so we remove terminal leftovers first, then enqueue. If enqueue
+   * still dedups (mid-flight retry race), process()'s idempotent replay is
+   * the backstop.
    */
   async retry(verificationId: string): Promise<void> {
     this.logger.log(`Manual retry requested for verification ${verificationId}`);
+    const jobId = `${VERIFICATION_JOB_ID_PREFIX}${verificationId}`;
+    try {
+      const existing = await this.queue.getJob(jobId);
+      if (existing && ['completed', 'failed'].includes(await existing.getState())) {
+        await existing.remove();
+        this.logger.log(`Removed terminal job ${jobId} before re-enqueue`);
+      }
+    } catch (err) {
+      // Removing is best-effort; if the job is mid-state removal is refused.
+      this.logger.warn(`Job cleanup before retry skipped: ${(err as Error).message}`);
+    }
     await this.enqueue(verificationId);
   }
 

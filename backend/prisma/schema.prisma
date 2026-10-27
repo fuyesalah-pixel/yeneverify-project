@@ -492,8 +492,11 @@ model CreditTransaction {
 
   merchant            Merchant             @relation(fields: [merchantId], references: [id])
   subscription        Subscription?        @relation(fields: [subscriptionId], references: [id])
-  verification        Verification?        @relation(fields: [verificationId], references: [id])
-  billingVerification BillingVerification? @relation(fields: [billingVerificationId], references: [id])
+  // Restrict (not the optional-relation SetNull default): FK SET NULL actions
+  // issue UPDATEs that the immutable-ledger rules on this table rewrite, so
+  // every verification delete aborts. RESTRICT's read-only RI check is rule-safe.
+  verification        Verification?        @relation(fields: [verificationId], references: [id], onDelete: Restrict)
+  billingVerification BillingVerification? @relation(fields: [billingVerificationId], references: [id], onDelete: Restrict)
   actorUser           User?                @relation("CreditAdjuster", fields: [actorUserId], references: [id])
 
   @@index([merchantId])

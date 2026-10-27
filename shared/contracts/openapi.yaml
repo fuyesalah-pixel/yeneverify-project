@@ -15,6 +15,171 @@ paths:
           description: ''
       tags:
         - Health
+  /verifications:
+    post:
+      operationId: VerificationsController_submit
+      summary: Submit a receipt for bank verification
+      parameters: []
+      responses:
+        '202':
+          description: Verification queued
+        '400':
+          description: Validation failed (billing fields for BILLING source)
+        '403':
+          description: Sub-merchant verifying another uploader’s receipt
+        '404':
+          description: Receipt not found in this tenant
+        '429':
+          description: Submission rate limit exceeded
+      tags: &ref_0
+        - Verifications
+      security:
+        - access-token: []
+    get:
+      operationId: VerificationsController_list
+      summary: List verifications (tenant-scoped, paginated)
+      parameters: []
+      responses:
+        '200':
+          description: Verification page
+      tags: *ref_0
+      security:
+        - access-token: []
+  /verifications/{id}:
+    get:
+      operationId: VerificationsController_getById
+      summary: Get a verification’s status and result
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Verification detail
+        '404':
+          description: Not found in this tenant
+      tags: *ref_0
+      security:
+        - access-token: []
+  /verifications/{id}/retry:
+    post:
+      operationId: VerificationsController_retry
+      summary: Retry a failed or under-review verification
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Re-enqueued for processing
+        '403':
+          description: Sub-merchants cannot retry
+        '404':
+          description: Verification not found in this tenant
+        '409':
+          description: Verification already has a definitive verdict
+      tags: *ref_0
+      security:
+        - access-token: []
+  /verifications/{id}/request-review:
+    post:
+      operationId: VerificationsController_requestReview
+      summary: Flag a verification for manual review (merchant only)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Flagged for manual review
+        '403':
+          description: Sub-merchants cannot flag reviews
+        '404':
+          description: Verification not found in this tenant
+        '409':
+          description: Verification already has a definitive verdict
+      tags: *ref_0
+      security:
+        - access-token: []
+  /receipts/presign:
+    post:
+      operationId: ReceiptsController_presign
+      summary: Reserve a storage key and get an upload URL
+      parameters: []
+      responses:
+        '200':
+          description: Upload URL issued
+        '400':
+          description: Unsupported mimeType or oversized file
+      tags: &ref_1
+        - Receipts
+      security:
+        - access-token: []
+  /receipts/complete:
+    post:
+      operationId: ReceiptsController_complete
+      summary: Confirm the upload and create the receipt
+      parameters: []
+      responses:
+        '201':
+          description: Receipt created
+        '400':
+          description: Checksum mismatch or invalid object
+        '404':
+          description: No uploaded object for that key
+      tags: *ref_1
+      security:
+        - access-token: []
+  /receipts/{id}/ocr:
+    post:
+      operationId: ReceiptsController_runOcr
+      summary: Run OCR on a stored receipt image
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Extracted OCR text
+        '403':
+          description: Sub-merchant reading another uploader’s receipt
+        '404':
+          description: Receipt not found in this tenant
+        '422':
+          description: OCR provider returned no text
+        '502':
+          description: OCR provider failure
+      tags: *ref_1
+      security:
+        - access-token: []
+  /receipts/{id}:
+    get:
+      operationId: ReceiptsController_getById
+      summary: Get receipt metadata with a download URL
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Receipt metadata
+        '403':
+          description: Sub-merchant reading another uploader’s receipt
+        '404':
+          description: Receipt not found in this tenant
+      tags: *ref_1
+      security:
+        - access-token: []
   /health:
     get:
       operationId: HealthController_liveness
@@ -23,7 +188,7 @@ paths:
       responses:
         '200':
           description: ''
-      tags: &ref_3
+      tags: &ref_5
         - Health
   /health/ready:
     get:
@@ -43,8 +208,8 @@ paths:
                     example: ok
                   info:
                     type: object
-                    example: &ref_0
-                      database: &ref_1
+                    example: &ref_2
+                      database: &ref_3
                         status: up
                     additionalProperties:
                       type: object
@@ -69,7 +234,7 @@ paths:
                     nullable: true
                   details:
                     type: object
-                    example: *ref_0
+                    example: *ref_2
                     additionalProperties:
                       type: object
                       required:
@@ -90,7 +255,7 @@ paths:
                     example: error
                   info:
                     type: object
-                    example: *ref_0
+                    example: *ref_2
                     additionalProperties:
                       type: object
                       required:
@@ -103,7 +268,7 @@ paths:
                   error:
                     type: object
                     example:
-                      redis: &ref_2
+                      redis: &ref_4
                         status: down
                         message: Could not connect
                     additionalProperties:
@@ -118,8 +283,8 @@ paths:
                   details:
                     type: object
                     example:
-                      database: *ref_1
-                      redis: *ref_2
+                      database: *ref_3
+                      redis: *ref_4
                     additionalProperties:
                       type: object
                       required:
@@ -128,7 +293,7 @@ paths:
                         status:
                           type: string
                       additionalProperties: true
-      tags: *ref_3
+      tags: *ref_5
   /auth/request-otp:
     post:
       operationId: AuthController_requestOtp
@@ -139,7 +304,7 @@ paths:
           description: OTP sent successfully
         '429':
           description: Rate limited
-      tags: &ref_4
+      tags: &ref_6
         - Auth
   /auth/verify-otp:
     post:
@@ -153,7 +318,7 @@ paths:
           description: Invalid or expired OTP
         '429':
           description: Rate limited or locked out
-      tags: *ref_4
+      tags: *ref_6
   /auth/refresh:
     post:
       operationId: AuthController_refresh
@@ -164,7 +329,7 @@ paths:
           description: New tokens issued
         '401':
           description: Invalid or expired refresh token
-      tags: *ref_4
+      tags: *ref_6
   /auth/logout:
     post:
       operationId: AuthController_logout
@@ -173,7 +338,7 @@ paths:
       responses:
         '204':
           description: Logged out
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/logout-all:
@@ -184,7 +349,7 @@ paths:
       responses:
         '204':
           description: All sessions revoked
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/devices:
@@ -195,7 +360,7 @@ paths:
       responses:
         '200':
           description: List of active devices
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/devices/{id}:
@@ -211,7 +376,7 @@ paths:
       responses:
         '204':
           description: Device revoked
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/me:
@@ -222,7 +387,7 @@ paths:
       responses:
         '200':
           description: Current user profile
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/me/language:
@@ -233,7 +398,7 @@ paths:
       responses:
         '200':
           description: Language updated
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/pin/set:
@@ -248,7 +413,7 @@ paths:
           description: PIN already set or weak PIN
         '429':
           description: Rate limited or token too old
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/pin/verify:
@@ -263,7 +428,7 @@ paths:
           description: Invalid or expired PIN
         '429':
           description: Locked out
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/pin/change:
@@ -281,7 +446,7 @@ paths:
           description: PIN changed, other sessions revoked
         '401':
           description: Invalid current PIN or missing step-up
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/pin/reset:
@@ -294,7 +459,7 @@ paths:
           description: PIN reset, all sessions revoked
         '400':
           description: Invalid OTP
-      tags: *ref_4
+      tags: *ref_6
   /auth/biometric/enable:
     post:
       operationId: AuthController_enableBiometric
@@ -310,7 +475,7 @@ paths:
           description: Biometric enabled
         '401':
           description: Missing or invalid step-up token
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/biometric/disable:
@@ -328,7 +493,7 @@ paths:
           description: Biometric disabled
         '401':
           description: Missing or invalid step-up token
-      tags: *ref_4
+      tags: *ref_6
       security:
         - access-token: []
   /auth/step-up/biometric:
@@ -341,7 +506,7 @@ paths:
           description: Step-up token issued
         '401':
           description: Invalid refresh token or device mismatch
-      tags: *ref_4
+      tags: *ref_6
   /auth/unlock:
     post:
       operationId: AuthController_unlock
@@ -352,7 +517,7 @@ paths:
           description: New tokens issued
         '401':
           description: Invalid token, device mismatch, or no PIN
-      tags: *ref_4
+      tags: *ref_6
   /onboarding/status:
     get:
       operationId: OnboardingController_getStatus
@@ -361,7 +526,7 @@ paths:
       responses:
         '200':
           description: Onboarding status for the current user
-      tags: &ref_5
+      tags: &ref_7
         - Onboarding
       security:
         - access-token: []
@@ -377,7 +542,7 @@ paths:
           description: Validation failed
         '409':
           description: Merchant already onboarded
-      tags: *ref_5
+      tags: *ref_7
   /sub-merchants/invite:
     post:
       operationId: SubMerchantsController_invite
@@ -390,7 +555,7 @@ paths:
           description: Plan limit reached
         '409':
           description: Sub-merchant already exists
-      tags: &ref_6
+      tags: &ref_8
         - Sub-Merchants
       security:
         - access-token: []
@@ -402,7 +567,7 @@ paths:
       responses:
         '200':
           description: Paginated list (phones masked)
-      tags: *ref_6
+      tags: *ref_8
       security:
         - access-token: []
   /sub-merchants/{id}:
@@ -420,7 +585,7 @@ paths:
           description: Detail (phone masked)
         '404':
           description: Not found
-      tags: *ref_6
+      tags: *ref_8
       security:
         - access-token: []
     patch:
@@ -437,7 +602,7 @@ paths:
           description: Updated
         '404':
           description: Not found
-      tags: *ref_6
+      tags: *ref_8
       security:
         - access-token: []
     delete:
@@ -454,7 +619,7 @@ paths:
           description: Removed
         '404':
           description: Not found
-      tags: *ref_6
+      tags: *ref_8
       security:
         - access-token: []
   /sub-merchants/invites/{id}/resend:
@@ -474,7 +639,7 @@ paths:
           description: Max resends reached
         '404':
           description: Invite not found
-      tags: *ref_6
+      tags: *ref_8
       security:
         - access-token: []
   /sub-merchants/accept:
@@ -489,7 +654,7 @@ paths:
           description: Invalid/expired invite or phone mismatch
         '409':
           description: Invite already used
-      tags: *ref_6
+      tags: *ref_8
       security:
         - access-token: []
   /sub-merchants/decline:
@@ -504,7 +669,7 @@ paths:
           description: Invalid or expired invite
         '409':
           description: Invite already accepted
-      tags: *ref_6
+      tags: *ref_8
   /merchants/me:
     get:
       operationId: MerchantsController_getMe
@@ -513,7 +678,7 @@ paths:
       responses:
         '200':
           description: Merchant profile
-      tags: &ref_7
+      tags: &ref_9
         - Merchants
       security:
         - access-token: []
@@ -524,80 +689,7 @@ paths:
       responses:
         '200':
           description: Profile updated
-      tags: *ref_7
-      security:
-        - access-token: []
-  /receipts/presign:
-    post:
-      operationId: ReceiptsController_presign
-      summary: Reserve a storage key and get an upload URL
-      parameters: []
-      responses:
-        '200':
-          description: Upload URL issued
-        '400':
-          description: Unsupported mimeType or oversized file
-      tags: &ref_8
-        - Receipts
-      security:
-        - access-token: []
-  /receipts/complete:
-    post:
-      operationId: ReceiptsController_complete
-      summary: Confirm the upload and create the receipt
-      parameters: []
-      responses:
-        '201':
-          description: Receipt created
-        '400':
-          description: Checksum mismatch or invalid object
-        '404':
-          description: No uploaded object for that key
-      tags: *ref_8
-      security:
-        - access-token: []
-  /receipts/{id}/ocr:
-    post:
-      operationId: ReceiptsController_runOcr
-      summary: Run OCR on a stored receipt image
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Extracted OCR text
-        '403':
-          description: Sub-merchant reading another uploader’s receipt
-        '404':
-          description: Receipt not found in this tenant
-        '422':
-          description: OCR provider returned no text
-        '502':
-          description: OCR provider failure
-      tags: *ref_8
-      security:
-        - access-token: []
-  /receipts/{id}:
-    get:
-      operationId: ReceiptsController_getById
-      summary: Get receipt metadata with a download URL
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Receipt metadata
-        '403':
-          description: Sub-merchant reading another uploader’s receipt
-        '404':
-          description: Receipt not found in this tenant
-      tags: *ref_8
+      tags: *ref_9
       security:
         - access-token: []
 info:

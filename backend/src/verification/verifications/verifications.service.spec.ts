@@ -13,6 +13,11 @@ import type { BankAdapter, VerifyInput, VerifyResult } from '../adapters/adapter
 import { VerificationsService } from './verifications.service';
 import type { VerificationRow, VerificationWithReceipt } from './verifications.repository';
 import type { ProcessInput, VerificationResult } from './verifications.types';
+import {
+  ForbiddenError,
+  VerificationNotRetryableError,
+  VerificationNotReviewableError,
+} from '../../common/errors/domain-errors';
 
 // ── Fakes ─────────────────────────────────────────────────────────────────
 
@@ -52,6 +57,18 @@ const pendingRow = (overrides: Partial<VerificationWithReceipt> = {}): Verificat
 
 const OCR_TEXT = 'CBE transfer FT26195DBK5W81465291 1200.00 Selam Coffee';
 
+/** VERIFIED VerifyResult used by both the process() and HTTP-surface suites. */
+const verifiedAdapterResult = (): VerifyResult => ({
+  status: 'VERIFIED',
+  bankReference: 'FT26195DBK5W81465291',
+  amountMinor: 12000n,
+  currency: 'ETB',
+  senderName: 'Yonas Alemu',
+  receiverName: 'Selam Coffee',
+  paidAt: new Date('2026-07-14T11:08:00.000Z'),
+  metadata: { source: 'stub' },
+});
+
 const makeStubAdapter = (verifyResult: VerifyResult | Error, detectText = 'CBE'): BankAdapter => ({
   bankCode: 'TEST_BANK' as never,
   displayName: 'Test Bank (stub)',
@@ -65,14 +82,8 @@ const makeStubAdapter = (verifyResult: VerifyResult | Error, detectText = 'CBE')
 });
 
 type Deps = {
-  repo: {
-    loadForProcessing: jest.Mock;
-    persistOcr: jest.Mock;
-    updateWithOutcome: jest.Mock;
-    getSource: jest.Mock;
-    toExistingResult: jest.Mock;
-  };
-  prisma: { $transaction: jest.Mock };
+  repo: Record<string, jest.Mock>;
+  prisma: Record<string, unknown> & { $transaction: jest.Mock };
   storage: { getObject: jest.Mock };
   ocr: { recognize: jest.Mock };
   registry: AdapterRegistry;
@@ -84,6 +95,8 @@ type Deps = {
   };
   projector: { project: jest.Mock };
   audit: { log: jest.Mock };
+  queue: { enqueue: jest.Mock; retry: jest.Mock };
+  receiptsRepo: { findByIdForMerchant: jest.Mock };
 };
 
 const makeDeps = (stubAdapter: BankAdapter): Deps => ({
@@ -119,6 +132,19 @@ const makeDeps = (stubAdapter: BankAdapter): Deps => ({
   },
   projector: { project: jest.fn() },
   audit: { log: jest.fn() },
+  queue: { enqueue: jest.fn(async () => undefined), retry: jest.fn(async () => undefined) },
+  receiptsRepo: { findByIdForMerchant: jest.fn(async () => receiptRow()) },
+});
+
+/** Receipt row used by submit() (13E.3). Matching uploadedByUserId by default. */
+const receiptRow = (overrides: Record<string, unknown> = {}) => ({
+  id: 'receipt-1',
+  merchantId: 'merchant-1',
+  uploadedByUserId: 'user-1',
+  mimeType: 'image/jpeg',
+  sizeBytes: 1024,
+  createdAt: new Date('2026-10-01T00:00:00.000Z'),
+  ...overrides,
 });
 
 const makeService = (deps: Deps): VerificationsService =>
@@ -131,6 +157,8 @@ const makeService = (deps: Deps): VerificationsService =>
     deps.duplicates as never,
     deps.projector as never,
     deps.audit as never,
+    deps.queue as never,
+    deps.receiptsRepo as never,
   );
 
 const input = (overrides: Partial<ProcessInput> = {}): ProcessInput => ({
@@ -490,5 +518,516 @@ describe('VerificationsService.process', () => {
     expect(logged).not.toContain('Yonas Alemu');
     // the *normalized* reference may appear; the raw OCR text must not
     expect(logged).not.toContain('CBE transfer');
+  });
+});
+
+// ── 13E.3 — HTTP surface (submit / read / list / retry / review) ─────────
+
+describe('VerificationsService 13E.3 HTTP surface', () => {
+  let logSpy: jest.SpyInstance;
+  beforeEach(() => {
+    logSpy = jest.spyOn(Logger.prototype as unknown as { log: jest.Mock }, 'log');
+  });
+  afterEach(() => logSpy.mockRestore());
+
+  const user = (role: 'MERCHANT' | 'SUB_MERCHANT') => ({
+    id: 'user-1',
+    role,
+    merchantId: 'merchant-1',
+  });
+
+  const makeListQuery = () => ({
+    page: 1,
+    pageSize: 20,
+    sortBy: 'createdAt' as const,
+    sortOrder: 'desc' as const,
+  });
+
+  /** Detail-row shape returned by repo.findDetailById mocks. */
+  const detailRow = (overrides: Record<string, unknown> = {}) => ({
+    id: 'verif-1',
+    merchantId: 'merchant-1',
+    source: 'TRANSACTION',
+    bankCode: null,
+    bankReference: null,
+    referenceNormalized: null,
+    amountMinor: null,
+    senderName: null,
+    receiverName: null,
+    paidAt: null,
+    status: 'ERROR',
+    ocrConfidence: null,
+    adapterMetadata: null,
+    errorCode: null,
+    errorMessage: null,
+    durationMs: null,
+    createdAt: new Date('2026-10-01T00:00:00.000Z'),
+    completedAt: new Date('2026-10-01T00:00:05.000Z'),
+    receipt: {
+      id: 'receipt-1',
+      mimeType: 'image/jpeg',
+      sizeBytes: 1024,
+      createdAt: new Date('2026-10-01T00:00:00.000Z'),
+    },
+    ...overrides,
+  });
+
+  const withPrisma = (deps: Deps, extra: Record<string, unknown> = {}): Deps => ({
+    ...deps,
+    prisma: {
+      $transaction: deps.prisma.$transaction,
+      duplicateFingerprint: { findUnique: jest.fn(async () => null) },
+      ...extra,
+    },
+  });
+
+  it('submit: creates PENDING row, audits and enqueues', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    const service = makeService(deps);
+
+    const res = await service.submit({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+      requestId: 'req-1',
+    });
+
+    expect(res.status).toBe('PENDING');
+    expect(deps.receiptsRepo.findByIdForMerchant).toHaveBeenCalledWith('receipt-1', 'merchant-1');
+    expect(deps.repo.createPending).toHaveBeenCalledWith(
+      expect.objectContaining({ merchantId: 'merchant-1', verifiedByUserId: 'user-1' }),
+    );
+    expect(deps.audit.log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'verification.submitted' }),
+    );
+    expect(deps.queue.enqueue).toHaveBeenCalledWith('verif-1');
+  });
+
+  it('submit: sub-merchant cannot verify another user\u2019s receipt', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.receiptsRepo.findByIdForMerchant = jest.fn(async () =>
+      receiptRow({ uploadedByUserId: 'someone-else' }),
+    );
+    deps.repo.createPending = jest.fn();
+    const service = makeService(deps);
+
+    await expect(
+      service.submit({
+        user: user('SUB_MERCHANT'),
+        merchantId: 'merchant-1',
+        dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    expect(deps.repo.createPending).not.toHaveBeenCalled();
+    expect(deps.queue.enqueue).not.toHaveBeenCalled();
+  });
+
+  it('submit: unknown/foreign receipt \u2192 ReceiptNotFoundError', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.receiptsRepo.findByIdForMerchant = jest.fn(async () => null);
+    deps.repo.createPending = jest.fn();
+    const service = makeService(deps);
+
+    await expect(
+      service.submit({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        dto: { receiptId: 'nope', source: 'TRANSACTION' },
+      }),
+    ).rejects.toThrow('Receipt not found');
+    expect(deps.repo.createPending).not.toHaveBeenCalled();
+  });
+
+  it('submit BILLING: accepted as source, enqueue proceeds (billing row is Step 16)', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    const service = makeService(deps);
+
+    const res = await service.submit({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      dto: {
+        receiptId: 'receipt-1',
+        source: 'BILLING',
+        billingPackageCode: 'PREMIUM',
+        billingExpectedAmountMinor: '2500',
+      },
+    });
+
+    expect(res.status).toBe('PENDING');
+    expect(deps.repo.createPending).toHaveBeenCalledWith(
+      expect.objectContaining({ source: 'BILLING' }),
+    );
+    expect(deps.queue.enqueue).toHaveBeenCalled();
+  });
+
+  it('findByIdForUser: sub-merchant scoping is passed into the WHERE clause', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow());
+    const service = makeService(withPrisma(deps));
+
+    await service.findByIdForUser({
+      user: user('SUB_MERCHANT'),
+      merchantId: 'merchant-1',
+      verificationId: 'verif-1',
+    });
+    expect(deps.repo.findDetailById).toHaveBeenCalledWith('verif-1', 'merchant-1', 'user-1');
+  });
+
+  it('findByIdForUser: merchant is tenant-wide (no user scope)', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow());
+    const service = makeService(withPrisma(deps));
+
+    await service.findByIdForUser({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      verificationId: 'verif-1',
+    });
+    expect(deps.repo.findDetailById).toHaveBeenCalledWith('verif-1', 'merchant-1', null);
+  });
+
+  it('findByIdForUser: unknown id \u2192 VerificationNotFoundError', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => null);
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.findByIdForUser({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        verificationId: 'nope',
+      }),
+    ).rejects.toThrow('not found');
+  });
+
+  it('findByIdForUser: PII-safe DTO \u2014 detailFromRow output has no storageKey/ocrRawText/adapterMetadata', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow());
+    const service = makeService(withPrisma(deps));
+
+    const dto = await service.findByIdForUser({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      verificationId: 'verif-1',
+    });
+    const json = JSON.stringify(dto);
+    expect(json).not.toContain('storageKey');
+    expect(json).not.toContain('ocrRawText');
+    expect(json).not.toContain('adapterMetadata');
+    expect(dto.receipt).toEqual(expect.not.objectContaining({ storageKey: expect.anything() }));
+  });
+
+  it('findByIdForUser: DUPLICATE row surfaces duplicateOf from metadata', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    const prisma = withPrisma(deps);
+    (
+      prisma.prisma as unknown as { duplicateFingerprint: { findUnique: jest.Mock } }
+    ).duplicateFingerprint.findUnique = jest.fn(async () => ({
+      firstMerchantId: 'first-merchant',
+    }));
+    deps.repo.findDetailById = jest.fn(async () =>
+      detailRow({
+        status: 'DUPLICATE',
+        adapterMetadata: { duplicateOfVerificationId: 'verif-original' },
+        bankCode: 'CBE',
+        referenceNormalized: 'FT26195DBK5W81465291',
+      }),
+    );
+    const service = makeService(prisma);
+
+    const dto = await service.findByIdForUser({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      verificationId: 'verif-1',
+    });
+    expect(dto.duplicateOf).toEqual({
+      verificationId: 'verif-original',
+      merchantId: 'first-merchant',
+    });
+  });
+
+  it('list: sub-merchant scope applied in the query, not post-fetch', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.listSummaries = jest.fn(async () => ({ rows: [], total: 0 }));
+    const service = makeService(withPrisma(deps));
+
+    await service.list({
+      user: user('SUB_MERCHANT'),
+      merchantId: 'merchant-1',
+      query: makeListQuery(),
+    });
+    expect(deps.repo.listSummaries).toHaveBeenCalledWith(
+      expect.objectContaining({ verifiedByUserId: 'user-1' }),
+    );
+  });
+
+  it('list: merchant + subMerchantId filter maps to subMerchantUserId scope', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.listSummaries = jest.fn(async () => ({ rows: [], total: 0 }));
+    const service = makeService(withPrisma(deps));
+
+    await service.list({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      query: { ...makeListQuery(), subMerchantId: 'sub-9' },
+    });
+    expect(deps.repo.listSummaries).toHaveBeenCalledWith(
+      expect.objectContaining({ subMerchantUserId: 'sub-9' }),
+    );
+  });
+
+  it('list: pagination math \u2014 totalPages from total/pageSize', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.listSummaries = jest.fn(async () => ({
+      rows: [detailRow(), detailRow({ id: 'verif-2' })],
+      total: 21,
+    }));
+    const service = makeService(withPrisma(deps));
+
+    const res = await service.list({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      query: makeListQuery(),
+    });
+    expect(res.data).toHaveLength(2);
+    expect(res.data[0].amountMinor).toBeNull(); // bigint → string-null, never a number
+    expect(res.meta).toEqual({ page: 1, pageSize: 20, total: 21, totalPages: 2 });
+  });
+
+  it('list: skip/take derived from page/pageSize', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.listSummaries = jest.fn(async () => ({ rows: [], total: 0 }));
+    const service = makeService(withPrisma(deps));
+
+    await service.list({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      query: { ...makeListQuery(), page: 3, pageSize: 10 },
+    });
+    expect(deps.repo.listSummaries).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 20, take: 10 }),
+    );
+  });
+
+  it('retry: sub-merchant \u2192 ForbiddenError, no enqueue', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow());
+    deps.repo.resetForRetry = jest.fn();
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.retry({
+        user: user('SUB_MERCHANT'),
+        merchantId: 'merchant-1',
+        verificationId: 'verif-1',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    expect(deps.repo.resetForRetry).not.toHaveBeenCalled();
+    expect(deps.queue.retry).not.toHaveBeenCalled();
+  });
+
+  it('retry: VERIFIED \u2192 VerificationNotRetryableError (Watch #5)', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow({ status: 'VERIFIED' }));
+    deps.repo.resetForRetry = jest.fn();
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.retry({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        verificationId: 'verif-1',
+      }),
+    ).rejects.toBeInstanceOf(VerificationNotRetryableError);
+    expect(deps.repo.resetForRetry).not.toHaveBeenCalled();
+    expect(deps.queue.retry).not.toHaveBeenCalled();
+  });
+
+  it('retry: FAKE \u2192 VerificationNotRetryableError (Watch #5)', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow({ status: 'FAKE' }));
+    deps.repo.resetForRetry = jest.fn();
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.retry({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        verificationId: 'verif-1',
+      }),
+    ).rejects.toBeInstanceOf(VerificationNotRetryableError);
+  });
+
+  it('retry: DUPLICATE \u2192 VerificationNotRetryableError', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow({ status: 'DUPLICATE' }));
+    deps.repo.resetForRetry = jest.fn();
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.retry({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        verificationId: 'verif-1',
+      }),
+    ).rejects.toBeInstanceOf(VerificationNotRetryableError);
+  });
+
+  it('retry: ERROR \u2192 reset + audit + re-enqueue \u2192 202 shape', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () =>
+      detailRow({ status: 'ERROR', errorCode: 'BANK_ADAPTER_UNAVAILABLE' }),
+    );
+    deps.repo.resetForRetry = jest.fn();
+    const service = makeService(withPrisma(deps));
+
+    const res = await service.retry({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      verificationId: 'verif-1',
+    });
+    expect(res.status).toBe('PENDING');
+    expect(deps.repo.resetForRetry).toHaveBeenCalledWith('verif-1', 'merchant-1');
+    expect(deps.audit.log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'verification.retry_requested' }),
+    );
+    expect(deps.queue.retry).toHaveBeenCalledWith('verif-1');
+  });
+
+  it('retry: NEEDS_REVIEW is also retryable', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow({ status: 'NEEDS_REVIEW' }));
+    deps.repo.resetForRetry = jest.fn();
+    const service = makeService(withPrisma(deps));
+
+    const res = await service.retry({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      verificationId: 'verif-1',
+    });
+    expect(res.status).toBe('PENDING');
+  });
+
+  it('retry: unknown id \u2192 VerificationNotFoundError', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => null);
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.retry({ user: user('MERCHANT'), merchantId: 'merchant-1', verificationId: 'nope' }),
+    ).rejects.toThrow('not found');
+  });
+
+  it('requestReview: VERIFIED \u2192 VerificationNotReviewableError', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow({ status: 'VERIFIED' }));
+    deps.repo.updateStatusToNeedsReview = jest.fn();
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.requestReview({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        verificationId: 'verif-1',
+        dto: { reason: 'looks wrong' },
+      }),
+    ).rejects.toBeInstanceOf(VerificationNotReviewableError);
+    expect(deps.repo.updateStatusToNeedsReview).not.toHaveBeenCalled();
+  });
+
+  it('requestReview: PENDING is not reviewable either', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow({ status: 'PENDING' }));
+    deps.repo.updateStatusToNeedsReview = jest.fn();
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.requestReview({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        verificationId: 'verif-1',
+        dto: { reason: 'waiting forever' },
+      }),
+    ).rejects.toBeInstanceOf(VerificationNotReviewableError);
+  });
+
+  it('requestReview: FAKE \u2192 NEEDS_REVIEW row + review id + audit', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow({ status: 'FAKE' }));
+    deps.repo.updateStatusToNeedsReview = jest.fn(async () => 'review-1');
+    const service = makeService(withPrisma(deps));
+
+    const res = await service.requestReview({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      verificationId: 'verif-1',
+      dto: { reason: 'genuine receipt was flagged' },
+    });
+    expect(res.status).toBe('NEEDS_REVIEW');
+    expect(res.reviewId).toBe('review-1');
+    expect(deps.repo.updateStatusToNeedsReview).toHaveBeenCalledWith(
+      'verif-1',
+      'merchant-1',
+      'user-1',
+      'genuine receipt was flagged',
+    );
+    expect(deps.audit.log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'verification.review_requested' }),
+    );
+  });
+
+  it('requestReview: concurrent terminal write (updateMany count 0) \u2192 not reviewable', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => detailRow({ status: 'FAKE' }));
+    deps.repo.updateStatusToNeedsReview = jest.fn(async () => null);
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.requestReview({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        verificationId: 'verif-1',
+        dto: { reason: 'raced' },
+      }),
+    ).rejects.toBeInstanceOf(VerificationNotReviewableError);
+  });
+
+  it('requestReview: unknown id \u2192 VerificationNotFoundError', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () => null);
+    deps.repo.updateStatusToNeedsReview = jest.fn();
+    const service = makeService(withPrisma(deps));
+
+    await expect(
+      service.requestReview({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        verificationId: 'nope',
+        dto: { reason: 'check' },
+      }),
+    ).rejects.toThrow('not found');
+  });
+
+  it('audit never carries PII in review metadata (names stay out of the logs)', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.findDetailById = jest.fn(async () =>
+      detailRow({ status: 'FAKE', senderName: 'Secret Sender', receiverName: 'Secret Receiver' }),
+    );
+    deps.repo.updateStatusToNeedsReview = jest.fn(async () => 'review-1');
+    const service = makeService(withPrisma(deps));
+
+    await service.requestReview({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      verificationId: 'verif-1',
+      dto: { reason: 'some complaint' },
+    });
+
+    const auditCalls = deps.audit.log.mock.calls as unknown[][];
+    const serialized = JSON.stringify(auditCalls);
+    expect(serialized).not.toContain('Secret Sender');
+    expect(serialized).not.toContain('Secret Receiver');
   });
 });

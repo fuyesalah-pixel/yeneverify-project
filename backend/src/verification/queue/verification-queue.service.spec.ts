@@ -14,22 +14,46 @@ type AddedJob = { name: string; data: unknown; opts: Record<string, unknown> };
 function makeQueueMock(config: { jobAttempts: number; backoffMs: number }) {
   const waitlist = new Map<string, AddedJob>();
   const added: AddedJob[] = [];
+  // BullMQ job hashes survive in terminal states while retention keeps them
+  // (removeOnComplete/removeOnFail) — and the ADD script dedups on them.
+  const jobHashes = new Map<string, { state: string }>();
+  const removedJobs: string[] = [];
 
   const queue = {
     add: async (name: string, data: unknown, opts: Record<string, unknown>) => {
       const jobId = String(opts['jobId']);
-      if (waitlist.has(jobId)) return undefined; // BullMQ dedup contract
+      if (jobHashes.has(jobId)) return undefined; // BullMQ dedup contract
       const job = { name, data, opts };
+      jobHashes.set(jobId, { state: 'waiting' });
       waitlist.set(jobId, job);
       added.push(job);
       return job;
     },
+    getJob: async (jobId: string) => {
+      if (!jobHashes.has(jobId)) return null; // moved out / removed
+      const record = jobHashes.get(jobId)!;
+      return {
+        getState: async () => record.state,
+        remove: async () => {
+          jobHashes.delete(jobId);
+          waitlist.delete(jobId);
+          removedJobs.push(jobId);
+        },
+      };
+    },
+    /** Test helper to settle a retained job in a terminal state. */
+    __settle: (jobId: string, state: 'completed' | 'failed' | 'active') => {
+      const record = jobHashes.get(jobId);
+      if (record) record.state = state;
+      waitlist.delete(jobId);
+    },
+    __removedJobs: removedJobs,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     client: { ping: async (): Promise<any> => 'PONG' },
     __config: config,
   } as unknown as Queue & { __config: typeof config };
 
-  return { queue, added, waitlist, config };
+  return { queue, added, waitlist, jobHashes, removedJobs, config };
 }
 
 const CONFIG = { jobAttempts: 3, backoffMs: 2000 } as const;
@@ -51,9 +75,10 @@ describe('VerificationQueueService', () => {
 
   // ── enqueue() ────────────────────────────────────────────────────────
 
-  it('uses jobId = verification:<id>', async () => {
+  it('uses jobId = verification-<id> (BullMQ forbids colons in custom ids)', async () => {
     await service.enqueue('vid-1');
-    expect(queueMock.added[0].opts['jobId']).toBe('verification:vid-1');
+    expect(queueMock.added[0].opts['jobId']).toBe('verification-vid-1');
+    expect(queueMock.added[0].opts['attempts']).toBe(3);
   });
 
   it('sets attempts: 3 from config', async () => {
@@ -99,6 +124,16 @@ describe('VerificationQueueService', () => {
     expect(queueMock.added).toHaveLength(1);
   });
 
+  it('enqueue dedup contract holds across terminal states until the hash is removed', async () => {
+    await service.enqueue('vid-term');
+    (queueMock.queue as unknown as { __settle: (id: string, s: string) => void }).__settle(
+      'verification-vid-term',
+      'completed',
+    );
+    await service.enqueue('vid-term'); // retained hash → still deduped
+    expect(queueMock.added).toHaveLength(1);
+  });
+
   it('enqueues for different verificationIds do NOT collide', async () => {
     await service.enqueue('vid-a');
     await service.enqueue('vid-b');
@@ -107,18 +142,55 @@ describe('VerificationQueueService', () => {
 
   // ── retry() ──────────────────────────────────────────────────────────
 
-  it('retry() re-enqueues with the same idempotent jobId', async () => {
+  // REAL BullMQ behavior (found by the e2e): the ADD script dedups on the
+  // custom jobId hash in ANY state. removeOnComplete keeps completed jobs
+  // for 1h, so a bare re-add is a SILENT NO-OP after a terminal attempt and
+  // the verification would stay PENDING forever. retry() must clear the
+  // terminal leftover first.
+  it('retry() removes a retained terminal (completed) job before re-enqueueing', async () => {
+    await service.enqueue('vid-1');
+    (queueMock.queue as unknown as { __settle: (id: string, s: string) => void }).__settle(
+      'verification-vid-1',
+      'completed',
+    );
+
     await service.retry('vid-1');
-    expect(queueMock.added[0].opts['jobId']).toBe('verification:vid-1');
-    expect(queueMock.added[0].opts['attempts']).toBe(3);
+    expect(queueMock.removedJobs).toEqual(['verification-vid-1']);
+    expect(queueMock.added).toHaveLength(2); // fresh job after cleanup
   });
 
-  it('retry() after a COMPLETED job adds a fresh job (waitlist no longer holds it)', async () => {
-    // Simulate BullMQ moving the job out of the waitlist once completed.
-    await service.enqueue('vid-1');
-    queueMock.waitlist.delete('verification:vid-1');
-    await service.retry('vid-1');
+  it('retry() also clears FAILED (dead-letter) leftovers so an admin retry can take effect', async () => {
+    await service.enqueue('vid-2');
+    (queueMock.queue as unknown as { __settle: (id: string, s: string) => void }).__settle(
+      'verification-vid-2',
+      'failed',
+    );
+
+    await service.retry('vid-2');
+    expect(queueMock.removedJobs).toEqual(['verification-vid-2']);
     expect(queueMock.added).toHaveLength(2);
+  });
+
+  it('retry() leaves an ACTIVE job in place and still attempts enqueue', async () => {
+    await service.enqueue('vid-3');
+    (queueMock.queue as unknown as { __settle: (id: string, s: string) => void }).__settle(
+      'verification-vid-3',
+      'active',
+    );
+
+    await service.retry('vid-3');
+    expect(queueMock.removedJobs).toEqual([]); // active job must not be destroyed
+    // The retained ACTIVE hash still dedups the add (correct BullMQ semantics:
+    // only one attempt may be mid-flight); the PENDING row rides until it settles.
+    expect(queueMock.added).toHaveLength(1);
+  });
+
+  it('retry() with no existing job just enqueues', async () => {
+    await service.retry('vid-4');
+    expect(queueMock.removedJobs).toEqual([]);
+    expect(queueMock.added).toHaveLength(1);
+    expect(queueMock.added[0].opts['jobId']).toBe('verification-vid-4');
+    expect(queueMock.added[0].opts['attempts']).toBe(3);
   });
 
   // ── health() ─────────────────────────────────────────────────────────

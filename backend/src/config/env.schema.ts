@@ -340,6 +340,8 @@ export const envSchema = z
     THROTTLE_LIMIT: integerValue(1, 1_000_000).default(100),
     THROTTLE_OTP_TTL: integerValue(1, 3_600).default(60),
     THROTTLE_OTP_LIMIT: integerValue(1, 100).default(5),
+    // Verification submissions per merchant per minute (13E.3).
+    VERIFICATION_SUBMIT_RATE_PER_MINUTE: integerValue(1, 1_000).default(60),
 
     // ── CORS ─────────────────────────────────────────────────────────────
     CORS_ORIGINS: z

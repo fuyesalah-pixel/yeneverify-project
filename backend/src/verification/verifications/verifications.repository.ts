@@ -8,13 +8,78 @@
 
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import type { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { newId } from '../../common/utils/id.util';
 import type {
   SupplementaryPrompt,
   VerificationResult,
   VerdictOutcome,
   VerdictStatus,
 } from './verifications.types';
+
+// ============================================================
+// 13E.3 — API-facing queries. Sub-merchant scoping happens HERE, in
+// the WHERE clause (Watch rule: never filter in JS after fetch).
+// ============================================================
+
+/** The detail projection shared by GET /verifications/:id. */
+const DETAIL_SELECT = {
+  id: true,
+  source: true,
+  bankCode: true,
+  bankReference: true,
+  referenceNormalized: true,
+  amountMinor: true,
+  senderName: true,
+  receiverName: true,
+  paidAt: true,
+  status: true,
+  ocrConfidence: true,
+  adapterMetadata: true,
+  errorCode: true,
+  errorMessage: true,
+  durationMs: true,
+  createdAt: true,
+  completedAt: true,
+  receipt: { select: { id: true, mimeType: true, sizeBytes: true, createdAt: true } },
+} satisfies Prisma.VerificationSelect;
+
+export type VerificationDetailRow = Prisma.VerificationGetPayload<{ select: typeof DETAIL_SELECT }>;
+
+export type CreatePendingInput = {
+  merchantId: string;
+  verifiedByUserId: string;
+  receiptId: string;
+  source: 'TRANSACTION' | 'BILLING';
+};
+
+export type VerificationSummaryRow = {
+  id: string;
+  status: string;
+  bankCode: string | null;
+  bankReference: string | null;
+  amountMinor: bigint | null;
+  createdAt: Date;
+  completedAt: Date | null;
+};
+
+export type ListSummariesFilter = {
+  merchantId: string;
+  /** Set for SUB_MERCHANT callers: hard user scope in SQL. */
+  verifiedByUserId: string | null;
+  /** MERCHANT-only sub-merchant drilldown. */
+  subMerchantUserId: string | null;
+  status: string[] | null;
+  source: 'TRANSACTION' | 'BILLING' | null;
+  bankCode: string[] | null;
+  from: Date | null;
+  to: Date | null;
+  search: string | null;
+  sortBy: 'createdAt' | 'amountMinor';
+  sortOrder: 'asc' | 'desc';
+  skip: number;
+  take: number;
+};
 
 /** How the verification row was loaded for process(). */
 export type LoadedVerification =
@@ -39,6 +104,9 @@ export type VerificationRow = {
   adapterMetadata: Prisma.JsonValue | null;
   errorCode: string | null;
   errorMessage: string | null;
+  /** Present when selected via ROW_SELECT; legacy spec fixtures omit it. */
+  createdAt?: Date;
+  completedAt?: Date | null;
 };
 
 export type VerificationWithReceipt = VerificationRow & {
@@ -68,6 +136,8 @@ const ROW_SELECT = {
   adapterMetadata: true,
   errorCode: true,
   errorMessage: true,
+  createdAt: true,
+  completedAt: true,
 } satisfies Prisma.VerificationSelect;
 
 @Injectable()
@@ -170,6 +240,143 @@ export class VerificationsRepository {
         adapterMetadata: { queuedFailure: { errorCode, at: new Date().toISOString() } },
       },
     });
+  }
+
+  // ── 13E.3 — API surface methods ─────────────────────────────────────
+
+  async createPending(input: CreatePendingInput): Promise<VerificationRow> {
+    const row = await this.prisma.verification.create({
+      data: {
+        id: newId(),
+        merchantId: input.merchantId,
+        verifiedByUserId: input.verifiedByUserId,
+        receiptId: input.receiptId,
+        source: input.source,
+        status: 'PENDING',
+      },
+      select: ROW_SELECT,
+    });
+    return row as VerificationRow;
+  }
+
+  /**
+   * Tenant-scoped (and optionally sub-merchant-scoped) detail lookup.
+   * The scope is part of the WHERE clause, not post-fetch filtering.
+   */
+  async findDetailById(
+    id: string,
+    merchantId: string,
+    subMerchantUserId: string | null,
+  ): Promise<VerificationDetailRow | null> {
+    return this.prisma.verification.findFirst({
+      where: {
+        id,
+        merchantId,
+        ...(subMerchantUserId && { verifiedByUserId: subMerchantUserId }),
+      },
+      select: DETAIL_SELECT,
+    });
+  }
+
+  /** Paginated, filterable list — scoping stays in the WHERE clause. */
+  async listSummaries(
+    filter: ListSummariesFilter,
+  ): Promise<{ rows: VerificationSummaryRow[]; total: number }> {
+    const where: Prisma.VerificationWhereInput = {
+      merchantId: filter.merchantId,
+      ...(filter.verifiedByUserId && { verifiedByUserId: filter.verifiedByUserId }),
+      ...(filter.subMerchantUserId && { verifiedByUserId: filter.subMerchantUserId }),
+      ...(filter.status?.length && { status: { in: filter.status as never } }),
+      ...(filter.source && { source: filter.source }),
+      ...(filter.bankCode?.length && { bankCode: { in: filter.bankCode as never } }),
+      ...((filter.from || filter.to) && {
+        createdAt: {
+          ...(filter.from && { gte: filter.from }),
+          ...(filter.to && { lte: filter.to }),
+        },
+      }),
+      ...(filter.search && {
+        OR: [
+          { bankReference: { contains: filter.search, mode: 'insensitive' } },
+          { referenceNormalized: { contains: filter.search, mode: 'insensitive' } },
+        ],
+      }),
+    };
+
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.verification.findMany({
+        where,
+        select: {
+          id: true,
+          status: true,
+          bankCode: true,
+          bankReference: true,
+          amountMinor: true,
+          createdAt: true,
+          completedAt: true,
+        },
+        orderBy: { [filter.sortBy]: filter.sortOrder },
+        skip: filter.skip,
+        take: filter.take,
+      }),
+      this.prisma.verification.count({ where }),
+    ]);
+    return { rows, total };
+  }
+
+  /**
+   * Reset an ERROR/NEEDS_REVIEW row for reprocessing. Scoped by
+   * merchantId so tenants can never reset each other's rows. Keeps
+   * ocrRawText (skip re-OCR) — previous attempt metadata remains as
+   * an audit trail until the next run overwrites it.
+   */
+  async resetForRetry(id: string, merchantId: string): Promise<void> {
+    await this.prisma.verification.updateMany({
+      where: { id, merchantId, status: { in: ['ERROR', 'NEEDS_REVIEW'] } },
+      data: {
+        status: 'PENDING',
+        errorCode: null,
+        errorMessage: null,
+        startedAt: new Date(),
+        completedAt: null,
+        attemptCount: { increment: 1 },
+      },
+    });
+  }
+
+  /** Flag a verification for manual review; returns the review id. */
+  async updateStatusToNeedsReview(
+    id: string,
+    merchantId: string,
+    requestedByUserId: string,
+    reason: string,
+  ): Promise<string | null> {
+    const onlyReviewable: ('FAKE' | 'ERROR' | 'NEEDS_REVIEW')[] = ['FAKE', 'ERROR', 'NEEDS_REVIEW'];
+    const result = await this.prisma.$transaction(async (tx) => {
+      // updateMany first: only FAKE/ERROR/NEEDS_REVIEW rows flip.
+      const updated = await tx.verification.updateMany({
+        where: { id, merchantId, status: { in: onlyReviewable } },
+        data: { status: 'NEEDS_REVIEW', errorCode: 'VERIFICATION_MANUAL_REVIEW' },
+      });
+      if (updated.count === 0) return null;
+
+      // One review row per verification (unique on verification_id).
+      // upsert keeps re-requests idempotent: they refresh the reason.
+      const review = await tx.verificationReview.upsert({
+        where: { verificationId: id },
+        update: { reason, requestedByUserId },
+        create: {
+          id: newId(),
+          verificationId: id,
+          merchantId,
+          requestedByUserId,
+          reason,
+          status: 'OPEN',
+        },
+      });
+      return review.id;
+    });
+    return result;
   }
 
   /** Reads the source column within the completion transaction. */

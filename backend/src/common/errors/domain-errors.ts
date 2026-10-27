@@ -336,6 +336,35 @@ export class VerificationNotPendingError extends AppError {
   }
 }
 
+/**
+ * Only ERROR / NEEDS_REVIEW verifications may be retried. VERIFIED,
+ * FAKE and DUPLICATE are definitive verdicts — re-running them would
+ * re-query the bank with a receipt that is already resolved (or fake),
+ * which in aggregate turns a “retry” button into a bank-DoS vector.
+ */
+export class VerificationNotRetryableError extends AppError {
+  constructor(status: string) {
+    super(
+      ERROR_CODES.VERIFICATION_NOT_RETRYABLE,
+      'Only failed or under-review verifications can be retried.',
+      409,
+      { status },
+    );
+  }
+}
+
+/** Only FAKE / ERROR / NEEDS_REVIEW verifications can be flagged for manual review. */
+export class VerificationNotReviewableError extends AppError {
+  constructor(status: string) {
+    super(
+      ERROR_CODES.VERIFICATION_NOT_REVIEWABLE,
+      'This verification cannot be flagged for manual review.',
+      409,
+      { status },
+    );
+  }
+}
+
 /** The receipt backing a pending verification is gone from storage records. */
 export class VerificationReceiptMissingError extends AppError {
   constructor(verificationId: string, receiptId: string) {

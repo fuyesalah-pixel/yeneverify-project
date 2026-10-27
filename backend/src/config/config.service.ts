@@ -253,6 +253,13 @@ export class AppConfigService {
     } as const;
   }
 
+  /** Per-merchant verification submission budget (13E.3). */
+  get verification() {
+    return {
+      submitRatePerMinute: this.value('VERIFICATION_SUBMIT_RATE_PER_MINUTE'),
+    } as const;
+  }
+
   // ── CORS ────────────────────────────────────────────────────────────────
   get cors() {
     return {
