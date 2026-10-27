@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { createHash, randomBytes } from 'crypto';
 import { AppConfigService } from '../../config/config.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { InvalidTokenError, TokenExpiredError } from '../errors';
+import { InvalidTokenError, TokenExpiredError, RefreshTokenInvalidError, RefreshTokenExpiredError, RefreshTokenReuseDetectedError, DeviceRevokedError, AccountSuspendedError } from '../errors';
 
 interface AccessTokenClaims {
   sub: string;
@@ -25,11 +25,6 @@ interface AccessTokenClaims {
 interface RefreshTokenPair {
   raw: string;
   hash: string;
-}
-
-interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
 }
 
 @Injectable()
@@ -55,6 +50,11 @@ export class TokenService {
    * Sign an access token with the given claims.
    */
   signAccessToken(claims: Omit<AccessTokenClaims, 'iat' | 'exp' | 'iss' | 'aud'>): string {
+    if (!claims.sid) {
+      // Never sign a token with no session id — jwt.strategy does a DB lookup
+      // by sid and an empty string would 500 every authenticated call.
+      throw new InvalidTokenError('Access token requires a real session id (sid)');
+    }
     return this.jwt.sign(claims);
   }
 
@@ -89,27 +89,6 @@ export class TokenService {
   }
 
   /**
-   * Generate both access and refresh tokens for a new session.
-   */
-  generateTokens(
-    userId: string,
-    role: string,
-    merchantId: string | undefined,
-    deviceId: string,
-  ): TokenPair {
-    const accessToken = this.signAccessToken({
-      sub: userId,
-      role,
-      merchantId,
-      sid: '', // Will be filled by SessionService
-      did: deviceId,
-    });
-
-    const { raw: refreshToken } = this.generateRefreshToken();
-    return { accessToken, refreshToken };
-  }
-
-  /**
    * Hash a refresh token using SHA-256.
    */
   hashRefreshToken(raw: string): string {
@@ -130,65 +109,71 @@ export class TokenService {
           select: { id: true, role: true, status: true, ownedMerchant: { select: { id: true } } },
         },
         device: {
-          select: { id: true, revokedAt: true },
+          select: { id: true, revokedAt: true, deviceFingerprint: true, platform: true },
         },
       },
     });
 
     if (!session) {
-      throw new InvalidTokenError('Refresh token not found');
+      throw new RefreshTokenInvalidError('Refresh token not found');
     }
 
     if (session.revokedAt) {
       // Reuse detected - revoke all sessions for this user
       await this.revokeAllUserSessions(session.userId, 'reuse_detected');
-      throw new Error('REFRESH_REUSE_DETECTED');
+      throw new RefreshTokenReuseDetectedError();
     }
 
     if (session.expiresAt < new Date()) {
-      throw new Error('REFRESH_EXPIRED');
+      throw new RefreshTokenExpiredError();
     }
 
     if (session.device.revokedAt) {
-      throw new Error('DEVICE_REVOKED');
+      throw new DeviceRevokedError();
     }
 
     if (session.user.status !== 'ACTIVE') {
-      throw new Error('USER_INACTIVE');
+      throw new AccountSuspendedError('Refresh token belongs to an inactive account.');
     }
 
     return session;
   }
 
   /**
-   * Rotate refresh token: revoke current session, create new one.
+   * Rotate refresh token: validate the raw token, revoke its session, and
+   * create a fresh one in one transaction.
+   *
+   * User and device come from the validated session row — callers must NOT
+   * pass them in (the old signature let auth flows pass empty strings, which
+   * violated the deviceId FK and broke every refresh).
+   *
+   * Throws RefreshTokenInvalidError / ReuseDetected / Expired / DeviceRevoked.
    */
   async rotateRefreshToken(
     oldRawToken: string,
-    userId: string,
-    deviceId: string,
     ip?: string,
     userAgent?: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
+    const oldSession = await this.validateRefreshToken(oldRawToken);
     const oldHash = this.hashRefreshToken(oldRawToken);
 
     const newSession = await this.prisma.$transaction(async (tx) => {
       // Revoke old session
       await tx.session.update({
-        where: { refreshTokenHash: oldHash },
+        where: { refreshTokenHash: oldHash, id: oldSession.id },
         data: { revokedAt: new Date() },
       });
 
-      // Create new session
+      // Create new session for the same user/device
       const { raw, hash } = this.generateRefreshToken();
       const session = await tx.session.create({
         data: {
           id: crypto.randomUUID(),
-          userId,
-          deviceId,
+          userId: oldSession.userId,
+          deviceId: oldSession.deviceId,
           refreshTokenHash: hash,
-          ip,
-          userAgent,
+          ip: ip ?? oldSession.ip ?? undefined,
+          userAgent: userAgent ?? oldSession.userAgent ?? undefined,
           expiresAt: new Date(Date.now() + this.parseTtl(this.config.jwt.refreshTtl)),
         },
         include: {
@@ -198,13 +183,13 @@ export class TokenService {
       return { session, raw };
     });
 
-    // Generate new access token
+    // Generate new access token with the real session id
     const accessToken = this.signAccessToken({
-      sub: userId,
+      sub: newSession.session.userId,
       role: newSession.session.user.role,
       merchantId: newSession.session.user.ownedMerchant?.id,
       sid: newSession.session.id,
-      did: deviceId,
+      did: newSession.session.deviceId,
     });
 
     return { accessToken, refreshToken: newSession.raw };

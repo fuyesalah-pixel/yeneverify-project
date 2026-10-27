@@ -16,7 +16,7 @@ import { BiometricService } from './biometric/biometric.service';
 import { StepUpService } from './step-up/step-up.service';
 import { DevicePlatform } from '@prisma/client';
 import { OtpPurpose } from './constants';
-import { AccountBannedError, AccountSuspendedError, DeviceRevokedError } from './errors';
+import { AccountBannedError, AccountSuspendedError, DeviceRevokedError, RefreshTokenInvalidError } from './errors';
 
 export interface AuthTokens {
   accessToken: string;
@@ -211,23 +211,21 @@ export class AuthService {
       throw new DeviceRevokedError();
     }
 
-    // Create session and issue tokens
-    const { accessToken, refreshToken } = this.tokenService.generateTokens(
-      user.id,
-      user.role,
-      user.ownedMerchant?.id,
-      device.id,
-    );
-
-    // Create session
-    const { raw: refreshTokenRaw } = this.tokenService.generateRefreshToken();
-    await this.sessionService.create(
+    // Create the session first, then sign the access token with its real id.
+    const { sessionId, rawRefreshToken } = await this.sessionService.createSession(
       user.id,
       device.id,
-      refreshTokenRaw, // Note: TokenService.hashRefreshToken is called inside
       ip,
       userAgent,
     );
+    const accessToken = this.tokenService.signAccessToken({
+      sub: user.id,
+      role: user.role,
+      merchantId: user.ownedMerchant?.id,
+      sid: sessionId,
+      did: device.id,
+    });
+    const refreshToken = rawRefreshToken;
 
     // Audit log
     this.audit.log({
@@ -276,8 +274,9 @@ export class AuthService {
    * Refresh access token using refresh token.
    */
   async refresh(refreshToken: string, ip: string): Promise<AuthTokens> {
+    // User/device come from the validated session row inside rotateRefreshToken.
     const { accessToken, refreshToken: newRefreshToken } =
-      await this.tokenService.rotateRefreshToken(refreshToken, '', '', ip);
+      await this.tokenService.rotateRefreshToken(refreshToken, ip);
 
     this.audit.log({
       actorType: 'USER',
@@ -390,13 +389,15 @@ export class AuthService {
     pin: string,
     ip: string,
     userAgent: string | undefined,
+    session: { sessionId: string; deviceId: string },
   ): Promise<{ stepUpToken: string; expiresIn: number }> {
     await this.pinService.verifyPin(userId, pin, ip, userAgent);
-    // Generate step-up token
+    // Generate step-up token bound to the caller's real session/device
+    // (the step-up guard compares claims.sid/did against the request's auth context).
     const { stepUpToken, expiresIn } = await this.stepUpService.issueStepUpTokenPin(
       userId,
-      '', // sessionId - will be filled by stepUpService
-      '', // deviceId - will be filled by stepUpService
+      session.sessionId,
+      session.deviceId,
       ip,
     );
     return { stepUpToken, expiresIn };
@@ -463,7 +464,7 @@ export class AuthService {
    * Get step-up token after biometric unlock.
    */
   async biometricStepUp(
-    _refreshToken: string,
+    refreshToken: string,
     _fingerprint: string,
     _platform: 'ANDROID' | 'IOS',
     _model?: string,
@@ -472,7 +473,14 @@ export class AuthService {
     _pushToken?: string,
     ip: string = '',
   ): Promise<{ stepUpToken: string; expiresIn: number }> {
-    return this.stepUpService.issueStepUpTokenBiometric('', '', '', ip);
+    // Derive user/session/device from the validated refresh token's session row.
+    const session = await this.tokenService.validateRefreshToken(refreshToken);
+    return this.stepUpService.issueStepUpTokenBiometric(
+      session.userId,
+      session.id,
+      session.deviceId,
+      ip,
+    );
   }
 
   /**
@@ -486,12 +494,18 @@ export class AuthService {
     _unlockMethod: 'BIOMETRIC' | 'PIN',
     ip: string,
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
-    const tokens = await this.tokenService.rotateRefreshToken(
-      refreshToken,
-      fingerprint,
-      platform,
-      ip,
-    );
+    // Device verification: the refresh token must belong to the device making
+    // the call. A stolen refresh token replayed from another device is rejected.
+    const session = await this.tokenService.validateRefreshToken(refreshToken);
+    const device = session.device as { deviceFingerprint: string; platform: string };
+    if (
+      device.deviceFingerprint !== fingerprint ||
+      device.platform !== platform
+    ) {
+      throw new RefreshTokenInvalidError('Refresh token does not belong to this device');
+    }
+
+    const tokens = await this.tokenService.rotateRefreshToken(refreshToken, ip);
     return {
       ...tokens,
       expiresIn: this.parseTtl(this.config.jwt.accessTtl) / 1000,

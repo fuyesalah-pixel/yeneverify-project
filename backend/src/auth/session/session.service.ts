@@ -53,6 +53,32 @@ export class SessionService {
   }
 
   /**
+   * Create a session and generate its refresh token pair.
+   * Stores only sha256(raw) — the raw token is returned to the caller once,
+   * to be handed to the client alongside the access token.
+   */
+  async createSession(
+    userId: string,
+    deviceId: string,
+    ip?: string,
+    userAgent?: string,
+  ): Promise<{ sessionId: string; rawRefreshToken: string }> {
+    const { raw, hash } = this.tokenService.generateRefreshToken();
+    const session = await this.prisma.session.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId,
+        deviceId,
+        refreshTokenHash: hash,
+        ip,
+        userAgent,
+        expiresAt: new Date(Date.now() + this.parseTtl(this.tokenService['config'].jwt.refreshTtl)),
+      },
+    });
+    return { sessionId: session.id, rawRefreshToken: raw };
+  }
+
+  /**
    * Find session by ID.
    */
   async findById(id: string): Promise<SessionInfo | null> {

@@ -20,6 +20,7 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
+import { AuthUser } from './guards/jwt-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
@@ -165,12 +166,15 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Invalid or expired PIN' })
   @ApiResponse({ status: 429, description: 'Locked out' })
   async verifyPin(
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: AuthUser,
     @Body() dto: VerifyPinDto,
     @Req() req: Request,
     @Ip() ip: string,
   ) {
-    const result = await this.auth.verifyPin(user.id, dto.pin, ip, req.headers['user-agent']);
+    const result = await this.auth.verifyPin(user.id, dto.pin, ip, req.headers['user-agent'], {
+      sessionId: user.sessionId,
+      deviceId: user.deviceId,
+    });
     return { stepUpToken: result.stepUpToken, expiresIn: result.expiresIn };
   }
 
