@@ -165,6 +165,9 @@ describe('Auth login flow (e2e, real verify-otp)', () => {
       .expect(200);
 
     // ── 8. replaying the old refresh token must be rejected with 401
-    await request(app.getHttpServer()).post('/api/v1/auth/refresh').send({ refreshToken }).expect(401);
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/refresh')
+      .send({ refreshToken })
+      .expect(401);
   });
 });

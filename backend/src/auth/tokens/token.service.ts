@@ -8,7 +8,15 @@ import { JwtService } from '@nestjs/jwt';
 import { createHash, randomBytes } from 'crypto';
 import { AppConfigService } from '../../config/config.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { InvalidTokenError, TokenExpiredError, RefreshTokenInvalidError, RefreshTokenExpiredError, RefreshTokenReuseDetectedError, DeviceRevokedError, AccountSuspendedError } from '../errors';
+import {
+  InvalidTokenError,
+  TokenExpiredError,
+  RefreshTokenInvalidError,
+  RefreshTokenExpiredError,
+  RefreshTokenReuseDetectedError,
+  DeviceRevokedError,
+  AccountSuspendedError,
+} from '../errors';
 
 interface AccessTokenClaims {
   sub: string;

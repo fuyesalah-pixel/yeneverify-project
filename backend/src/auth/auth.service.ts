@@ -16,7 +16,12 @@ import { BiometricService } from './biometric/biometric.service';
 import { StepUpService } from './step-up/step-up.service';
 import { DevicePlatform } from '@prisma/client';
 import { OtpPurpose } from './constants';
-import { AccountBannedError, AccountSuspendedError, DeviceRevokedError, RefreshTokenInvalidError } from './errors';
+import {
+  AccountBannedError,
+  AccountSuspendedError,
+  DeviceRevokedError,
+  RefreshTokenInvalidError,
+} from './errors';
 
 export interface AuthTokens {
   accessToken: string;
@@ -498,10 +503,7 @@ export class AuthService {
     // the call. A stolen refresh token replayed from another device is rejected.
     const session = await this.tokenService.validateRefreshToken(refreshToken);
     const device = session.device as { deviceFingerprint: string; platform: string };
-    if (
-      device.deviceFingerprint !== fingerprint ||
-      device.platform !== platform
-    ) {
+    if (device.deviceFingerprint !== fingerprint || device.platform !== platform) {
       throw new RefreshTokenInvalidError('Refresh token does not belong to this device');
     }
 
