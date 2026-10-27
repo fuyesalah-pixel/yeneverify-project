@@ -19,6 +19,8 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { ReceiptsService } from './receipts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { CurrentTenant, requireTenant } from '../common/decorators/current-tenant.decorator';
+import type { TenantScope } from '../common/decorators/current-tenant.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import type { AuthUser } from '../common/types/auth-user.type';
@@ -40,9 +42,13 @@ export class ReceiptsController {
   @ApiResponse({ status: 400, description: 'Unsupported mimeType or oversized file' })
   async presign(
     @CurrentUser() user: AuthUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
     @Body(new ZodValidationPipe(PresignUploadDtoSchema)) dto: PresignUploadDto,
   ) {
-    return this.service.presign(user, dto);
+    // merchantId comes from the TenantGuard-resolved DB scope, NOT the
+    // JWT claim: tokens issued by the login flow carry no merchantId,
+    // so a claim-based lookup broke every real (non-minted) request.
+    return this.service.presign(user, dto, requireTenant(tenant));
   }
 
   @Post('complete')
@@ -54,9 +60,10 @@ export class ReceiptsController {
   @ApiResponse({ status: 404, description: 'No uploaded object for that key' })
   async complete(
     @CurrentUser() user: AuthUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
     @Body(new ZodValidationPipe(CompleteUploadDtoSchema)) dto: CompleteUploadDto,
   ) {
-    return this.service.complete(user, dto);
+    return this.service.complete(user, dto, requireTenant(tenant));
   }
 
   @Post(':id/ocr')
@@ -68,8 +75,12 @@ export class ReceiptsController {
   @ApiResponse({ status: 404, description: 'Receipt not found in this tenant' })
   @ApiResponse({ status: 422, description: 'OCR provider returned no text' })
   @ApiResponse({ status: 502, description: 'OCR provider failure' })
-  async runOcr(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.service.runOcr(id, user);
+  async runOcr(
+    @CurrentUser() user: AuthUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
+    @Param('id') id: string,
+  ) {
+    return this.service.runOcr(id, user, requireTenant(tenant));
   }
 
   @Get(':id')
@@ -78,7 +89,11 @@ export class ReceiptsController {
   @ApiResponse({ status: 200, description: 'Receipt metadata' })
   @ApiResponse({ status: 403, description: 'Sub-merchant reading another uploader’s receipt' })
   @ApiResponse({ status: 404, description: 'Receipt not found in this tenant' })
-  async getById(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.service.getById(user, id);
+  async getById(
+    @CurrentUser() user: AuthUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
+    @Param('id') id: string,
+  ) {
+    return this.service.getById(user, id, requireTenant(tenant));
   }
 }

@@ -30,6 +30,7 @@ import { SubMerchantInvitesService } from './sub-merchant-invites.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { CurrentTenant, TenantScope } from '../common/decorators/current-tenant.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
   AcceptInviteDtoSchema,
@@ -67,10 +68,11 @@ export class SubMerchantsController {
   @ApiResponse({ status: 409, description: 'Sub-merchant already exists' })
   async invite(
     @CurrentUser() user: AuthedUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
     @Body(new ZodValidationPipe(InviteSubMerchantDtoSchema))
     dto: { phone: string; name?: string; branchLabel?: string },
   ) {
-    const merchantId = this.requireMerchantId(user);
+    const merchantId = this.requireMerchantId(tenant);
     return this.invitesService.invite(merchantId, user.id, dto);
   }
 
@@ -79,7 +81,8 @@ export class SubMerchantsController {
   @ApiOperation({ summary: 'List sub-merchants and pending invites' })
   @ApiResponse({ status: 200, description: 'Paginated list (phones masked)' })
   async list(
-    @CurrentUser() user: AuthedUser,
+    @CurrentUser() _user: AuthedUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
     @Query(new ZodValidationPipe(SubMerchantListQueryDtoSchema))
     query: {
       status?: 'INVITED' | 'ACTIVE' | 'SUSPENDED' | 'REMOVED';
@@ -88,7 +91,7 @@ export class SubMerchantsController {
       pageSize: number;
     },
   ) {
-    return this.service.list(this.requireMerchantId(user), query);
+    return this.service.list(this.requireMerchantId(tenant), query);
   }
 
   @Get(':id')
@@ -96,8 +99,12 @@ export class SubMerchantsController {
   @ApiOperation({ summary: 'Get sub-merchant or invite detail' })
   @ApiResponse({ status: 200, description: 'Detail (phone masked)' })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async getById(@CurrentUser() user: AuthedUser, @Param('id') id: string) {
-    const item = await this.service.getById(this.requireMerchantId(user), id);
+  async getById(
+    @CurrentUser() _user: AuthedUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
+    @Param('id') id: string,
+  ) {
+    const item = await this.service.getById(this.requireMerchantId(tenant), id);
     if (!item) {
       return null; // controller-level 404 mapping stays envelope-friendly
     }
@@ -111,11 +118,12 @@ export class SubMerchantsController {
   @ApiResponse({ status: 200, description: 'Updated' })
   @ApiResponse({ status: 404, description: 'Not found' })
   async update(
-    @CurrentUser() user: AuthedUser,
+    @CurrentUser() _user: AuthedUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateSubMerchantDtoSchema)) dto: { branchLabel?: string },
   ) {
-    await this.service.update(this.requireMerchantId(user), id, dto);
+    await this.service.update(this.requireMerchantId(tenant), id, dto);
     return { ok: true };
   }
 
@@ -125,8 +133,12 @@ export class SubMerchantsController {
   @ApiOperation({ summary: 'Remove sub-merchant or revoke pending invite' })
   @ApiResponse({ status: 204, description: 'Removed' })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async remove(@CurrentUser() user: AuthedUser, @Param('id') id: string) {
-    await this.service.remove(this.requireMerchantId(user), id);
+  async remove(
+    @CurrentUser() _user: AuthedUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
+    @Param('id') id: string,
+  ) {
+    await this.service.remove(this.requireMerchantId(tenant), id);
   }
 
   @Post('invites/:id/resend')
@@ -136,8 +148,12 @@ export class SubMerchantsController {
   @ApiResponse({ status: 200, description: 'Invite resent' })
   @ApiResponse({ status: 403, description: 'Max resends reached' })
   @ApiResponse({ status: 404, description: 'Invite not found' })
-  async resendInvite(@CurrentUser() user: AuthedUser, @Param('id') inviteId: string) {
-    return this.invitesService.resendInvite(this.requireMerchantId(user), inviteId);
+  async resendInvite(
+    @CurrentUser() _user: AuthedUser,
+    @CurrentTenant() tenant: TenantScope | undefined,
+    @Param('id') inviteId: string,
+  ) {
+    return this.invitesService.resendInvite(this.requireMerchantId(tenant), inviteId);
   }
 
   // ============================================================
@@ -177,12 +193,12 @@ export class SubMerchantsController {
 
   // ── helpers ─────────────────────────────────────────────────────────────
 
-  private requireMerchantId(user: AuthedUser): string {
-    if (!user.merchantId) {
+  private requireMerchantId(tenant: TenantScope | undefined): string {
+    if (!tenant?.merchantId) {
       // TenantRequiredGuard normally rejects earlier; this keeps the
       // controller safe if a route is ever mounted without it.
       throw new AppError(ERROR_CODES.MERCHANT_NOT_ONBOARDED, 'Merchant onboarding required.', 403);
     }
-    return user.merchantId;
+    return tenant.merchantId;
   }
 }

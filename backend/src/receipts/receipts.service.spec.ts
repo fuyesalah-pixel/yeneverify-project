@@ -76,12 +76,16 @@ describe('ReceiptsService', () => {
 
   describe('presign', () => {
     it('returns a tenant-scoped storage key and upload URL', async () => {
-      const res = await service.presign(merchant, {
-        fileName: 'receipt.jpg',
-        mimeType: 'image/jpeg',
-        sizeBytes: 2048,
-        inputMethod: 'PHOTO',
-      });
+      const res = await service.presign(
+        merchant,
+        {
+          fileName: 'receipt.jpg',
+          mimeType: 'image/jpeg',
+          sizeBytes: 2048,
+          inputMethod: 'PHOTO',
+        },
+        MERCHANT_ID,
+      );
 
       expect(res.storageKey).toMatch(new RegExp(`^receipts/${MERCHANT_ID}/.+\\.jpg$`));
       expect(res.method).toBe('PUT');
@@ -90,59 +94,76 @@ describe('ReceiptsService', () => {
     });
 
     it('derives the extension from the mime type', async () => {
-      const png = await service.presign(merchant, {
-        fileName: 'a.png',
-        mimeType: 'image/png',
-        sizeBytes: 10,
-        inputMethod: 'UPLOAD',
-      });
+      const png = await service.presign(
+        merchant,
+        {
+          fileName: 'a.png',
+          mimeType: 'image/png',
+          sizeBytes: 10,
+          inputMethod: 'UPLOAD',
+        },
+        MERCHANT_ID,
+      );
       expect(png.storageKey.endsWith('.png')).toBe(true);
     });
 
     it('rejects a disallowed mime type', async () => {
       await expect(
-        service.presign(merchant, {
-          fileName: 'a.txt',
-          mimeType: 'text/plain' as never,
-          sizeBytes: 10,
-          inputMethod: 'UPLOAD',
-        }),
+        service.presign(
+          merchant,
+          {
+            fileName: 'a.txt',
+            mimeType: 'text/plain' as never,
+            sizeBytes: 10,
+            inputMethod: 'UPLOAD',
+          },
+          MERCHANT_ID,
+        ),
       ).rejects.toMatchObject({ code: 'RECEIPT_INVALID_TYPE' });
       expect(storage.presignUpload).not.toHaveBeenCalled();
     });
 
     it('rejects a file larger than the maximum', async () => {
       await expect(
-        service.presign(merchant, {
-          fileName: 'big.jpg',
-          mimeType: 'image/jpeg',
-          sizeBytes: MAX_RECEIPT_BYTES + 1,
-          inputMethod: 'UPLOAD',
-        }),
+        service.presign(
+          merchant,
+          {
+            fileName: 'big.jpg',
+            mimeType: 'image/jpeg',
+            sizeBytes: MAX_RECEIPT_BYTES + 1,
+            inputMethod: 'UPLOAD',
+          },
+          MERCHANT_ID,
+        ),
       ).rejects.toMatchObject({ code: 'RECEIPT_TOO_LARGE' });
     });
 
-    it('rejects a user with no merchant scope', async () => {
+    it('rejects a controller that supplies no merchant scope', async () => {
       await expect(
         service.presign(
-          { id: USER_ID, role: 'MERCHANT' },
+          merchant,
           {
             fileName: 'a.jpg',
             mimeType: 'image/jpeg',
             sizeBytes: 10,
             inputMethod: 'UPLOAD',
           },
+          undefined as never,
         ),
       ).rejects.toMatchObject({ code: 'TENANT_ISOLATION_VIOLATION' });
     });
 
     it('never creates a receipt row', async () => {
-      await service.presign(merchant, {
-        fileName: 'a.jpg',
-        mimeType: 'image/jpeg',
-        sizeBytes: 10,
-        inputMethod: 'UPLOAD',
-      });
+      await service.presign(
+        merchant,
+        {
+          fileName: 'a.jpg',
+          mimeType: 'image/jpeg',
+          sizeBytes: 10,
+          inputMethod: 'UPLOAD',
+        },
+        MERCHANT_ID,
+      );
       expect(repo.create).not.toHaveBeenCalled();
     });
   });
@@ -165,13 +186,17 @@ describe('ReceiptsService', () => {
         ...input,
       }));
 
-      const res = await service.complete(merchant, {
-        storageKey: key,
-        inputMethod: 'PHOTO',
-        sha256: sha256Of(JPEG),
-        width: 800,
-        height: 600,
-      });
+      const res = await service.complete(
+        merchant,
+        {
+          storageKey: key,
+          inputMethod: 'PHOTO',
+          sha256: sha256Of(JPEG),
+          width: 800,
+          height: 600,
+        },
+        MERCHANT_ID,
+      );
 
       expect(res.receiptId).toBe('receipt-1');
       expect(res.sizeBytes).toBe(JPEG.length);
@@ -194,11 +219,15 @@ describe('ReceiptsService', () => {
 
     it('rejects a key belonging to another tenant', async () => {
       await expect(
-        service.complete(merchant, {
-          storageKey: `receipts/${OTHER_MERCHANT_ID}/abc.jpg`,
-          inputMethod: 'UPLOAD',
-          sha256: sha256Of(JPEG),
-        }),
+        service.complete(
+          merchant,
+          {
+            storageKey: `receipts/${OTHER_MERCHANT_ID}/abc.jpg`,
+            inputMethod: 'UPLOAD',
+            sha256: sha256Of(JPEG),
+          },
+          MERCHANT_ID,
+        ),
       ).rejects.toMatchObject({ code: 'TENANT_ISOLATION_VIOLATION' });
 
       expect(storage.head).not.toHaveBeenCalled();
@@ -210,11 +239,15 @@ describe('ReceiptsService', () => {
       storage.getObject.mockResolvedValue(JPEG);
 
       await expect(
-        service.complete(merchant, {
-          storageKey: key,
-          inputMethod: 'UPLOAD',
-          sha256: 'a'.repeat(64),
-        }),
+        service.complete(
+          merchant,
+          {
+            storageKey: key,
+            inputMethod: 'UPLOAD',
+            sha256: 'a'.repeat(64),
+          },
+          MERCHANT_ID,
+        ),
       ).rejects.toMatchObject({ code: 'RECEIPT_HASH_MISMATCH' });
 
       expect(repo.create).not.toHaveBeenCalled();
@@ -224,11 +257,15 @@ describe('ReceiptsService', () => {
       storage.head.mockResolvedValue(null);
 
       await expect(
-        service.complete(merchant, {
-          storageKey: key,
-          inputMethod: 'UPLOAD',
-          sha256: sha256Of(JPEG),
-        }),
+        service.complete(
+          merchant,
+          {
+            storageKey: key,
+            inputMethod: 'UPLOAD',
+            sha256: sha256Of(JPEG),
+          },
+          MERCHANT_ID,
+        ),
       ).rejects.toMatchObject({ code: 'RECEIPT_NOT_UPLOADED' });
 
       expect(repo.create).not.toHaveBeenCalled();
@@ -242,11 +279,15 @@ describe('ReceiptsService', () => {
       });
 
       await expect(
-        service.complete(merchant, {
-          storageKey: key,
-          inputMethod: 'UPLOAD',
-          sha256: sha256Of(JPEG),
-        }),
+        service.complete(
+          merchant,
+          {
+            storageKey: key,
+            inputMethod: 'UPLOAD',
+            sha256: sha256Of(JPEG),
+          },
+          MERCHANT_ID,
+        ),
       ).rejects.toMatchObject({ code: 'RECEIPT_TOO_LARGE' });
     });
 
@@ -258,11 +299,15 @@ describe('ReceiptsService', () => {
       });
 
       await expect(
-        service.complete(merchant, {
-          storageKey: key,
-          inputMethod: 'UPLOAD',
-          sha256: sha256Of(JPEG),
-        }),
+        service.complete(
+          merchant,
+          {
+            storageKey: key,
+            inputMethod: 'UPLOAD',
+            sha256: sha256Of(JPEG),
+          },
+          MERCHANT_ID,
+        ),
       ).rejects.toMatchObject({ code: 'RECEIPT_INVALID_TYPE' });
     });
   });
@@ -288,7 +333,7 @@ describe('ReceiptsService', () => {
     it('returns metadata with a download URL for the owning merchant', async () => {
       repo.findByIdForMerchant.mockResolvedValue(record);
 
-      const res = await service.getById(merchant, 'receipt-1');
+      const res = await service.getById(merchant, 'receipt-1', MERCHANT_ID);
 
       expect(res.receiptId).toBe('receipt-1');
       expect(res.downloadUrl).toBe('http://localhost:3000/dl');
@@ -299,7 +344,7 @@ describe('ReceiptsService', () => {
       repo.findByIdForMerchant.mockResolvedValue(null);
 
       await expect(
-        service.getById(user({ merchantId: OTHER_MERCHANT_ID }), 'receipt-1'),
+        service.getById(user({ merchantId: OTHER_MERCHANT_ID }), 'receipt-1', OTHER_MERCHANT_ID),
       ).rejects.toMatchObject({ code: 'RECEIPT_NOT_FOUND' });
     });
 
@@ -310,6 +355,7 @@ describe('ReceiptsService', () => {
         service.getById(
           { id: 'other-user', role: 'SUB_MERCHANT', merchantId: MERCHANT_ID },
           'receipt-1',
+          MERCHANT_ID,
         ),
       ).rejects.toMatchObject({ httpStatus: 403 });
     });
@@ -320,6 +366,7 @@ describe('ReceiptsService', () => {
       const res = await service.getById(
         { id: USER_ID, role: 'SUB_MERCHANT', merchantId: MERCHANT_ID },
         'receipt-1',
+        MERCHANT_ID,
       );
       expect(res.receiptId).toBe('receipt-1');
     });

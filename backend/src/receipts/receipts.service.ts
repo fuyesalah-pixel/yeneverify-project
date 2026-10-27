@@ -63,8 +63,9 @@ export class ReceiptsService {
    * Does not touch the database; the Receipt row is created on complete().
    */
   async presign(
-    user: AuthUser,
+    _user: AuthUser,
     dto: PresignUploadDto,
+    merchantId: string,
   ): Promise<{
     storageKey: string;
     uploadUrl: string;
@@ -72,7 +73,7 @@ export class ReceiptsService {
     headers: Record<string, string>;
     expiresAt: string;
   }> {
-    const merchantId = this.requireMerchantId(user);
+    this.requireMerchantId(merchantId);
 
     if (!isAllowedMimeType(dto.mimeType)) {
       throw new ReceiptInvalidTypeError(dto.mimeType);
@@ -115,13 +116,14 @@ export class ReceiptsService {
   async complete(
     user: AuthUser,
     dto: CompleteUploadDto,
+    merchantId: string,
   ): Promise<{
     receiptId: string;
     storageKey: string;
     sizeBytes: number;
     createdAt: string;
   }> {
-    const merchantId = this.requireMerchantId(user);
+    this.requireMerchantId(merchantId);
     this.assertTenantKey(dto.storageKey, merchantId);
 
     const head = await this.storage.head(dto.storageKey);
@@ -196,6 +198,7 @@ export class ReceiptsService {
   async getById(
     user: AuthUser,
     receiptId: string,
+    merchantId: string,
   ): Promise<{
     receiptId: string;
     storageKey: string;
@@ -209,7 +212,7 @@ export class ReceiptsService {
     expiresAt: string | null;
     downloadUrl: string;
   }> {
-    const receipt = await this.loadForUser(receiptId, user);
+    const receipt = await this.loadForUser(receiptId, user, merchantId);
 
     const { downloadUrl } = await this.storage.presignDownload(
       receipt.storageKey,
@@ -242,6 +245,7 @@ export class ReceiptsService {
   async runOcr(
     receiptId: string,
     user: AuthUser,
+    merchantId: string,
   ): Promise<{
     receiptId: string;
     text: string;
@@ -249,7 +253,7 @@ export class ReceiptsService {
     provider: string;
     durationMs: number;
   }> {
-    const receipt = await this.loadForUser(receiptId, user);
+    const receipt = await this.loadForUser(receiptId, user, merchantId);
 
     const image = await this.storage.getObject(receipt.storageKey);
 
@@ -267,7 +271,7 @@ export class ReceiptsService {
       targetType: 'receipt',
       targetId: receipt.id,
       metadata: {
-        merchantId: this.requireMerchantId(user),
+        merchantId,
         storageKey: receipt.storageKey,
         provider: result.provider,
         durationMs: result.durationMs,
@@ -300,8 +304,8 @@ export class ReceiptsService {
    * The only receipt lookup path for MERCHANT/SUB_MERCHANT users:
    * tenant-scoped SQL plus the sub-merchant own-uploads rule.
    */
-  private async loadForUser(receiptId: string, user: AuthUser) {
-    const merchantId = this.requireMerchantId(user);
+  private async loadForUser(receiptId: string, user: AuthUser, merchantId: string) {
+    this.requireMerchantId(merchantId);
 
     const receipt = await this.repo.findByIdForMerchant(receiptId, merchantId);
     if (!receipt) {
@@ -325,10 +329,10 @@ export class ReceiptsService {
     return `receipts/${merchantId}/${newId()}.${extensionForMimeType(mimeType)}`;
   }
 
-  private requireMerchantId(user: AuthUser): string {
-    if (!user.merchantId) {
+  private requireMerchantId(merchantId: string | undefined): string {
+    if (!merchantId) {
       throw new TenantIsolationError();
     }
-    return user.merchantId;
+    return merchantId;
   }
 }

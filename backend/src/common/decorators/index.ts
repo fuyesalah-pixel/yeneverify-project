@@ -11,4 +11,6 @@ export {
   isTenantRequiredRoute,
 } from './tenant-required.decorator';
 export { CurrentUser } from './current-user.decorator';
+export { CurrentTenant, requireTenant } from './current-tenant.decorator';
+export type { TenantScope } from './current-tenant.decorator';
 export { RequestId } from './request-id.decorator';
