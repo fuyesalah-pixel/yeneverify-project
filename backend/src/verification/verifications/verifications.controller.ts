@@ -7,8 +7,10 @@
 // POST   /api/v1/verifications/:id/retry  retry ERROR/NEEDS_REVIEW (202)
 // POST   /api/v1/verifications/:id/request-review  MERCHANT flag (200)
 //
-// Scoping model: every handler requires a merchant id on the token;
-// VERIFIED/FAKE/DUPLICATE cannot be retried; review requests are
+// Scoping model: every handler takes the merchant id resolved from
+// the DB by the global TenantGuard (NOT a JWT claim — tokens issued
+// by the login flow carry no merchantId); VERIFIED/FAKE/DUPLICATE
+// cannot be retried; review requests are
 // MERCHANT-only. No new global filter — the existing
 // AllExceptionsFilter maps the typed domain errors.
 // ============================================================
@@ -44,10 +46,10 @@ import {
 import { VerificationSubmitRateGuard } from './verification-submit-rate.guard';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentTenant, requireTenant } from '../../common/decorators/current-tenant.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import type { AuthUser } from '../../common/types/auth-user.type';
-import { TenantIsolationError } from '../../common/errors/domain-errors';
 
 @ApiTags('Verifications')
 @Controller({ path: 'verifications', version: '1' })
@@ -56,11 +58,8 @@ import { TenantIsolationError } from '../../common/errors/domain-errors';
 export class VerificationsController {
   constructor(private readonly service: VerificationsService) {}
 
-  private merchantId(user: AuthUser): string {
-    if (!user.merchantId) {
-      throw new TenantIsolationError();
-    }
-    return user.merchantId;
+  private merchantId(tenant: { merchantId: string } | undefined): string {
+    return requireTenant(tenant);
   }
 
   // ── POST /verifications ───────────────────────────────────────────────
@@ -80,11 +79,12 @@ export class VerificationsController {
   @ApiResponse({ status: 429, description: 'Submission rate limit exceeded' })
   async submit(
     @CurrentUser() user: AuthUser,
+    @CurrentTenant() tenant: { merchantId: string } | undefined,
     @Body(new ZodValidationPipe(CreateVerificationDtoSchema)) dto: CreateVerificationDto,
   ): Promise<VerificationSubmittedResponseDto> {
     return this.service.submit({
       user,
-      merchantId: this.merchantId(user),
+      merchantId: this.merchantId(tenant),
       dto,
     });
   }
@@ -97,11 +97,12 @@ export class VerificationsController {
   @ApiResponse({ status: 200, description: 'Verification page' })
   async list(
     @CurrentUser() user: AuthUser,
+    @CurrentTenant() tenant: { merchantId: string } | undefined,
     @Query(new ZodValidationPipe(ListVerificationsQuerySchema)) query: ListVerificationsQuery,
   ): Promise<VerificationListResponseDto> {
     return this.service.list({
       user,
-      merchantId: this.merchantId(user),
+      merchantId: this.merchantId(tenant),
       query,
     });
   }
@@ -115,11 +116,12 @@ export class VerificationsController {
   @ApiResponse({ status: 404, description: 'Not found in this tenant' })
   async getById(
     @CurrentUser() user: AuthUser,
+    @CurrentTenant() tenant: { merchantId: string } | undefined,
     @Param('id') verificationId: string,
   ): Promise<VerificationDetailDto> {
     return this.service.findByIdForUser({
       user,
-      merchantId: this.merchantId(user),
+      merchantId: this.merchantId(tenant),
       verificationId,
     });
   }
@@ -136,11 +138,12 @@ export class VerificationsController {
   @ApiResponse({ status: 409, description: 'Verification already has a definitive verdict' })
   async retry(
     @CurrentUser() user: AuthUser,
+    @CurrentTenant() tenant: { merchantId: string } | undefined,
     @Param('id') verificationId: string,
   ): Promise<RetryResponseDto> {
     return this.service.retry({
       user,
-      merchantId: this.merchantId(user),
+      merchantId: this.merchantId(tenant),
       verificationId,
     });
   }
@@ -158,12 +161,13 @@ export class VerificationsController {
   @ApiResponse({ status: 409, description: 'Verification already has a definitive verdict' })
   async requestReview(
     @CurrentUser() user: AuthUser,
+    @CurrentTenant() tenant: { merchantId: string } | undefined,
     @Param('id') verificationId: string,
     @Body(new ZodValidationPipe(RequestReviewDtoSchema)) dto: RequestReviewDto,
   ): Promise<RequestReviewResponseDto> {
     return this.service.requestReview({
       user,
-      merchantId: this.merchantId(user),
+      merchantId: this.merchantId(tenant),
       verificationId,
       dto,
     });

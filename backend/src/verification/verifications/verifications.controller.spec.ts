@@ -74,7 +74,7 @@ describe('VerificationsController (unit)', () => {
     const controller = new VerificationsController(service as never);
     const dto = { receiptId: 'receipt-1', source: 'TRANSACTION' } as never;
 
-    const res = await controller.submit(baseUser, dto);
+    const res = await controller.submit(baseUser, { merchantId: 'merchant-1' }, dto);
 
     expect(res.status).toBe('PENDING');
     expect(service.submit).toHaveBeenCalledWith({
@@ -88,7 +88,9 @@ describe('VerificationsController (unit)', () => {
     const controller = new VerificationsController(service as never);
 
     await expect(
-      controller.submit({ ...baseUser, merchantId: undefined }, {} as never),
+      controller.submit({ ...baseUser, merchantId: undefined }, undefined, {
+        receiptId: 'receipt-1',
+      } as never),
     ).rejects.toBeInstanceOf(TenantIsolationError);
     expect(service.submit).not.toHaveBeenCalled();
   });
@@ -102,7 +104,7 @@ describe('VerificationsController (unit)', () => {
       sortOrder: 'asc' as const,
     } as never;
 
-    await controller.list(baseUser, query);
+    await controller.list(baseUser, { merchantId: 'merchant-1' }, query);
 
     expect(service.list).toHaveBeenCalledWith({
       user: baseUser,
@@ -114,7 +116,7 @@ describe('VerificationsController (unit)', () => {
   it('getById routes to findByIdForUser with the requested id', async () => {
     const controller = new VerificationsController(service as never);
 
-    const res = await controller.getById(baseUser, 'verif-9');
+    const res = await controller.getById(baseUser, { merchantId: 'merchant-1' }, 'verif-9');
 
     expect(res.id).toBe('verif-1'); // mocked detail comes back untouched
     expect(service.findByIdForUser).toHaveBeenCalledWith({
@@ -128,7 +130,7 @@ describe('VerificationsController (unit)', () => {
     const controller = new VerificationsController(service as never);
     (service.retry as any).mockResolvedValue({ verificationId: 'verif-9', status: 'PENDING' });
 
-    const res = await controller.retry(baseUser, 'verif-9');
+    const res = await controller.retry(baseUser, { merchantId: 'merchant-1' }, 'verif-9');
 
     expect(res.status).toBe('PENDING');
     expect(service.retry).toHaveBeenCalledWith({
@@ -147,7 +149,12 @@ describe('VerificationsController (unit)', () => {
       status: 'NEEDS_REVIEW',
     });
 
-    const res = await controller.requestReview(baseUser, 'verif-9', dto);
+    const res = await controller.requestReview(
+      baseUser,
+      { merchantId: 'merchant-1' },
+      'verif-9',
+      dto,
+    );
 
     expect(res.status).toBe('NEEDS_REVIEW');
     expect(service.requestReview).toHaveBeenCalledWith({
@@ -178,11 +185,14 @@ describe('VerificationsController (unit)', () => {
       // no JwtStrategy/Redis dependency.
       .overrideGuard(JwtAuthGuard)
       .useValue({
-        // Auth stub AND user source: the controller needs req.user.
+        // Auth stub AND user/tenant source: the controller needs req.user
+        // and req.tenant (set by the global TenantGuard in the real app).
         canActivate: (ctx: {
           switchToHttp: () => { getRequest: () => Record<string, unknown> };
         }) => {
-          ctx.switchToHttp().getRequest()['user'] = baseUser;
+          const req = ctx.switchToHttp().getRequest();
+          req['user'] = baseUser;
+          req['tenant'] = { merchantId: 'merchant-1' };
           return true;
         },
       })
