@@ -64,7 +64,10 @@
 
   "CREDITS": {
     "CREDITS_INSUFFICIENT": "Insufficient verification credits.",
-    "CREDITS_LEDGER_ERROR": "An error occurred while processing credits. No charges were made."
+    "CREDITS_LEDGER_ERROR": "An error occurred while processing credits. No charges were made.",
+    "CREDITS_INVALID_AMOUNT": "Credit amount must be positive.",
+    "CREDITS_SUBSCRIPTION_EXPIRED": "Your subscription has expired. Renew to continue verifying receipts.",
+    "CREDITS_RECONCILIATION_FAILED": "Could not reconcile the credit balance. Please try again."
   },
 
   "MERCHANT": {

@@ -27,6 +27,7 @@ import { OnboardingModule } from './onboarding/onboarding.module';
 import { SubMerchantsModule } from './sub-merchants/sub-merchants.module';
 import { MerchantsModule } from './merchants/merchants.module';
 import { ReceiptsModule } from './receipts/receipts.module';
+import { CreditsModule } from './credits/credits.module';
 
 import { RootController } from './root/root.controller';
 import { VersionController } from './version/version.controller';
@@ -87,11 +88,11 @@ import { buildLoggerOptions } from './common/logger/logger.config';
     SubMerchantsModule,
     MerchantsModule,
     ReceiptsModule,
+    CreditsModule,
 
     // Feature modules added here in Steps 13+:
     // VerificationModule,
     // TransactionsModule,
-    // CreditsModule,
     // BillingModule,
     // AnalyticsModule,
     // NotificationsModule,

@@ -93,3 +93,17 @@ Options: a `db:reset:tests` script that drops and re-seeds via the
 dev profile, a dedicated test database selected by env, or a
 system-admin-role cleanup StoredProc that bypasses the anti-tamper rules.
 Trigger: annoying when dev DB state starts confusing manual re-tests.
+
+## 11. Clean up 28 `no-explicit-any` lint warnings
+
+Present since Step 13D.1 — mostly in `src/common/scope/sub-merchant.scope.ts`
+and the bank adapter files. Type the params properly. Non-blocking, but
+must be clean before Step 28 (launch).
+
+## 12. Credit-cost policy review
+
+The CREDIT_COST map baked into `src/credits/credits.service.ts`
+(VERIFIED/DUPLICATE = 1 credit, FAKE/ERROR/NEEDS_REVIEW = 0) is a product
+decision, not a technical constraint. Revisit with billing once real
+usage data exists — especially whether FAKE-detection should eventually
+be charged. Tune the map in one place; consumption logic never changes.
