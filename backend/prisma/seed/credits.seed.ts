@@ -8,8 +8,10 @@ import { newId } from '../../src/common/utils/uuid';
 // the cached merchants.creditsBalance to match the ledger sum.
 //
 // Merchant 1 (Selam Coffee, BUSINESS): starts with 400 credits, uses 10
-// Merchant 2 (Dawit Electronics, PREMIUM): unlimited plan, still seeds
-//   a GRANT for tracking purposes (balance_after = bigint(0) since unlimited)
+// Merchant 2 (Dawit Electronics, PREMIUM): unlimited plan — NO credit GRANT
+// is written. The DB enforces credit_tx_amount_nonzero_check (amount <> 0),
+// and unlimited plans never consume credits, so the balance stays 0. The
+// subscription itself is the source of "unlimited".
 
 export async function seedCredits(prisma: PrismaClient): Promise<void> {
   let count = 0;
@@ -81,22 +83,9 @@ export async function seedCredits(prisma: PrismaClient): Promise<void> {
   });
 
   // ── Merchant 2: PREMIUM plan (unlimited — no credits consumed) ─────────
-  await prisma.creditTransaction.upsert({
-    where:  { id: IDS.creditGrant2 },
-    create: {
-      id:             IDS.creditGrant2,
-      merchantId:     IDS.merchant2,
-      type:           'GRANT',
-      amount:         0n,           // Unlimited plan: 0 credits granted (tracked for audit)
-      balanceAfter:   0n,
-      subscriptionId: IDS.subscription2,
-      reason:         'PREMIUM package activation (unlimited plan)',
-      createdAt:      daysAgo(20),
-    },
-    update: {},
-  });
-  count++;
-
+  // No credit_transactions row: the nonzero-amount constraint makes a 0-GRANT
+  // impossible, and a 0-balance merchant on an unlimited plan is correct.
+  // The subscription (IDS.subscription2) already records the entitlement.
   await prisma.merchant.update({
     where: { id: IDS.merchant2 },
     data: {
