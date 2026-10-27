@@ -25,7 +25,15 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { RequireStepUp } from './step-up';
-import { RequestOtpDto, VerifyOtpDto, RefreshTokenDto, LogoutDto, UpdateLanguageDto } from './dto';
+import {
+  RequestOtpDto,
+  RequestOtpDtoSchema,
+  VerifyOtpDto,
+  RefreshTokenDto,
+  LogoutDto,
+  UpdateLanguageDto,
+} from './dto';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { SetPinDto } from './pin/dto/set-pin.dto';
 import { VerifyPinDto } from './pin/dto/verify-pin.dto';
 import { ChangePinDto } from './pin/dto/change-pin.dto';
@@ -44,7 +52,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Request OTP for phone verification' })
   @ApiResponse({ status: 200, description: 'OTP sent successfully' })
   @ApiResponse({ status: 429, description: 'Rate limited' })
-  async requestOtp(@Body() dto: RequestOtpDto, @Req() req: Request, @Ip() ip: string) {
+  async requestOtp(
+    @Body(new ZodValidationPipe(RequestOtpDtoSchema)) dto: RequestOtpDto,
+    @Req() req: Request,
+    @Ip() ip: string,
+  ) {
+    // DTOs were previously passed through unparsed — zod defaults (purpose:
+    // LOGIN) never ran and `purpose: undefined` reached the OTP insert.
     return this.auth.requestOtp(dto.phone, dto.purpose, ip, req.headers['user-agent']);
   }
 

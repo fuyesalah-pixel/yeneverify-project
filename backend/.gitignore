@@ -1,2 +1,9 @@
 // Local storage driver (dev-only) writes receipt objects here; never commit them.
 .storage/
+
+// Scratch artifacts from manual verification sessions (curl output files,
+// minted tokens, ad-hoc scripts). Tokens in these are live credentials.
+.tok*
+test-receipt*
+*-report.json
+scripts-dev/
