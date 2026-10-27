@@ -83,3 +83,13 @@ trap still exists for the other SET NULL FKs into rule-protected tables:
 and any FK pointing at `audit_logs`. Decision needed when subscription or
 user hard-delete flows land (users are soft-deleted today): convert the
 FKs to RESTRICT, or accept that referenced rows are hard-delete-immutable.
+
+## 10. Test DB cleanup job (dev hygiene)
+
+E2e specs leave merchant/subscription/credit rows behind: the credit and
+audit anti-tamper triggers block deletes, so tests cannot clean up after
+themselves. Dev DBs accumulate seed + test data every full-suite run.
+Options: a `db:reset:tests` script that drops and re-seeds via the
+dev profile, a dedicated test database selected by env, or a
+system-admin-role cleanup StoredProc that bypasses the anti-tamper rules.
+Trigger: annoying when dev DB state starts confusing manual re-tests.
