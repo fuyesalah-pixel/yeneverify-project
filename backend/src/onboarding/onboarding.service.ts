@@ -12,6 +12,8 @@ import { CreateMerchantDto } from './dto/create-merchant.dto';
 
 const FREE_PLAN_INITIAL_CREDITS = 10n;
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 @Injectable()
 export class OnboardingService {
   private readonly logger = new Logger(OnboardingService.name);
@@ -31,6 +33,16 @@ export class OnboardingService {
     ip: string,
     userAgent: string | undefined,
   ) {
+    // Guard the FK before it can fail: a caller passing a broken/empty
+    // owner id means wiring is wrong, not that the merchant data is bad.
+    if (!UUID_RE.test(userId)) {
+      throw new AppError(
+        ERROR_CODES.VALIDATION_FAILED,
+        'Owner user id must come from the authenticated session.',
+        500,
+      );
+    }
+
     const existing = await this.prisma.merchant.findUnique({
       where: { ownerUserId: userId },
       select: { id: true },
@@ -105,7 +117,11 @@ export class OnboardingService {
         },
       });
 
-      return { merchant, subscription };
+      // Re-fetch so the response reflects the credit grant + subscription link
+      const finalMerchant = await tx.merchant.findUniqueOrThrow({
+        where: { id: merchant.id },
+      });
+      return { merchant: finalMerchant, subscription };
     });
 
     this.audit.log({
@@ -125,7 +141,22 @@ export class OnboardingService {
       userId,
     });
 
-    return result;
+    return {
+      merchant: this.serializeMerchant(result.merchant),
+      subscription: {
+        ...result.subscription,
+        // bigint fields (none currently on subscription) would break
+        // JSON.stringify — map proactively same as amounts
+      },
+    };
+  }
+
+  /**
+   * Map bigint fields to strings — JSON.stringify(bigint) throws and the
+   * interceptor has no polyfill (same rule as verification DTO mappers).
+   */
+  private serializeMerchant<T extends { creditsBalance: bigint }>(m: T) {
+    return { ...m, creditsBalance: m.creditsBalance.toString() };
   }
 
   /**

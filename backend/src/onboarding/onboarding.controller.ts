@@ -12,6 +12,7 @@ import { CreateMerchantDto } from './dto/create-merchant.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { SkipOnboarding } from '../common/decorators/skip-onboarding.decorator';
+import { SkipTenant } from '../common/decorators/skip-tenant.decorator';
 
 @ApiTags('Onboarding')
 @Controller({ path: 'onboarding', version: '1' })
@@ -23,6 +24,7 @@ export class OnboardingController {
 
   @UseGuards(JwtAuthGuard)
   @SkipOnboarding()
+  @SkipTenant()
   @Get('status')
   @HttpCode(200)
   @ApiBearerAuth('access-token')
@@ -32,15 +34,24 @@ export class OnboardingController {
     return this.statusService.getStatus(user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @SkipOnboarding()
+  @SkipTenant()
   @Post('merchant')
   @HttpCode(201)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Create merchant profile (onboarding)' })
   @ApiResponse({ status: 201, description: 'Merchant created successfully' })
   @ApiResponse({ status: 409, description: 'Merchant already onboarded' })
   @ApiResponse({ status: 400, description: 'Validation failed' })
-  async createMerchant(@Body() dto: CreateMerchantDto, @Req() req: Request, @Ip() ip: string) {
-    // The ownerUserId will be set from the authenticated user in the service
-    return this.service.createMerchant('', dto, ip, req.headers['user-agent']);
+  async createMerchant(
+    @CurrentUser() user: { id: string; role: string },
+    @Body() dto: CreateMerchantDto,
+    @Req() req: Request,
+    @Ip() ip: string,
+  ) {
+    // The merchant is owned by the authenticated user — never a client- or
+    // service-supplied id (the old stub passed '' and broke the FK).
+    return this.service.createMerchant(user.id, dto, ip, req.headers['user-agent']);
   }
 }

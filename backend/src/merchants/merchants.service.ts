@@ -7,6 +7,19 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UpdateMerchantDto } from './dto/merchant.dto';
 
+const MeInclude = {
+  currentSubscription: {
+    select: { id: true, packageCode: true, status: true, expiresAt: true },
+  },
+  _count: {
+    select: {
+      subMerchants: true,
+      transactions: true,
+      verifications: true,
+    },
+  },
+} as const;
+
 @Injectable()
 export class MerchantsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -14,18 +27,18 @@ export class MerchantsService {
   async getMe(merchantId: string) {
     return this.prisma.merchant.findUnique({
       where: { id: merchantId },
-      include: {
-        currentSubscription: {
-          select: { id: true, packageCode: true, status: true, expiresAt: true },
-        },
-        _count: {
-          select: {
-            subMerchants: true,
-            transactions: true,
-            verifications: true,
-          },
-        },
-      },
+      include: MeInclude,
+    });
+  }
+
+  /**
+   * Fallback for tokens issued BEFORE onboarding (no merchantId claim yet):
+   * resolve the merchant owned by this user.
+   */
+  async getMeByOwner(ownerUserId: string) {
+    return this.prisma.merchant.findUnique({
+      where: { ownerUserId },
+      include: MeInclude,
     });
   }
 
