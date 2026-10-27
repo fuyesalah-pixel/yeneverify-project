@@ -14,10 +14,23 @@
 import type { BankCodeLiteral } from './create-verification.dto';
 import type { SupplementaryPrompt } from '../verifications.types';
 
+/**
+ * Credit snapshot returned on submit so the client can render instant
+ * balance warnings (the pre-Step-15 push-notification surface).
+ */
+export interface SubmittedCreditsDto {
+  /** bigint minor units as a string. */
+  balance: string;
+  unlimited: boolean;
+  /** balance <= 20 and the plan is finite — show the renewal banner. */
+  lowBalance: boolean;
+}
+
 export interface VerificationSubmittedResponseDto {
   verificationId: string;
   status: 'PENDING';
   createdAt: string;
+  credits: SubmittedCreditsDto;
 }
 
 export interface ReceiptSummaryDto {

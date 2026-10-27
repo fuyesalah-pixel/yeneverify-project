@@ -11,6 +11,7 @@
 
 import { CreditsRepository } from './credits.repository';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreditsExhaustedError } from './credit-errors';
 
 const MERCHANT_ID = '11111111-1111-4111-8111-111111111111';
 const VERIFICATION_ID = '22222222-2222-4222-8222-222222222222';
@@ -18,7 +19,7 @@ const VERIFICATION_ID = '22222222-2222-4222-8222-222222222222';
 /** A stubbed Prisma delegate tree matching the shape the repo touches. */
 function makeClient(): any {
   return {
-    merchant: { findUnique: jest.fn(), update: jest.fn() },
+    merchant: { findUnique: jest.fn(), update: jest.fn(), updateMany: jest.fn() },
     creditTransaction: {
       aggregate: jest.fn(),
       findFirst: jest.fn(),
@@ -141,13 +142,36 @@ describe('CreditsRepository', () => {
     expect(prisma.creditTransaction.create).not.toHaveBeenCalled();
   });
 
-  it('updateCachedBalance writes credits_balance + credits_updated_at on the tx', async () => {
+  it('updateCachedBalance applies the delta atomically through the tx', async () => {
+    tx.merchant.updateMany.mockResolvedValue({ count: 1 });
     await repo.updateCachedBalance(MERCHANT_ID, 389n, tx);
-    expect(tx.merchant.update).toHaveBeenCalledWith({
+    expect(tx.merchant.updateMany).toHaveBeenCalledWith({
       where: { id: MERCHANT_ID },
-      data: { creditsBalance: 389n, creditsUpdatedAt: expect.any(Date) },
+      data: { creditsBalance: { increment: 389n }, creditsUpdatedAt: expect.any(Date) },
     });
-    expect(prisma.merchant.update).not.toHaveBeenCalled();
+    expect(prisma.merchant.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('updateCachedBalance guards decrements: balance below -delta throws CreditsExhaustedError', async () => {
+    tx.merchant.updateMany.mockResolvedValue({ count: 0 }); // guard found no row
+    await expect(repo.updateCachedBalance(MERCHANT_ID, -1n, tx)).rejects.toBeInstanceOf(
+      CreditsExhaustedError,
+    );
+    // The guarded decrement filters on the CURRENT balance.
+    expect(tx.merchant.updateMany).toHaveBeenCalledWith({
+      where: { id: MERCHANT_ID, creditsBalance: { gte: 1n } },
+      data: { creditsBalance: { increment: -1n }, creditsUpdatedAt: expect.any(Date) },
+    });
+  });
+
+  it('updateCachedBalance does not guard increments (drift/positive deltas)', async () => {
+    tx.merchant.updateMany.mockResolvedValue({ count: 1 });
+    await repo.updateCachedBalance(MERCHANT_ID, 389n, tx);
+    expect(tx.merchant.updateMany).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        where: { id: MERCHANT_ID, creditsBalance: expect.anything() },
+      }),
+    );
   });
 
   it('listHistory applies page/pageSize and reports the total', async () => {

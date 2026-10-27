@@ -25,6 +25,8 @@ import { QUEUE_NAMES } from '../../queue/queue.constants';
 import { AppConfigService } from '../../config/config.service';
 import { VerificationsService } from '../verifications/verifications.service';
 import { VerificationsRepository } from '../verifications/verifications.repository';
+import { CreditsService } from '../../credits/credits.service';
+import { AuditService } from '../../audit/audit.service';
 import { ERROR_CODES } from '../../common/constants/error-codes';
 
 /** Error codes whose ERROR verdict is worth another adapter attempt. */
@@ -58,6 +60,8 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
     private readonly service: VerificationsService,
     private readonly repo: VerificationsRepository,
     private readonly config: AppConfigService,
+    private readonly credits: CreditsService,
+    private readonly audit: AuditService,
   ) {
     super();
   }
@@ -77,12 +81,13 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
     );
 
     try {
+      // Real merchant identity, loaded from the row the service reads
+      // anyway — process() uses these for duplicate firstMerchantId and
+      // audit attribution. A literal 'system' would poison both.
+      const actorFields = await this.loadActorFields(verificationId);
       const result = await this.service.process({
         verificationId,
-        // Real merchant identity, loaded from the row the service reads
-        // anyway — process() uses these for duplicate firstMerchantId and
-        // audit attribution. A literal 'system' would poison both.
-        ...(await this.loadActorFields(verificationId)),
+        ...actorFields,
         requestId: `job:${String(job.id)}`,
       });
 
@@ -90,20 +95,27 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
         if (result.errorCode && RETRYABLE_ERROR_CODES.has(result.errorCode)) {
           const attempts = this.config.queue.jobAttempts;
           if (attempt < attempts) {
+            // Retry path: NO consume here — the retry re-runs the adapter
+            // and the terminal attempt consumes then.
             throw new RetryableJobError(result.errorCode);
           }
           this.logger.warn(
             `verification.job.exhausted verificationId=${verificationId} errorCode=${result.errorCode} attempts=${attempt}`,
           );
+          await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
           return;
         }
         // Non-retryable: verdict is final ERROR already persisted.
+        await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
         this.logger.log(
           `verification.job.complete (non-retryable ERROR) verificationId=${verificationId} attempt=${attempt} durationMs=${Date.now() - startedAt} status=${result.status}`,
         );
         return;
       }
 
+      // Any other terminal verdict (VERIFIED/FAKE/DUPLICATE/NEEDS_REVIEW)
+      // is billed according to CREDIT_COST before the job completes.
+      await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
       this.logger.log(
         `verification.job.complete verificationId=${verificationId} attempt=${attempt} durationMs=${Date.now() - startedAt} status=${result.status}`,
       );
@@ -115,6 +127,40 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
         .markErrorIfPending(verificationId, ERROR_CODES.VERIFICATION_QUEUE_FAILURE)
         .catch(() => undefined);
       throw err;
+    }
+  }
+
+  /**
+   * Bills the verdict AFTER process() has committed it. Deliberately a
+   * SEPARATE transaction: if consume fails (say the merchant raced out
+   * of credits between submit and process), the verdict still stands —
+   * we never let a credit-accounting error hide a legitimate answer.
+   * Failures are logged + audited ('credits.consume_failed') and the
+   * job completes normally.
+   */
+  private async consumeForVerdict(
+    merchantId: string,
+    verificationId: string,
+    result: { status: string },
+  ): Promise<void> {
+    try {
+      await this.credits.consume({ merchantId, verificationId, verificationStatus: result.status });
+    } catch (err) {
+      this.logger.error(
+        `credits.consume_failed verificationId=${verificationId} status=${result.status} merchantId=${merchantId} error=${err instanceof Error ? err.message : String(err)}`,
+      );
+      // Audit is append-only — log-and-continue, never block the job.
+      this.audit.log({
+        actorType: 'SYSTEM',
+        action: 'credits.consume_failed',
+        targetType: 'verification',
+        targetId: verificationId,
+        metadata: {
+          merchantId,
+          verificationStatus: result.status,
+          reason: err instanceof Error ? err.message : String(err),
+        },
+      });
     }
   }
 

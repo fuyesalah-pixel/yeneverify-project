@@ -26,6 +26,7 @@ import { AppModule } from '../src/app.module';
 import { AppConfigService } from '../src/config/config.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { TokenService } from '../src/auth/tokens/token.service';
+import { CreditsService } from '../src/credits/credits.service';
 
 const JPEG = Buffer.from([
   0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0xff, 0xd9,
@@ -109,6 +110,24 @@ describe('Verifications (e2e, local driver + real queue)', () => {
         status: 'ACTIVE',
       },
     });
+    // 14.2 gates submissions on credits; this suite tests the verification
+    // pipeline, not billing — top the ledger up so submits pass the gate.
+    // Idempotent per-run: the ledger is append-only and the fixed fixture
+    // merchant accumulates rows, so grant only when the base grant is new
+    // (ledger sum below the requested balance).
+    const credits = app.get(CreditsService);
+    const merchantLedger = await prisma.creditTransaction.aggregate({
+      where: { merchantId, type: { not: 'ADJUSTMENT' } },
+      _sum: { amount: true },
+    });
+    if ((merchantLedger._sum.amount ?? 0n) < 1000n) {
+      await credits.grant({
+        merchantId,
+        amount: 1000n,
+        type: 'GRANT',
+        reason: 'E2E verifications fixture balance',
+      });
+    }
     // TenantGuard resolves SUB_MERCHANT scope from sub_merchants (status must
     // be ACTIVE) — a bare user row is not enough for the tenant guard.
     await prisma.subMerchant.upsert({

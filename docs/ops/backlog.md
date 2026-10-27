@@ -107,3 +107,22 @@ The CREDIT_COST map baked into `src/credits/credits.service.ts`
 decision, not a technical constraint. Revisit with billing once real
 usage data exists — especially whether FAKE-detection should eventually
 be charged. Tune the map in one place; consumption logic never changes.
+
+## 13. Per-run queue isolation for e2e suites (14.2 finding)
+
+Every e2e suite booting the app registers a VerificationProcessor on the
+SHARED BullMQ queue. Under parallel jest workers a suite whose worker has
+no matching OCR fixtures can steal another suite's jobs and produce ERROR
+verdicts (observed twice on 2026-10-27). Mitigated by running e2e serially
+(`test:e2e` uses `--runInBand`). Proper fix: derive the queue name per
+suite/run (e.g. env-suffixed QUEUE_NAMES) so suites can run in parallel.
+Trigger: e2e runtime becomes annoying enough to want parallelism.
+
+## 14. OTP rate-limit counters are cross-run e2e state (14.2 finding)
+
+The Redis-backed OTP limiter keys on phone, IP, and phone+purpose with
+hourly/5-min windows; repeated e2e runs exhaust the shared `otp:ip:*`
+budget and whole suites start 429ing. Mitigated by a beforeAll reset
+helper (`test/reset-otp-rate-limits.ts`) in OTP-touching suites. Trigger:
+if production relies on the same limiter, make sure the per-IP cap is
+tuned for shared egress (offices/NAT) before launch.

@@ -100,7 +100,8 @@ describe('CreditsService', () => {
       }),
       expect.anything(),
     );
-    expect(repo.updateCachedBalance).toHaveBeenCalledWith(MERCHANT_ID, 9n, expect.anything());
+    // Delta semantics: a consume decrements the cache by the cost.
+    expect(repo.updateCachedBalance).toHaveBeenCalledWith(MERCHANT_ID, -1n, expect.anything());
   });
 
   it('consume FAKE → 0 credits, no ledger row, balance unchanged', async () => {
@@ -260,7 +261,8 @@ describe('CreditsService', () => {
       expect.objectContaining({ type: 'GRANT', amount: 10n, balanceAfter: 20n }),
       expect.anything(),
     );
-    expect(repo.updateCachedBalance).toHaveBeenCalledWith(MERCHANT_ID, 20n, expect.anything());
+    // Delta semantics: a grant increments the cache by the amount.
+    expect(repo.updateCachedBalance).toHaveBeenCalledWith(MERCHANT_ID, 10n, expect.anything());
     expect(audit.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'credits.granted' }));
   });
 
@@ -322,7 +324,8 @@ describe('CreditsService', () => {
       }),
       expect.anything(),
     );
-    expect(repo.updateCachedBalance).toHaveBeenCalledWith(MERCHANT_ID, 7n, expect.anything());
+    // Delta semantics: reconcile applies the signed drift as an increment.
+    expect(repo.updateCachedBalance).toHaveBeenCalledWith(MERCHANT_ID, -3n, expect.anything());
     expect(audit.log).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'credits.reconciled' }),
     );
@@ -336,7 +339,7 @@ describe('CreditsService', () => {
 
     expect(res.adjusted).toBe(true);
     expect(res.drift).toBe(-92n);
-    expect(repo.updateCachedBalance).toHaveBeenCalledWith(MERCHANT_ID, 8n, expect.anything());
+    expect(repo.updateCachedBalance).toHaveBeenCalledWith(MERCHANT_ID, -92n, expect.anything());
   });
 
   // ── checkSubmissionAllowed ─────────────────────────────────────────────

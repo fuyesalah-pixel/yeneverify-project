@@ -20,6 +20,7 @@ import { AppModule } from '../src/app.module';
 import { AppConfigService } from '../src/config/config.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { MockOtpSender } from '../src/auth/otp/mock-otp.sender';
+import { resetOtpRateLimits } from './reset-otp-rate-limits';
 
 const sha256 = (raw: string) => createHash('sha256').update(raw).digest('hex');
 
@@ -48,6 +49,8 @@ describe('Auth login flow (e2e, real verify-otp)', () => {
 
     prisma = app.get(PrismaService);
     sendSpy = jest.spyOn(MockOtpSender.prototype, 'send');
+    // Repeat-run safety: flush OTP rate-limit counters from earlier runs.
+    await resetOtpRateLimits(app);
   });
 
   afterAll(async () => {

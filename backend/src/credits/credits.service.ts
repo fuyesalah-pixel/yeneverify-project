@@ -135,8 +135,10 @@ export class CreditsService {
         },
         runTx,
       );
-      // Keep the cache inside the same transaction.
-      await this.repo.updateCachedBalance(input.merchantId, newBalance, runTx);
+      // Keep the cache inside the same transaction. Signed decrement,
+      // guarded: a consume that loses a race for the last credit fails
+      // here atomically instead of pushing the cache negative.
+      await this.repo.updateCachedBalance(input.merchantId, -cost, runTx);
       return { consumed: cost, newBalance, txId: row.id };
     });
 
@@ -169,7 +171,9 @@ export class CreditsService {
         },
         runTx,
       );
-      await this.repo.updateCachedBalance(input.merchantId, newBalance, runTx);
+      // Increment-only cache write: a grant never clobbers a consume
+      // running concurrently (absolute writes would).
+      await this.repo.updateCachedBalance(input.merchantId, input.amount, runTx);
       return { granted: input.amount, newBalance, txId: row.id };
     });
 
@@ -221,7 +225,10 @@ export class CreditsService {
         },
         runTx,
       );
-      await this.repo.updateCachedBalance(merchantId, ledgerBalance, runTx);
+      // Set the cache back to the ledger sum by applying the signed
+      // drift as an increment — absolute writes would clobber any
+      // concurrent consume/grant.
+      await this.repo.updateCachedBalance(merchantId, drift, runTx);
     });
 
     this.audit.log({

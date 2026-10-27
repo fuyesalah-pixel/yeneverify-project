@@ -13,6 +13,7 @@
 // ============================================================
 
 import { Injectable, Logger } from '@nestjs/common';
+import { BankCode } from '@prisma/client';
 import { normalizeReference } from '../regex/reference-patterns';
 import type { VerifyInput } from '../adapters/adapter.interface';
 import { AdapterRegistry } from '../adapters/adapter.registry';
@@ -31,6 +32,11 @@ import {
 import type { AuthUser } from '../../common/types/auth-user.type';
 import { VerificationQueueService } from '../queue/verification-queue.service';
 import { ReceiptsRepository } from '../../receipts/receipts.repository';
+import { CreditsService } from '../../credits/credits.service';
+import {
+  CreditsExhaustedError,
+  CreditsSubscriptionExpiredError,
+} from '../../credits/credit-errors';
 import { DuplicateDetector } from './duplicate-detector';
 import { TransactionProjector } from './transaction-projector';
 import { resolveVerdict } from './verdict-resolver';
@@ -47,7 +53,21 @@ import type {
   VerificationDetailDto,
   VerificationListResponseDto,
 } from './dto';
+import type { VerificationSubmittedResponseDto } from './dto/verification-response.dto';
 import { detailFromRow, duplicateReferenceFromMetadata, listFromRows } from './response-mapper';
+
+/**
+ * The DB's BankCode enum tracks the seven real banks only; TEST_BANK
+ * exists purely as a registry key for pipeline tests (see
+ * adapters/adapter.interface.ts) and must never reach an enum column —
+ * persist such outcomes with bankCode=null, keeping the raw code in the
+ * audit log and adapter metadata.
+ */
+const DB_BANK_CODES: ReadonlySet<string> = new Set(Object.values(BankCode) as string[]);
+
+function normalizeBankCodeForDb(bankCode: string | null | undefined): string | null {
+  return bankCode && DB_BANK_CODES.has(bankCode) ? bankCode : null;
+}
 
 @Injectable()
 export class VerificationsService {
@@ -63,6 +83,7 @@ export class VerificationsService {
     private readonly audit: AuditService,
     private readonly queue: VerificationQueueService,
     private readonly receiptsRepo: ReceiptsRepository,
+    private readonly credits: CreditsService,
   ) {}
 
   /**
@@ -177,9 +198,12 @@ export class VerificationsService {
       };
     }
 
-    // ── Stage 5: duplicate resolution (VERIFIED results only) ──
+    // ── Stage 5: duplicate resolution (VERIFIED, real banks only) ──
+    // duplicate_fingerprints.bankCode is a NOT NULL DB enum: TEST_BANK
+    // outcomes (test stubs) can never be recorded, checked for, or hit-
+    // escalated — skipping consistently keeps VERIFIED as their verdict.
     let duplicate = null;
-    if (adapterResult.status === 'VERIFIED') {
+    if (adapterResult.status === 'VERIFIED' && DB_BANK_CODES.has(adapter.bankCode)) {
       const fingerprint = this.duplicates.computeFingerprint(
         adapter.bankCode as never,
         referenceNormalized,
@@ -223,7 +247,7 @@ export class VerificationsService {
     merchantId: string;
     dto: CreateVerificationDto;
     requestId?: string;
-  }): Promise<{ verificationId: string; status: 'PENDING'; createdAt: string }> {
+  }): Promise<VerificationSubmittedResponseDto> {
     const { user, merchantId, dto } = input;
 
     // Tenant-scoped receipt; a SUB_MERCHANT may only verify their own uploads.
@@ -233,6 +257,16 @@ export class VerificationsService {
     }
     if (user.role === 'SUB_MERCHANT' && receipt.uploadedByUserId !== user.id) {
       throw new ForbiddenError('You can only verify receipts you uploaded.');
+    }
+
+    // Gate BEFORE creating the row: a merchant with no credits never
+    // enters the queue. The 402/403 typed errors carry balance context.
+    const gate = await this.credits.checkSubmissionAllowed(merchantId);
+    if (!gate.allowed) {
+      if (gate.reason === 'SUBSCRIPTION_EXPIRED') {
+        throw new CreditsSubscriptionExpiredError(merchantId);
+      }
+      throw new CreditsExhaustedError(gate.balance);
     }
 
     // TODO Step 16: create the billing_verifications row on BILLING source.
@@ -265,8 +299,13 @@ export class VerificationsService {
 
     return {
       verificationId: row.id,
-      status: 'PENDING',
+      status: 'PENDING' as const,
       createdAt: new Date().toISOString(),
+      credits: {
+        balance: gate.balance.toString(),
+        unlimited: gate.unlimited,
+        lowBalance: gate.lowBalance,
+      },
     };
   }
 
@@ -454,6 +493,9 @@ export class VerificationsService {
   ): Promise<VerificationResult> {
     const durationMs = Date.now() - startedAt;
     outcome.errorMessage ??= outcome.status === 'ERROR' ? 'Verification could not complete.' : null;
+    // Persisted columns are DB enums: a test-only registry code like
+    // TEST_BANK is not one. Keep verdict + reference; drop just the code.
+    outcome.bankCode = normalizeBankCodeForDb(outcome.bankCode) as BankCode | null;
 
     await this.prisma.$transaction(async (tx) => {
       await this.repo.updateWithOutcome(tx, input.verificationId, outcome, durationMs);

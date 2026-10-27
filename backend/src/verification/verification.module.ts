@@ -27,6 +27,7 @@ import { Global, Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { ReceiptsModule } from '../receipts/receipts.module';
 import { OcrModule } from '../ocr/ocr.module';
+import { CreditsModule } from '../credits/credits.module';
 import { AdapterRegistry } from './adapters/adapter.registry';
 import { BankAdapterMetrics } from './adapters/adapter.metrics';
 import { BrowserPool } from './browser/browser-pool';
@@ -48,7 +49,7 @@ import { VerificationsController } from './verifications/verifications.controlle
 
 @Global()
 @Module({
-  imports: [HttpModule, ReceiptsModule, OcrModule],
+  imports: [HttpModule, ReceiptsModule, OcrModule, CreditsModule],
   controllers: [VerificationsController],
   providers: [
     VerificationSubmitRateGuard,

@@ -16,6 +16,7 @@ import { AppModule } from '../src/app.module';
 import { AppConfigService } from '../src/config/config.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { MockOtpSender } from '../src/auth/otp/mock-otp.sender';
+import { resetOtpRateLimits } from './reset-otp-rate-limits';
 
 describe('Merchant onboarding (e2e, real login)', () => {
   let app: INestApplication;
@@ -41,6 +42,8 @@ describe('Merchant onboarding (e2e, real login)', () => {
 
     prisma = app.get(PrismaService);
     sendSpy = jest.spyOn(MockOtpSender.prototype, 'send');
+    // Repeat-run safety: flush OTP rate-limit counters from earlier runs.
+    await resetOtpRateLimits(app);
   });
 
   afterAll(async () => {

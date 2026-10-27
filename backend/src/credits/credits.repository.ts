@@ -16,6 +16,7 @@ import { Prisma } from '@prisma/client';
 import type { CreditTransaction } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { newId } from '../common/utils/id.util';
+import { CreditsExhaustedError } from './credit-errors';
 import type { SubscriptionContext } from './credits.types';
 
 type Client = Prisma.TransactionClient | PrismaService;
@@ -132,13 +133,33 @@ export class CreditsRepository {
     });
   }
 
-  /** Cache write. merchants.credits_balance is updated INSIDE the ledger tx. */
-  async updateCachedBalance(merchantId: string, newBalance: bigint, tx?: Tx): Promise<void> {
+  /**
+   * Cache write. merchants.credits_balance is updated INSIDE the ledger tx.
+   *
+   * Takes a SIGNED DELTA (not an absolute balance) and applies it with
+   * `increment`, so two concurrent updates can never clobber each other
+   * with one writer's stale absolute value.
+   *
+   * DECREMENTS are guarded: the row only updates when
+   * credits_balance >= -delta. A consume that lost a race for the last
+   * credit fails HERE — atomically — instead of pushing the cache
+   * negative, and surfaces as CreditsExhaustedError (402).
+   */
+  async updateCachedBalance(merchantId: string, delta: bigint, tx?: Tx): Promise<void> {
     const client = (tx ?? this.prisma) as Client;
-    await client.merchant.update({
-      where: { id: merchantId },
-      data: { creditsBalance: newBalance, creditsUpdatedAt: new Date() },
+    const result = await client.merchant.updateMany({
+      where: {
+        id: merchantId,
+        // Guard ONLY decrements; grants/reconcile increments need no gate.
+        ...(delta < 0n && { creditsBalance: { gte: -delta } }),
+      },
+      data: { creditsBalance: { increment: delta }, creditsUpdatedAt: new Date() },
     });
+    if (result.count === 0) {
+      // Ambiguous only if the merchant row vanished mid-tx — the caller
+      // treats it as insufficient balance either way.
+      throw new CreditsExhaustedError();
+    }
   }
 
   /** Append-only history page. */

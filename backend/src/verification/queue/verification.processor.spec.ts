@@ -10,6 +10,7 @@ import type { Job } from 'bullmq';
 import { RetryableJobError, VerificationProcessor } from './verification.processor';
 import { VerificationsService } from '../verifications/verifications.service';
 import { VerificationsRepository } from '../verifications/verifications.repository';
+import { CreditsExhaustedError } from '../../credits/credit-errors';
 import type {
   LoadedVerification,
   VerificationRow,
@@ -90,17 +91,22 @@ describe('VerificationProcessor', () => {
   let processor: VerificationProcessor;
   const serviceMock = { process: jest.fn() };
   const repoMock = { loadForProcessing: jest.fn(), markErrorIfPending: jest.fn() };
+  const creditsMock = { consume: jest.fn() };
+  const auditMock = { log: jest.fn() };
 
   beforeEach(() => {
     jest.clearAllMocks();
     repoMock.loadForProcessing.mockResolvedValue(pendingLoad(makeRow()));
     repoMock.markErrorIfPending.mockResolvedValue(undefined);
     serviceMock.process.mockResolvedValue(result({}));
+    creditsMock.consume.mockResolvedValue({ consumed: 1n, newBalance: 0n, txId: 'tx-1' });
     processor = new VerificationProcessor(
       serviceMock as unknown as VerificationsService,
       repoMock as unknown as VerificationsRepository,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { queue: { jobAttempts: 3, verificationConcurrency: 4, backoffMs: 2000 } } as any,
+      creditsMock as never,
+      auditMock as never,
     );
   });
 
@@ -245,5 +251,111 @@ describe('VerificationProcessor', () => {
     serviceMock.process.mockRejectedValue(new RetryableJobError('BANK_ADAPTER_TIMEOUT'));
     await expect(processor.process(makeJob('vid-1', 0))).rejects.toBeInstanceOf(RetryableJobError);
     expect(repoMock.markErrorIfPending).not.toHaveBeenCalled();
+  });
+
+  // ── 14.2 — Credit consumption on terminal verdicts ───────────────────
+
+  it('VERIFIED result → credits.consume called once with the DB merchantId', async () => {
+    serviceMock.process.mockResolvedValue(result({ status: 'VERIFIED' }));
+    await processor.process(makeJob('vid-1', 0));
+    expect(creditsMock.consume).toHaveBeenCalledTimes(1);
+    expect(creditsMock.consume).toHaveBeenCalledWith({
+      merchantId: 'merch-77',
+      verificationId: 'vid-1',
+      verificationStatus: 'VERIFIED',
+    });
+  });
+
+  it('FAKE result → consume called with status FAKE (CREDIT_COST decides the price, not the processor)', async () => {
+    serviceMock.process.mockResolvedValue(
+      result({ status: 'FAKE', errorCode: 'FAKE_UNKNOWN_RECEIPT' }),
+    );
+    await processor.process(makeJob('vid-1', 0));
+    expect(creditsMock.consume).toHaveBeenCalledWith(
+      expect.objectContaining({ verificationId: 'vid-1', verificationStatus: 'FAKE' }),
+    );
+  });
+
+  it('DUPLICATE result → consume called with status DUPLICATE', async () => {
+    serviceMock.process.mockResolvedValue(
+      result({ status: 'DUPLICATE', duplicateOfVerificationId: 'vid-original' }),
+    );
+    await processor.process(makeJob('vid-1', 0));
+    expect(creditsMock.consume).toHaveBeenCalledWith(
+      expect.objectContaining({ verificationStatus: 'DUPLICATE' }),
+    );
+  });
+
+  it('NEEDS_REVIEW result → consume called with status NEEDS_REVIEW (0-cost)', async () => {
+    serviceMock.process.mockResolvedValue(
+      result({ status: 'NEEDS_REVIEW', errorCode: 'BANK_SUPPLEMENTARY_REQUIRED' }),
+    );
+    await processor.process(makeJob('vid-1', 0));
+    expect(creditsMock.consume).toHaveBeenCalledWith(
+      expect.objectContaining({ verificationStatus: 'NEEDS_REVIEW' }),
+    );
+  });
+
+  it('non-retryable terminal ERROR (attempts exhausted) → consume called with status ERROR', async () => {
+    serviceMock.process.mockResolvedValue(
+      result({ status: 'ERROR', errorCode: 'BANK_ADAPTER_TIMEOUT' }),
+    );
+    await processor.process(makeJob('vid-1', 2)); // attempts exhausted
+    expect(creditsMock.consume).toHaveBeenCalledWith(
+      expect.objectContaining({ verificationStatus: 'ERROR' }),
+    );
+  });
+
+  it('ERROR + retryable + attempts remain → consume NEVER called (the retry bills later)', async () => {
+    serviceMock.process.mockResolvedValue(
+      result({ status: 'ERROR', errorCode: 'BANK_ADAPTER_UNAVAILABLE' }),
+    );
+    await expect(processor.process(makeJob('vid-1', 0))).rejects.toBeInstanceOf(RetryableJobError);
+    expect(creditsMock.consume).not.toHaveBeenCalled();
+  });
+
+  it('consume throwing (e.g. raced out of credits) → verdict NOT rolled back; no re-throw; audit consume_failed', async () => {
+    serviceMock.process.mockResolvedValue(result({ status: 'VERIFIED' }));
+    creditsMock.consume.mockRejectedValue(new CreditsExhaustedError());
+
+    await expect(processor.process(makeJob('vid-1', 0))).resolves.toBeUndefined();
+    // The job completed: the persisted verdict stands.
+    expect(repoMock.markErrorIfPending).not.toHaveBeenCalled();
+    // And the leak is loudly recorded for ops.
+    expect(auditMock.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'credits.consume_failed',
+        targetType: 'verification',
+        targetId: 'vid-1',
+      }),
+    );
+  });
+
+  it('consume failure still does not fail an already-terminal ERROR verdict', async () => {
+    serviceMock.process.mockResolvedValue(
+      result({ status: 'FAKE', errorCode: 'FAKE_UNKNOWN_RECEIPT' }),
+    );
+    creditsMock.consume.mockRejectedValue(new Error('ledger write failed'));
+
+    await expect(processor.process(makeJob('vid-1', 0))).resolves.toBeUndefined();
+    expect(auditMock.log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'credits.consume_failed' }),
+    );
+  });
+
+  it('idempotent replay on a reprocessed job: consume is called again but CreditsService dedups (no double-charge)', async () => {
+    // Simulate BullMQ redelivering the same verificationId: service replays
+    // the stored VERIFIED result; consume() is idempotent per
+    // verificationId inside CreditsService — the processor passes the same
+    // key both times.
+    repoMock.loadForProcessing.mockResolvedValue(finalLoad(makeRow({ status: 'VERIFIED' })));
+    serviceMock.process.mockResolvedValue(result({ status: 'VERIFIED' }));
+
+    await processor.process(makeJob('vid-1', 0));
+    await processor.process(makeJob('vid-1', 0));
+
+    expect(creditsMock.consume).toHaveBeenCalledTimes(2);
+    const keys = creditsMock.consume.mock.calls.map((c) => c[0].verificationId);
+    expect(new Set(keys).size).toBe(1);
   });
 });

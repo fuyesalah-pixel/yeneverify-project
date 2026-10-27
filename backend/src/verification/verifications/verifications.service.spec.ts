@@ -18,6 +18,10 @@ import {
   VerificationNotRetryableError,
   VerificationNotReviewableError,
 } from '../../common/errors/domain-errors';
+import {
+  CreditsExhaustedError,
+  CreditsSubscriptionExpiredError,
+} from '../../credits/credit-errors';
 
 // ── Fakes ─────────────────────────────────────────────────────────────────
 
@@ -69,8 +73,9 @@ const verifiedAdapterResult = (): VerifyResult => ({
   metadata: { source: 'stub' },
 });
 
+/** Real DB bank code — the sanitization drops TEST_BANK by design (see below). */
 const makeStubAdapter = (verifyResult: VerifyResult | Error, detectText = 'CBE'): BankAdapter => ({
-  bankCode: 'TEST_BANK' as never,
+  bankCode: 'CBE' as never,
   displayName: 'Test Bank (stub)',
   detect: jest.fn((t: string) => t.includes(detectText)),
   detectConfidence: () => 0.9,
@@ -97,6 +102,7 @@ type Deps = {
   audit: { log: jest.Mock };
   queue: { enqueue: jest.Mock; retry: jest.Mock };
   receiptsRepo: { findByIdForMerchant: jest.Mock };
+  credits: { checkSubmissionAllowed: jest.Mock };
 };
 
 const makeDeps = (stubAdapter: BankAdapter): Deps => ({
@@ -134,6 +140,14 @@ const makeDeps = (stubAdapter: BankAdapter): Deps => ({
   audit: { log: jest.fn() },
   queue: { enqueue: jest.fn(async () => undefined), retry: jest.fn(async () => undefined) },
   receiptsRepo: { findByIdForMerchant: jest.fn(async () => receiptRow()) },
+  credits: {
+    checkSubmissionAllowed: jest.fn(async () => ({
+      allowed: true,
+      balance: 50n,
+      unlimited: false,
+      lowBalance: false,
+    })),
+  },
 });
 
 /** Receipt row used by submit() (13E.3). Matching uploadedByUserId by default. */
@@ -159,6 +173,7 @@ const makeService = (deps: Deps): VerificationsService =>
     deps.audit as never,
     deps.queue as never,
     deps.receiptsRepo as never,
+    deps.credits as never,
   );
 
 const input = (overrides: Partial<ProcessInput> = {}): ProcessInput => ({
@@ -360,9 +375,33 @@ describe('VerificationsService.process', () => {
 
     expect(result.status).toBe('ERROR');
     expect(result.errorCode).toBe('BANK_REFERENCE_NOT_FOUND');
-    expect(result.bankCode).toBe('TEST_BANK');
+    expect(result.bankCode).toBe('CBE');
     expect(adapter.verify).not.toHaveBeenCalled();
     expect(deps.projector.project).not.toHaveBeenCalled();
+  });
+
+  it('non-DB registry code (TEST_BANK): verdict stands, bankCode persisted as null, duplicate bookkeeping skipped', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    Object.defineProperty(adapter, 'bankCode', { value: 'TEST_BANK' });
+    const deps = makeDeps(adapter);
+    const service = makeService(deps);
+
+    const result = await service.process(input());
+
+    // Verdict stands; only the enum column is dropped.
+    expect(result.status).toBe('VERIFIED');
+    expect(result.bankCode).toBeNull();
+    expect(deps.duplicates.check).not.toHaveBeenCalled();
+    expect(deps.duplicates.record).not.toHaveBeenCalled();
+    // Projection depends on the source, not the bank code — still PROJECTED.
+    expect(deps.projector.project).toHaveBeenCalledWith(
+      expect.anything(),
+      'verif-1',
+      expect.objectContaining({ status: 'VERIFIED', bankCode: null }),
+    );
+    expect(deps.audit.log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'verification.verified' }),
+    );
   });
 
   it('adapter FAKE → status FAKE, no fingerprint, no projection', async () => {
@@ -660,6 +699,126 @@ describe('VerificationsService 13E.3 HTTP surface', () => {
       expect.objectContaining({ source: 'BILLING' }),
     );
     expect(deps.queue.enqueue).toHaveBeenCalled();
+  });
+
+  // ── 14.2 — submit gating ──────────────────────────────────────────
+
+  it('submit with 0 credits → CreditsExhaustedError (402), NO verification row created', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn();
+    deps.credits.checkSubmissionAllowed = jest.fn(async () => ({
+      allowed: false,
+      reason: 'INSUFFICIENT_CREDITS' as const,
+      balance: 0n,
+      unlimited: false,
+      lowBalance: false,
+    }));
+    const service = makeService(deps);
+
+    await expect(
+      service.submit({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+      }),
+    ).rejects.toBeInstanceOf(CreditsExhaustedError);
+    expect(deps.repo.createPending).not.toHaveBeenCalled();
+    expect(deps.queue.enqueue).not.toHaveBeenCalled();
+  });
+
+  it('submit with expired subscription → CreditsSubscriptionExpiredError (403)', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn();
+    deps.credits.checkSubmissionAllowed = jest.fn(async () => ({
+      allowed: false,
+      reason: 'SUBSCRIPTION_EXPIRED' as const,
+      balance: 5n,
+      unlimited: false,
+      lowBalance: false,
+    }));
+    const service = makeService(deps);
+
+    await expect(
+      service.submit({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+      }),
+    ).rejects.toBeInstanceOf(CreditsSubscriptionExpiredError);
+    expect(deps.repo.createPending).not.toHaveBeenCalled();
+  });
+
+  it('submit with 5 credits → 202, lowBalance=true (balance <= 20 warning surface)', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    deps.credits.checkSubmissionAllowed = jest.fn(async () => ({
+      allowed: true,
+      balance: 5n,
+      unlimited: false,
+      lowBalance: true,
+    }));
+    const service = makeService(deps);
+
+    const res = await service.submit({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+    });
+    expect(res.credits).toEqual({ balance: '5', unlimited: false, lowBalance: true });
+  });
+
+  it('submit with 50 credits → 202, lowBalance=false', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    const service = makeService(deps); // default mock: balance 50n
+
+    const res = await service.submit({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+    });
+    expect(res.credits).toEqual({ balance: '50', unlimited: false, lowBalance: false });
+  });
+
+  it('submit on an unlimited plan → 202, unlimited=true, lowBalance=false', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    deps.credits.checkSubmissionAllowed = jest.fn(async () => ({
+      allowed: true,
+      balance: 0n,
+      unlimited: true,
+      lowBalance: false,
+    }));
+    const service = makeService(deps);
+
+    const res = await service.submit({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+    });
+    expect(res.credits).toEqual({ balance: '0', unlimited: true, lowBalance: false });
+  });
+
+  it('submit order: the gate runs BEFORE the receipt row insert', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn();
+    deps.credits.checkSubmissionAllowed.mockResolvedValue({
+      allowed: false,
+      reason: 'INSUFFICIENT_CREDITS' as const,
+      balance: 0n,
+      unlimited: false,
+      lowBalance: false,
+    });
+    const service = makeService(deps);
+
+    await expect(
+      service.submit({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+      }),
+    ).rejects.toBeInstanceOf(CreditsExhaustedError);
+    expect(deps.repo.createPending).not.toHaveBeenCalled();
   });
 
   it('findByIdForUser: sub-merchant scoping is passed into the WHERE clause', async () => {

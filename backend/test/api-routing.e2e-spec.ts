@@ -12,6 +12,7 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AppConfigService } from '../src/config/config.service';
+import { resetOtpRateLimits } from './reset-otp-rate-limits';
 
 describe('API routing (e2e)', () => {
   let app: INestApplication;
@@ -33,6 +34,8 @@ describe('API routing (e2e)', () => {
     });
 
     await app.init();
+    // Repeat-run safety: flush OTP rate-limit counters from earlier runs.
+    await resetOtpRateLimits(app);
   });
 
   afterAll(async () => {

@@ -11,6 +11,7 @@ import { Test } from '@nestjs/testing';
 import { INestApplication, VersioningType } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { resetOtpRateLimits } from './reset-otp-rate-limits';
 import { AppConfigService } from '../src/config/config.service';
 
 describe('Request OTP validation (e2e)', () => {
@@ -31,6 +32,8 @@ describe('Request OTP validation (e2e)', () => {
       defaultVersion: cfg.runtime.apiVersion.replace(/^v/i, ''),
     });
     await app.init();
+    // Repeat-run safety: flush OTP rate-limit counters from earlier runs.
+    await resetOtpRateLimits(app);
   });
 
   afterAll(async () => {
