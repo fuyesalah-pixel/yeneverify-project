@@ -38,7 +38,9 @@ import { StorageService } from '../storage/storage.service';
 // TenantGuard; assertToken() then enforces the real authorization, and
 // assertLocal() keeps them 404 in every non-local environment.
 @Public()
-@Controller('internal')
+// Versioned explicitly ('1') so the presigned uploadUrl stays
+// /api/v1/internal/... now that no defaultVersion exists.
+@Controller({ path: 'internal', version: '1' })
 export class InternalStorageController {
   constructor(
     private readonly storage: StorageService,

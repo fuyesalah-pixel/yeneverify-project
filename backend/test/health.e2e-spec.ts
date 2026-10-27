@@ -25,7 +25,8 @@ describe('Health (e2e)', () => {
     });
     app.enableVersioning({
       type: VersioningType.URI,
-      defaultVersion: cfg.runtime.apiVersion.replace(/^v/i, ''),
+      // No defaultVersion — controllers declare version: '1' explicitly,
+      // mirroring src/main.ts. Ops routes stay at their bare paths.
     });
 
     await app.init();
@@ -35,14 +36,14 @@ describe('Health (e2e)', () => {
     await app.close();
   });
 
-  it('GET /v1/health returns 200', async () => {
-    const res = await request(app.getHttpServer()).get('/v1/health');
+  it('GET /health returns 200 (excluded from the API base path)', async () => {
+    const res = await request(app.getHttpServer()).get('/health');
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ status: 'ok' });
   });
 
-  it('GET /v1/version returns 200', async () => {
-    const res = await request(app.getHttpServer()).get('/v1/version');
+  it('GET /version returns 200', async () => {
+    const res = await request(app.getHttpServer()).get('/version');
     expect(res.status).toBe(200);
   });
 

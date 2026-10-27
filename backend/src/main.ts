@@ -43,9 +43,9 @@ async function bootstrap(): Promise<void> {
 
   app.enableVersioning({
     type: VersioningType.URI,
-    // Nest prepends "v" for URI versioning, so a configured "v1" would
-    // become the "/vv1/..." segment. Accept both spellings.
-    defaultVersion: cfg.runtime.apiVersion.replace(/^v/i, ''),
+    // No defaultVersion: controllers opt in explicitly with `version: '1'`,
+    // so prefix-excluded ops routes (health, version, root) are served at
+    // their bare paths (/health, /version) instead of inheriting /v1.
   });
 
   // ── API docs (skipped in production) ─────────────────────────────────
