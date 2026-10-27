@@ -543,6 +543,8 @@ paths:
         '409':
           description: Merchant already onboarded
       tags: *ref_7
+      security:
+        - access-token: []
   /sub-merchants/invite:
     post:
       operationId: SubMerchantsController_invite
