@@ -93,6 +93,10 @@ describe('VerificationProcessor', () => {
   const repoMock = { loadForProcessing: jest.fn(), markErrorIfPending: jest.fn() };
   const creditsMock = { consume: jest.fn() };
   const auditMock = { log: jest.fn() };
+  const notificationsMock = {
+    notifyExhausted: jest.fn().mockResolvedValue(undefined),
+    notifyLowBalance: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -107,6 +111,7 @@ describe('VerificationProcessor', () => {
       { queue: { jobAttempts: 3, verificationConcurrency: 4, backoffMs: 2000 } } as any,
       creditsMock as never,
       auditMock as never,
+      notificationsMock as never,
     );
   });
 
@@ -357,5 +362,49 @@ describe('VerificationProcessor', () => {
     expect(creditsMock.consume).toHaveBeenCalledTimes(2);
     const keys = creditsMock.consume.mock.calls.map((c) => c[0].verificationId);
     expect(new Set(keys).size).toBe(1);
+  });
+
+  // ── Balance notifications after billing (14.3 Part C) ─────────────────
+
+  it('zero-cost verdicts (FAKE/ERROR/NEEDS_REVIEW) never fire a balance notification', async () => {
+    serviceMock.process.mockResolvedValue(result({ status: 'FAKE' }));
+    creditsMock.consume.mockResolvedValue({ consumed: 0n, newBalance: 7n, txId: null });
+    await processor.process(makeJob('vid-1', 0));
+    expect(notificationsMock.notifyExhausted).not.toHaveBeenCalled();
+    expect(notificationsMock.notifyLowBalance).not.toHaveBeenCalled();
+  });
+
+  it('consume to exactly 0 fires the exhausted notification (not the low one)', async () => {
+    creditsMock.consume.mockResolvedValue({ consumed: 1n, newBalance: 0n, txId: 'tx-1' });
+    await processor.process(makeJob('vid-1', 0));
+    expect(notificationsMock.notifyExhausted).toHaveBeenCalledTimes(1);
+    expect(notificationsMock.notifyExhausted).toHaveBeenCalledWith('merch-77');
+    expect(notificationsMock.notifyLowBalance).not.toHaveBeenCalled();
+  });
+
+  it('consume into the low-balance range fires the low-balance notification', async () => {
+    creditsMock.consume.mockResolvedValue({ consumed: 1n, newBalance: 19n, txId: 'tx-2' });
+    await processor.process(makeJob('vid-1', 0));
+    expect(notificationsMock.notifyLowBalance).toHaveBeenCalledTimes(1);
+    expect(notificationsMock.notifyLowBalance).toHaveBeenCalledWith('merch-77', 19n);
+    expect(notificationsMock.notifyExhausted).not.toHaveBeenCalled();
+  });
+
+  it('consume above the threshold fires no notification', async () => {
+    creditsMock.consume.mockResolvedValue({ consumed: 1n, newBalance: 21n, txId: 'tx-3' });
+    await processor.process(makeJob('vid-1', 0));
+    expect(notificationsMock.notifyLowBalance).not.toHaveBeenCalled();
+    expect(notificationsMock.notifyExhausted).not.toHaveBeenCalled();
+  });
+
+  it('notification failures never fail the job or trigger the consume_failed audit', async () => {
+    creditsMock.consume.mockResolvedValue({ consumed: 1n, newBalance: 0n, txId: 'tx-4' });
+    notificationsMock.notifyExhausted.mockRejectedValue(new Error('db down'));
+
+    await expect(processor.process(makeJob('vid-1', 0))).resolves.toBeUndefined();
+    // The notification failure is silent infra noise, not a credit
+    // accounting event — consumed_failed must stay reserved for
+    // ledger/consume errors.
+    expect(auditMock.log).not.toHaveBeenCalled();
   });
 });

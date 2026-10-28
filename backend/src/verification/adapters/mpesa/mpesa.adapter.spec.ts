@@ -100,6 +100,12 @@ describe('MpesaAdapter detect/extract (unit)', () => {
     expect(adapter.extractReference('ref QGH4XW7P2L M-Pesa')).toBe('QGH4XW7P2L');
   });
 
+  // 14.3 Part A: M-Pesa references are uppercase-only by format, but
+  // [A-Z0-9] spans the full alphabet — G-Z letters must survive.
+  it('extractReference() keeps G-Z letters (no hex-only truncation)', () => {
+    expect(adapter.extractReference('M-Pesa ref GPZ7WQXYAK')).toBe('GPZ7WQXYAK');
+  });
+
   it('extractReference() returns null without any 10-char run', () => {
     expect(adapter.extractReference('telebirr TBR99001122')).toBeNull();
     expect(adapter.extractReference('dashen DSH9021018AB34')).toBeNull();

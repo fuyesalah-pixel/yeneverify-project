@@ -97,6 +97,11 @@ describe('AwashAdapter detect/extract (unit)', () => {
     );
   });
 
+  // 14.3 Part A: [0-9A-Z] on both halves — G-Z letters must survive.
+  it('extractReference() keeps G-Z letters (no hex-only truncation)', () => {
+    expect(adapter.extractReference('ref ZXEX1HJJZ8-575JQI')).toBe('ZXEX1HJJZ8575JQI');
+  });
+
   it('extractReference() returns null when no Awash reference exists', () => {
     expect(adapter.extractReference('telebirr TBR99001122')).toBeNull();
     expect(adapter.extractReference('CBE FT26195DBK5W81465291')).toBeNull();

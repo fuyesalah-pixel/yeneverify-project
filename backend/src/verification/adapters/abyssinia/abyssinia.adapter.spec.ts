@@ -118,6 +118,11 @@ describe('AbyssiniaAdapter detect/extract (unit)', () => {
   it('extractReference() returns null when no Abyssinia-shaped reference exists', () => {
     expect(adapter.extractReference('telebirr TBR99001122')).toBeNull();
   });
+
+  // 14.3 Part A: FT suffix is [0-9A-Z] — G-Z letters must survive.
+  it('extractReference() keeps G-Z letters (no hex-only truncation)', () => {
+    expect(adapter.extractReference('BoA transfer FT26201WQQ7XZYM')).toBe('FT26201WQQ7XZYM');
+  });
 });
 
 describe('AbyssiniaAdapter supplementary gate (unit)', () => {

@@ -126,3 +126,40 @@ budget and whole suites start 429ing. Mitigated by a beforeAll reset
 helper (`test/reset-otp-rate-limits.ts`) in OTP-touching suites. Trigger:
 if production relies on the same limiter, make sure the per-IP cap is
 tuned for shared egress (offices/NAT) before launch.
+
+## 15. Adapter regex audit — hex-only truncation (DONE, 14.3 Part A)
+
+14.2 found a hex-only regex in the e2e stub fixture (`/TK[0-9A-F]+/`
+truncated `TKFAKE…` to `TK`, mislabeling FAKE as VERIFIED). Audited
+all 7 real adapters as part of 14.3: **0 of 7 use hex-only patterns** —
+every `extractReference` delegates to the shared
+[reference-patterns.ts](../../backend/src/verification/regex/reference-patterns.ts)
+map, whose shapes are all `[0-9A-Z]` (case-insensitive; M-Pesa is
+uppercase-only by receipt format). Edge-case tests asserting G-Z letters
+survive extraction added per adapter. Trigger to reopen: any new adapter
+introducing a local (non-shared) reference regex.
+
+## 16. Document "verdict commits before consume" for Step 15+ clients
+
+Architectural fact, not a bug: the processor writes the VERDICT first,
+then the consume commits in its own transaction. A client that polls the
+verification status and then immediately reads the credits balance can
+observe the charge a few ms late. Document for the Flutter step (Steps
+20+): after a terminal status, read the balance with a short retry window
+(200–500 ms) or render a transient loading state on the credits line.
+The e2e suites handle this by polling the balance until it settles.
+
+## 17. Re-enable parallel test:e2e via per-suite Redis key prefix
+
+Currently `test:e2e` runs with `--runInBand` (item 13's mitigation).
+Proper fix: derive a per-suite Redis key/queue prefix (e.g.
+`jest:<suite-name>:*` or env-suffixed `QUEUE_NAMES`) so each jest worker
+owns its BullMQ queues and OTP counters. Quality-of-life; revisit when
+e2e runtime gets annoying.
+
+## 18. FCM push delivery for credits notifications (Step 15)
+
+14.3 Part C creates IN_APP `Notification` rows only (CREDIT_LOW deduped
+per 24h, CREDIT_EXHAUSTED on the drain-to-zero event). Step 15 wires the
+FCM dispatcher to those rows (`pushedAt` / `pushError` columns already
+exist on the model) and adds the unread-inbox API surface.

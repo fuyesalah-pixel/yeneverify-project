@@ -107,6 +107,12 @@ describe('TelebirrAdapter detect/extract (unit)', () => {
     expect(adapter.extractReference('telebirr ref TBR99001122')).toBe('TBR99001122');
   });
 
+  // 14.3 Part A: suffix is [0-9A-Z] — G-Z letters must survive extraction.
+  it('extractReference() keeps G-Z letters (no hex-only truncation)', () => {
+    expect(adapter.extractReference('telebirr ref DEV6HKJX7KM2')).toBe('DEV6HKJX7KM2');
+    expect(adapter.extractReference('telebirr ref TBR98PY7WWQK')).toBe('TBR98PY7WWQK');
+  });
+
   it('extractReference() returns null when neither prefix appears', () => {
     expect(adapter.extractReference('CBE FT26195DBK5W81465291')).toBeNull();
   });

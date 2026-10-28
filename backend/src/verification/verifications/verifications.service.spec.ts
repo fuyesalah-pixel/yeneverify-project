@@ -103,6 +103,7 @@ type Deps = {
   queue: { enqueue: jest.Mock; retry: jest.Mock };
   receiptsRepo: { findByIdForMerchant: jest.Mock };
   credits: { checkSubmissionAllowed: jest.Mock };
+  notifications: { notifyLowBalance: jest.Mock; notifyExhausted: jest.Mock };
 };
 
 const makeDeps = (stubAdapter: BankAdapter): Deps => ({
@@ -148,6 +149,10 @@ const makeDeps = (stubAdapter: BankAdapter): Deps => ({
       lowBalance: false,
     })),
   },
+  notifications: {
+    notifyLowBalance: jest.fn(async () => undefined),
+    notifyExhausted: jest.fn(async () => undefined),
+  },
 });
 
 /** Receipt row used by submit() (13E.3). Matching uploadedByUserId by default. */
@@ -174,6 +179,7 @@ const makeService = (deps: Deps): VerificationsService =>
     deps.queue as never,
     deps.receiptsRepo as never,
     deps.credits as never,
+    deps.notifications as never,
   );
 
 const input = (overrides: Partial<ProcessInput> = {}): ProcessInput => ({
@@ -819,6 +825,62 @@ describe('VerificationsService 13E.3 HTTP surface', () => {
       }),
     ).rejects.toBeInstanceOf(CreditsExhaustedError);
     expect(deps.repo.createPending).not.toHaveBeenCalled();
+  });
+
+  // ── 14.3 Part C — submit-time low-balance notification ─────────────
+
+  it('submit with lowBalance=true fires notifyLowBalance with the gate balance', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    deps.credits.checkSubmissionAllowed.mockResolvedValue({
+      allowed: true,
+      balance: 12n,
+      unlimited: false,
+      lowBalance: true,
+    });
+    const service = makeService(deps);
+
+    await service.submit({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+    });
+    expect(deps.notifications.notifyLowBalance).toHaveBeenCalledWith('merchant-1', 12n);
+    expect(deps.notifications.notifyExhausted).not.toHaveBeenCalled();
+  });
+
+  it('submit with lowBalance=false fires no notification', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    const service = makeService(deps); // default gate: 50n, lowBalance=false
+
+    await service.submit({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+    });
+    expect(deps.notifications.notifyLowBalance).not.toHaveBeenCalled();
+  });
+
+  it('notification failures never fail the submit', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    deps.credits.checkSubmissionAllowed.mockResolvedValue({
+      allowed: true,
+      balance: 3n,
+      unlimited: false,
+      lowBalance: true,
+    });
+    deps.notifications.notifyLowBalance.mockRejectedValue(new Error('db down'));
+    const service = makeService(deps);
+
+    await expect(
+      service.submit({
+        user: user('MERCHANT'),
+        merchantId: 'merchant-1',
+        dto: { receiptId: 'receipt-1', source: 'TRANSACTION' },
+      }),
+    ).resolves.toMatchObject({ status: 'PENDING' });
   });
 
   it('findByIdForUser: sub-merchant scoping is passed into the WHERE clause', async () => {

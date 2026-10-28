@@ -33,6 +33,7 @@ import type { AuthUser } from '../../common/types/auth-user.type';
 import { VerificationQueueService } from '../queue/verification-queue.service';
 import { ReceiptsRepository } from '../../receipts/receipts.repository';
 import { CreditsService } from '../../credits/credits.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 import {
   CreditsExhaustedError,
   CreditsSubscriptionExpiredError,
@@ -84,6 +85,7 @@ export class VerificationsService {
     private readonly queue: VerificationQueueService,
     private readonly receiptsRepo: ReceiptsRepository,
     private readonly credits: CreditsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /**
@@ -267,6 +269,18 @@ export class VerificationsService {
         throw new CreditsSubscriptionExpiredError(merchantId);
       }
       throw new CreditsExhaustedError(gate.balance);
+    }
+
+    // In-app warning the moment the gate says the balance is running
+    // low. Fire-and-forget — notification failures never block a submit.
+    if (gate.lowBalance) {
+      this.notifications
+        .notifyLowBalance(merchantId, gate.balance)
+        .catch((err: unknown) =>
+          this.logger.warn(
+            `verification.low_balance.notify_failed error=${err instanceof Error ? err.message : String(err)}`,
+          ),
+        );
     }
 
     // TODO Step 16: create the billing_verifications row on BILLING source.

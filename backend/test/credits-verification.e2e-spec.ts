@@ -215,8 +215,21 @@ describe('Credits × Verification (e2e, real DB + real queue)', () => {
   }, 60_000);
 
   afterAll(async () => {
-    // Immutable consume rows keep their verification rows alive — best effort.
+    // Immutable consume rows keep their verification rows alive — resolve
+    // the blocked set first so the deletes below never race the ledger and
+    // the app logger never prints FK noise.
+    const consumed = new Set(
+      (
+        await prisma.creditTransaction.findMany({
+          where: { type: 'CONSUME', verificationId: { in: verifyRows } },
+          select: { verificationId: true },
+        })
+      )
+        .map((t) => t.verificationId)
+        .filter((id): id is string => Boolean(id)),
+    );
     for (const id of verifyRows) {
+      if (consumed.has(id)) continue;
       await prisma.verification.delete({ where: { id } }).catch(() => undefined);
     }
     await app.close();

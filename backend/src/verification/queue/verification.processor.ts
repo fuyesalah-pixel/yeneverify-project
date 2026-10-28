@@ -25,7 +25,8 @@ import { QUEUE_NAMES } from '../../queue/queue.constants';
 import { AppConfigService } from '../../config/config.service';
 import { VerificationsService } from '../verifications/verifications.service';
 import { VerificationsRepository } from '../verifications/verifications.repository';
-import { CreditsService } from '../../credits/credits.service';
+import { CreditsService, LOW_CREDITS_WARNING_THRESHOLD } from '../../credits/credits.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { AuditService } from '../../audit/audit.service';
 import { ERROR_CODES } from '../../common/constants/error-codes';
 
@@ -62,6 +63,7 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
     private readonly config: AppConfigService,
     private readonly credits: CreditsService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {
     super();
   }
@@ -144,7 +146,22 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
     result: { status: string },
   ): Promise<void> {
     try {
-      await this.credits.consume({ merchantId, verificationId, verificationStatus: result.status });
+      const consumeResult = await this.credits.consume({
+        merchantId,
+        verificationId,
+        verificationStatus: result.status,
+      });
+      // Fire-and-forget inbox stubs (FCM delivery is Step 15). Never
+      // delay the job on a notification write.
+      if (consumeResult.consumed > 0n) {
+        if (consumeResult.newBalance === 0n) {
+          this.notifications.notifyExhausted(merchantId).catch(() => undefined);
+        } else if (consumeResult.newBalance <= LOW_CREDITS_WARNING_THRESHOLD) {
+          this.notifications
+            .notifyLowBalance(merchantId, consumeResult.newBalance)
+            .catch(() => undefined);
+        }
+      }
     } catch (err) {
       this.logger.error(
         `credits.consume_failed verificationId=${verificationId} status=${result.status} merchantId=${merchantId} error=${err instanceof Error ? err.message : String(err)}`,

@@ -104,6 +104,11 @@ describe('ZemenAdapter detect/extract (unit)', () => {
     expect(adapter.extractReference('Zemen receipt 108987654321098')).toBe('108987654321098');
   });
 
+  // 14.3 Part A: 108 suffix is [0-9A-Z] — G-Z letters must survive.
+  it('extractReference() keeps G-Z letters (no hex-only truncation)', () => {
+    expect(adapter.extractReference('Zemen ref 108WVX987654Y')).toBe('108WVX987654Y');
+  });
+
   it('extractReference() returns null without the 108 prefix', () => {
     expect(adapter.extractReference('telebirr TBR99001122')).toBeNull();
     expect(adapter.extractReference('plain number 9876543210')).toBeNull();

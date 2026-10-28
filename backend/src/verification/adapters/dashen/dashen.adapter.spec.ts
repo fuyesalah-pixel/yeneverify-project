@@ -104,6 +104,11 @@ describe('DashenAdapter detect/extract (unit)', () => {
     expect(adapter.extractReference('dashen transfer 90211045123456')).toBe('90211045123456');
   });
 
+  // 14.3 Part A: DSH suffix is [0-9A-Z] — G-Z letters must survive.
+  it('extractReference() keeps G-Z letters (no hex-only truncation)', () => {
+    expect(adapter.extractReference('ref DSH6029XY7WQ1')).toBe('DSH6029XY7WQ1');
+  });
+
   it('extractReference() prefers DSH over numeric, null otherwise', () => {
     expect(adapter.extractReference('dsh code DSH9021018AB34 or 9021104512')).toBe(
       'DSH9021018AB34',

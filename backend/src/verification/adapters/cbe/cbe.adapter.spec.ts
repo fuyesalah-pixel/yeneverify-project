@@ -91,6 +91,14 @@ describe('CbeAdapter detect/extract (unit)', () => {
     );
   });
 
+  // 14.3 Part A: the shared CBE regex is [0-9A-Z] (case-insensitive); a
+  // hex-only pattern would truncate at the first G-Z letter. Guards the
+  // exact bug class observed on the e2e stub fixture ('TKFAKE…' → 'TK').
+  it('extractReference() keeps G-Z letters (no hex-only truncation)', () => {
+    expect(adapter.extractReference('FT2XYZ95DBK5W81465291')).toBe('FT2XYZ95DBK5W81465291');
+    expect(adapter.extractReference('ft1wvxyztu9876543210')).toBe('FT1WVXYZTU9876543210');
+  });
+
   it('extractReference() returns null when no FT reference exists', () => {
     expect(adapter.extractReference('telebirr TBR99001122')).toBeNull();
   });
