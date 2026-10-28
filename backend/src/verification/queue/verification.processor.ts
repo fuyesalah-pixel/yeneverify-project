@@ -37,6 +37,33 @@ const RETRYABLE_ERROR_CODES = new Set([
   'BANK_ADAPTER_UNAVAILABLE',
 ]);
 
+/** User-facing push title for each terminal verdict. */
+const VERDICT_NOTIFICATION_TITLE: Record<string, string> = {
+  VERIFIED: 'Payment verified',
+  DUPLICATE: 'Duplicate receipt',
+  FAKE: 'Fake receipt detected',
+  ERROR: 'Verification failed',
+  NEEDS_REVIEW: 'Needs review',
+};
+
+/** User-facing push body for each terminal verdict. */
+function verdictBody(result: {
+  status: string;
+  bankReference: string | null;
+  amountMinor: bigint | null;
+}): string {
+  switch (result.status) {
+    case 'VERIFIED':
+      return `Reference ${result.bankReference ?? ''} verified successfully.`.replace('  ', ' ');
+    case 'FAKE':
+      return `Reference ${result.bankReference ?? ''} could not be verified with the bank.`;
+    case 'DUPLICATE':
+      return `Reference ${result.bankReference ?? ''} was already verified before.`;
+    default:
+      return 'This verification needs your attention. Open the app for details.';
+  }
+}
+
 /**
  * Thrown ONLY for retryable outcomes. BullMQ counts it against the
  * job's attempts budget; everything else completes the job.
@@ -105,10 +132,12 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
             `verification.job.exhausted verificationId=${verificationId} errorCode=${result.errorCode} attempts=${attempt}`,
           );
           await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
+          this.notifyVerdict(actorFields, result, verificationId);
           return;
         }
         // Non-retryable: verdict is final ERROR already persisted.
         await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
+        this.notifyVerdict(actorFields, result, verificationId);
         this.logger.log(
           `verification.job.complete (non-retryable ERROR) verificationId=${verificationId} attempt=${attempt} durationMs=${Date.now() - startedAt} status=${result.status}`,
         );
@@ -118,6 +147,7 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
       // Any other terminal verdict (VERIFIED/FAKE/DUPLICATE/NEEDS_REVIEW)
       // is billed according to CREDIT_COST before the job completes.
       await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
+      this.notifyVerdict(actorFields, result, verificationId);
       this.logger.log(
         `verification.job.complete verificationId=${verificationId} attempt=${attempt} durationMs=${Date.now() - startedAt} status=${result.status}`,
       );
@@ -130,6 +160,44 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
         .catch(() => undefined);
       throw err;
     }
+  }
+
+  /**
+   * Pushes the terminal verdict to the user who asked for the check
+   * (Step 15: VERIFICATION_RESULT via the notify() choke point).
+   *
+   * Fully fire-and-forget: never awaited from the job path, never
+   * allows a notification failure (row-creation included) to affect
+   * a verdict or its billing — both have already committed by now.
+   */
+  private notifyVerdict(
+    actorFields: { merchantId: string; requestedByUserId: string },
+    result: {
+      status: string;
+      bankReference: string | null;
+      amountMinor: bigint | null;
+    },
+    verificationId: string,
+  ): void {
+    const title = VERDICT_NOTIFICATION_TITLE[result.status] ?? 'Verification update';
+    this.notifications
+      .notify({
+        userId: actorFields.requestedByUserId,
+        merchantId: actorFields.merchantId,
+        type: 'VERIFICATION_RESULT',
+        title,
+        body: verdictBody(result),
+        data: {
+          verificationId,
+          status: result.status,
+          ...(result.bankReference ? { bankReference: result.bankReference } : {}),
+        },
+      })
+      .catch((err: unknown) => {
+        this.logger.warn(
+          `notification.verification_result.failed verificationId=${verificationId} error=${err instanceof Error ? err.message : String(err)}`,
+        );
+      });
   }
 
   /**
@@ -199,7 +267,7 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
     };
   }
 
-  // ── Worker observability events (log-only; FCM dispatch is Step 15) ──
+  // ── Worker observability events (log-only) ──
 
   @OnWorkerEvent('completed')
   onCompleted(job: Job<VerificationJobData>): void {

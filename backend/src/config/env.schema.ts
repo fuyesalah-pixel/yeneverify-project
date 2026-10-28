@@ -308,6 +308,8 @@ export const envSchema = z
         { message: 'must be empty or a mounted-file path.' },
       ),
     FCM_MOCK: booleanValue(true),
+    // Explicit FCM provider selection; empty defers to FCM_MOCK.
+    FCM_PROVIDER: z.union([z.literal('mock'), z.literal('firebase'), z.literal('')]).default(''),
 
     // ── SMTP (transactional email; optional for MVP) ─────────────────────
     SMTP_HOST: z.string().min(1, 'must not be empty.').default('localhost'),

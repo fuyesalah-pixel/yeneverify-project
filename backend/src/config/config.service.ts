@@ -219,6 +219,9 @@ export class AppConfigService {
       // The loader expands escaped newlines only at the adapter boundary.
       privateKey: this.secretLoaderInstance.fcmPrivateKey(),
       privateKeyFile: this.value('FCM_PRIVATE_KEY_FILE'),
+      // Explicit provider wins; empty falls back to the legacy FCM_MOCK
+      // boolean so existing env files keep working unmodified.
+      provider: this.value('FCM_PROVIDER'),
       mock: this.value('FCM_MOCK'),
     } as const;
   }

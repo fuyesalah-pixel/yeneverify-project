@@ -118,6 +118,16 @@ verdicts (observed twice on 2026-10-27). Mitigated by running e2e serially
 suite/run (e.g. env-suffixed QUEUE_NAMES) so suites can run in parallel.
 Trigger: e2e runtime becomes annoying enough to want parallelism.
 
+Third variant (Step 15, 2026-10-28): a stuck/jacked-up jest process from
+an earlier session kept running hours later and stole jobs from e2e runs
+while having no fixtures registered (silent VERIFICATION_BANK_NOT_DETECTED
+on otherwise-VERIFIED suites). Diagnostics that pointed the wrong way:
+solo suite runs passed, full runs failed, and the DB row looked intact.
+Rule of thumb after an agent session ends: before trustng a "suite failed
+in full run, passes solo" flake, list running jest/node processes — a
+stale one is a job thief. (`Get-CimInstance Win32_Process -Filter
+"Name='node.exe'"` and kill the stale `jest` PIDs.)
+
 ## 14. OTP rate-limit counters are cross-run e2e state (14.2 finding)
 
 The Redis-backed OTP limiter keys on phone, IP, and phone+purpose with
@@ -157,9 +167,28 @@ Proper fix: derive a per-suite Redis key/queue prefix (e.g.
 owns its BullMQ queues and OTP counters. Quality-of-life; revisit when
 e2e runtime gets annoying.
 
-## 18. FCM push delivery for credits notifications (Step 15)
+## 18. FCM push delivery for credits notifications (DONE, Step 15)
 
 14.3 Part C creates IN_APP `Notification` rows only (CREDIT_LOW deduped
-per 24h, CREDIT_EXHAUSTED on the drain-to-zero event). Step 15 wires the
-FCM dispatcher to those rows (`pushedAt` / `pushError` columns already
-exist on the model) and adds the unread-inbox API surface.
+per 24h, CREDIT_EXHAUSTED on the drain-to-zero event). Step 15 wired the
+closeout: `FcmProvider` seam (mock/firebase via `FCM_PROVIDER`),
+`NotificationsService.notify()` as the single choke point (row creation
++ fire-and-forget fan-out to every active device, `pushedAt`/`pushError`
+bookkeeping, device revocation on invalid tokens), and the 4-endpoint
+in-app inbox (list / unread-count / read / read-all). Remaining: leave
+in place (see below).
+
+- [x] FCM dispatcher wired to notification rows (mock default, firebase
+      behind `FCM_PROVIDER=firebase` + service-account creds).
+- [x] Unread-inbox API surface + VERIFICATION_RESULT / invite-flow /
+      credits notifications all writing through `notify()`.
+- [ ] Email fallback for users with no devices — new item (below).
+
+## 19. Email notification fallback (post-Step 15)
+
+The push step stops at `pushError = 'no successful delivery'`; the row
+stays queryable in-app but users without a registered device never get
+alerted off-app. If support volume once arrives here, decide: SMTP
+digest (there is unused SMTP config already) vs. a resend of CREDIT_LOW
+via SMS through AfroMessage. Trigger: first "I never got an alert"
+support ticket.

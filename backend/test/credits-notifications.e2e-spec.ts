@@ -359,7 +359,7 @@ describe('Credits × Notifications (e2e, real DB + real queue)', () => {
     const [lowRow1] = await prisma.notification.findMany({
       where: { merchantId, type: 'CREDIT_LOW' },
     });
-    expect(lowRow1.channel).toBe('IN_APP');
+    expect(lowRow1.channel).toBe('PUSH'); // Step 15: rows write through notify() → channel PUSH (in-app inbox still queryable)
     expect(lowRow1.data).toMatchObject({ balance: '20' });
     expect(lowRow1.userId).toBe(userId);
 
@@ -401,7 +401,7 @@ describe('Credits × Notifications (e2e, real DB + real queue)', () => {
     const [exRow] = await prisma.notification.findMany({
       where: { merchantId, type: 'CREDIT_EXHAUSTED' },
     });
-    expect(exRow.channel).toBe('IN_APP');
+    expect(exRow.channel).toBe('PUSH'); // Step 15: rows write through notify() → channel PUSH
     expect(exRow.userId).toBe(userId);
 
     // ── dry: submit at 0 credits → 402 ─────────────────────────────────

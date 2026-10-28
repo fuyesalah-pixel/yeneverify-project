@@ -94,6 +94,7 @@ describe('VerificationProcessor', () => {
   const creditsMock = { consume: jest.fn() };
   const auditMock = { log: jest.fn() };
   const notificationsMock = {
+    notify: jest.fn().mockResolvedValue({ notificationId: 'notification-1', row: {} }),
     notifyExhausted: jest.fn().mockResolvedValue(undefined),
     notifyLowBalance: jest.fn().mockResolvedValue(undefined),
   };

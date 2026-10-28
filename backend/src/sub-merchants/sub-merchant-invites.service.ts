@@ -10,6 +10,13 @@
 // Accept/decline write SUB_MERCHANT_JOINED / SUB_MERCHANT_DECLINED
 // notification rows for the merchant owner and invalidate tenant
 // caches so role/scope changes take effect immediately.
+//
+// Step 15: EVERY notification write goes through the single
+// NotificationsService.notify() choke point (row creation +
+// fire-and-forget FCM push). The joined/declined rows join the
+// caller's transaction so the notification cannot exist without
+// the state change it describes; the invite-time row to the
+// invitee is best-effort outside the transaction.
 // ============================================================
 
 import { Injectable, Logger } from '@nestjs/common';
@@ -18,6 +25,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AppConfigService } from '../config/config.service';
 import { TenantResolverService } from '../tenant/tenant.resolver.service';
 import { AuditService } from '../audit/audit.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import {
   InvalidInviteError,
   InviteExpiredError,
@@ -48,6 +56,7 @@ export class SubMerchantInvitesService {
     private readonly prisma: PrismaService,
     private readonly tenantResolver: TenantResolverService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {
     this.config = config;
     this.jwt = new JwtService({
@@ -112,6 +121,29 @@ export class SubMerchantInvitesService {
 
     const token = this.signInviteToken(sub.id, merchantId);
     const inviteUrl = `${this.config.app.url}/invite/${token}`;
+
+    // The invitee learns about the invite on their device (in-app
+    // poll or push). Best-effort: an inbox failure must not fail
+    // an invite that already exists and has a valid token.
+    try {
+      await this.notifications.notify({
+        userId: invitee.id,
+        merchantId,
+        type: 'SUB_MERCHANT_INVITED',
+        title: 'Team invite',
+        body: dto.branchLabel
+          ? `You were invited to join a merchant team. Branch: ${dto.branchLabel}.`
+          : 'You were invited to join a merchant team on Yene Verify.',
+        data: {
+          subMerchantId: sub.id,
+          branchLabel: dto.branchLabel ?? null,
+        },
+      });
+    } catch (err) {
+      this.logger.warn(
+        `sub_merchant.invite.notification_failed subMerchantId=${sub.id} error=${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
 
     this.audit.log({
       actorType: 'USER',
@@ -253,21 +285,21 @@ export class SubMerchantInvitesService {
         data: { role: 'SUB_MERCHANT' },
       });
       if (merchant) {
-        await tx.notification.create({
+        // Inside the transaction: the notification row rolls back with
+        // the join if anything below fails. notify() ignores its own
+        // push bookkeeping relative to this commit by contract.
+        await this.notifications.notify({
+          userId: merchant.ownerUserId,
+          merchantId,
+          type: 'SUB_MERCHANT_JOINED',
+          title: 'New team member',
+          body: `${sub.user.fullName} joined ${sub.branchLabel ?? 'your team'}.`,
           data: {
-            id: crypto.randomUUID(),
-            userId: merchant.ownerUserId,
-            merchantId,
-            type: 'SUB_MERCHANT_JOINED',
-            title: 'New team member',
-            body: `${sub.user.fullName} joined ${sub.branchLabel ?? 'your team'}.`,
-            data: {
-              subMerchantId: sub.id,
-              name: sub.user.fullName,
-              branchLabel: sub.branchLabel ?? null,
-            },
-            channel: 'IN_APP',
+            subMerchantId: sub.id,
+            name: sub.user.fullName,
+            branchLabel: sub.branchLabel ?? null,
           },
+          tx,
         });
       }
     });
@@ -334,17 +366,16 @@ export class SubMerchantInvitesService {
     await this.prisma.$transaction(async (tx) => {
       await tx.subMerchant.delete({ where: { id: sub.id } });
       if (merchant) {
-        await tx.notification.create({
-          data: {
-            id: crypto.randomUUID(),
-            userId: merchant.ownerUserId,
-            merchantId: sub.merchantId,
-            type: 'SUB_MERCHANT_DECLINED',
-            title: 'Invite declined',
-            body: `${this.maskPhone(sub.user.phone)} declined your invite.`,
-            data: { subMerchantId: sub.id, phoneMasked: this.maskPhone(sub.user.phone) },
-            channel: 'IN_APP',
-          },
+        // Same transaction rule as the joined row above.
+        await this.notifications.notify({
+          userId: merchant.ownerUserId,
+          merchantId: sub.merchantId,
+          type: 'SUB_MERCHANT_DECLINED',
+          title: 'Invite declined',
+          body: `${this.maskPhone(sub.user.phone)} declined your invite.`,
+          data: { subMerchantId: sub.id, phoneMasked: this.maskPhone(sub.user.phone) },
+          // Same transaction rule as the joined row above.
+          tx,
         });
       }
     });
