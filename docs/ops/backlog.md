@@ -217,6 +217,17 @@ tens of thousands of rows/merchant), wire a nightly snapshot writer and
 have the service read snapshots first, compute on demand only when a
 snapshot is stale. Trigger: measured p95 > 500ms on any analytics endpoint.
 
+## 24. Real email delivery for export-ready notifications (Step 19)
+
+Step 19 "emails the merchant" only in the sense that a SYSTEM
+notification row is created when an export finishes (the in-app inbox
+shows it even if every push fails). There is no SMTP delivery yet —
+MailHog/SMTP config already exists in env + docker-compose but nothing
+sends. Wire the email provider behind the notification choke point
+(notify()) so export-ready, credit and billing rows can reach users
+with no devices. Trigger: launch, or first support request about
+"I never got notified".
+
 ## 19. Email notification fallback (post-Step 15)
 
 The push step stops at `pushError = 'no successful delivery'`; the row

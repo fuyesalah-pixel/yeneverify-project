@@ -33,6 +33,7 @@ import { BillingModule } from './billing/billing.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PackagesModule } from './packages/packages.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { ExportsModule } from './exports/exports.module';
 
 import { RootController } from './root/root.controller';
 import { VersionController } from './version/version.controller';
@@ -98,12 +99,8 @@ import { buildLoggerOptions } from './common/logger/logger.config';
     BillingModule,
     PackagesModule,
     AnalyticsModule,
+    ExportsModule,
     NotificationsModule,
-
-    // Feature modules added here in Steps 19+:
-    // TransactionsModule,
-    // ExportsModule,
-    // ExportsModule,
   ],
 
   controllers: [RootController, VersionController],

@@ -411,3 +411,47 @@ export class BillingSessionNotPendingError extends AppError {
     );
   }
 }
+
+// ── Exports (Step 19) ─────────────────────────────────────────────────
+
+/** The requested export would exceed the row cap for its format. */
+export class ExportTooLargeError extends AppError {
+  constructor(format: 'CSV' | 'PDF', rowCount: number, hint: string) {
+    super(
+      ERROR_CODES.EXPORT_TOO_LARGE,
+      `Export would contain ${rowCount} rows, exceeding the ${format} row limit.`,
+      400,
+      { format, rowCount, hint },
+    );
+  }
+}
+
+/** No such export row for this tenant (cross-tenant misses 404 too). */
+export class ExportNotFoundError extends AppError {
+  constructor(exportId: string) {
+    super(ERROR_CODES.EXPORT_NOT_FOUND, 'Export not found.', 404, { exportId });
+  }
+}
+
+/** An export request matched zero transactions. */
+export class ExportNoDataError extends AppError {
+  constructor() {
+    super(
+      ERROR_CODES.EXPORT_NO_DATA,
+      'No transactions match these filters. Add data or widen the range.',
+      400,
+    );
+  }
+}
+
+/** An export file was expected in storage but is gone (expired/cleaned). */
+export class ExportFileMissingError extends AppError {
+  constructor(exportId: string) {
+    super(
+      ERROR_CODES.EXPORT_FAILED,
+      'The exported file is no longer available. Request a new export.',
+      404,
+      { exportId, reason: 'file_missing' },
+    );
+  }
+}

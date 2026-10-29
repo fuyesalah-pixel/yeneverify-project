@@ -104,7 +104,9 @@
   "EXPORT": {
     "EXPORT_NO_DATA": "No data available for the selected period.",
     "EXPORT_GENERATING": "Report is being generated. You will be notified when it is ready.",
-    "EXPORT_FAILED": "Report generation failed. Please try again."
+    "EXPORT_FAILED": "Report generation failed. Please try again.",
+    "EXPORT_TOO_LARGE": "The export would contain too many rows. Narrow the date range or use CSV.",
+    "EXPORT_NOT_FOUND": "The requested export was not found."
   },
 
   "GENERAL": {

@@ -928,6 +928,50 @@ paths:
       tags: *ref_13
       security:
         - access-token: []
+  /exports:
+    post:
+      operationId: ExportsController_create
+      summary: Request a CSV or PDF export (processed async)
+      parameters: []
+      responses:
+        '202':
+          description: Export queued
+        '400':
+          description: No data, or row cap exceeded (EXPORT_TOO_LARGE)
+        '422':
+          description: Validation failed (format, dates, range span)
+      tags: &ref_14
+        - Exports
+      security:
+        - access-token: []
+    get:
+      operationId: ExportsController_list
+      summary: List this merchant's past exports
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags: *ref_14
+      security:
+        - access-token: []
+  /exports/{id}:
+    get:
+      operationId: ExportsController_getById
+      summary: Get one export's status and download URL when ready
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Export detail (downloadUrl only when READY)
+        '404':
+          description: Not found in this tenant, or file missing
+      tags: *ref_14
+      security:
+        - access-token: []
 info:
   title: Yene Verify API
   description: Payment receipt verification for Ethiopian banks

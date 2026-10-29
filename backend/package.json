@@ -68,6 +68,7 @@
     "nestjs-pino": "^4.6.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
+    "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
     "pino": "^9.3.2",
     "pino-http": "^10.2.0",
