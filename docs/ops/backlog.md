@@ -226,6 +226,16 @@ sends. Wire the email provider behind the notification choke point
 with no devices. Trigger: launch, or first support request about
 "I never got notified".
 
+## 25. Shared test fixture helpers (DONE, 2026-10-29)
+
+[wrote test/fixtures/](../../backend/test/fixtures/) — generate-phone /
+generate-merchant (user + merchant + package + subscription + optional
+device/session + immutable GRANT credits) / generate-sub-merchant /
+generate-transaction (receipt → verification → transaction chain) /
+reset (soft rows only, ledger untouched). Notifications e2e refactored
+to use them as the pattern proof; fixtures.e2e-spec.ts tests the
+helpers themselves. Remaining suites migrate as they are touched.
+
 ## 19. Email notification fallback (post-Step 15)
 
 The push step stops at `pushError = 'no successful delivery'`; the row

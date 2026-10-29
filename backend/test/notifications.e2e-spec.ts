@@ -22,7 +22,7 @@
 import { Test } from '@nestjs/testing';
 import { INestApplication, VersioningType } from '@nestjs/common';
 import request from 'supertest';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import { AppModule } from '../src/app.module';
 import { AppConfigService } from '../src/config/config.service';
 import { PrismaService } from '../src/prisma/prisma.service';
@@ -32,6 +32,12 @@ import { MockFcmProvider } from '../src/notifications/fcm/fcm.provider.mock';
 import { FCM_PROVIDER } from '../src/notifications/fcm/fcm.provider';
 import { FcmTokenInvalidError } from '../src/notifications/fcm/fcm.errors';
 import { newId } from '../src/common/utils/id.util';
+import {
+  createMerchantFixture,
+  generatePhone,
+  resetFixtureState,
+  type MerchantFixture,
+} from './fixtures';
 
 jest.setTimeout(120_000);
 
@@ -45,14 +51,14 @@ describe('Notifications inbox + push (e2e, real DB, mock FCM)', () => {
   let mockFcm: MockFcmProvider;
   let accessToken: string;
 
-  const userId = newId();
-  const deviceId = newId();
-  const sessionId = newId();
-  const merchantId = newId();
-  const subscriptionId = newId();
+  // Fixture ids resolved in beforeAll via the shared helpers.
+  let fixture: MerchantFixture;
+  let userId: string;
+  let merchantId: string;
+  let deviceId: string;
+  let sessionId: string;
+  let PUSH_TOKEN: string;
   const foreignUserId = newId();
-
-  const PUSH_TOKEN = `fcm-e2e-${randomBytes(8).toString('hex')}`;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -74,85 +80,23 @@ describe('Notifications inbox + push (e2e, real DB, mock FCM)', () => {
     expect(mockFcm.name).toBe('mock'); // guard: a firebase provider in CI would be a real-send hazard
 
     // ── Fixture: merchant + owner with one registered device ────────────
-    await prisma.user.upsert({
-      where: { id: userId },
-      update: { status: 'ACTIVE', role: 'MERCHANT' },
-      create: {
-        id: userId,
-        phone: `+2519${Date.now().toString().slice(-8)}`,
-        phoneVerifiedAt: new Date(),
-        fullName: 'E2E Notifications Owner',
-        role: 'MERCHANT',
-        status: 'ACTIVE',
-      },
+    // Shared helper (test/fixtures) — per-run ids, valid phone, FK chain:
+    // user(MERCHANT) → merchant → package → ACTIVE subscription (+30d).
+    fixture = await createMerchantFixture(prisma, {
+      businessName: 'E2E Notifications Coffee',
+      withDevice: true,
     });
-    await prisma.merchant.upsert({
-      where: { id: merchantId },
-      update: { status: 'ACTIVE', subscriptionId },
-      create: {
-        id: merchantId,
-        ownerUserId: userId,
-        businessName: 'E2E Notifications Coffee',
-        status: 'ACTIVE',
-      },
-    });
-    await prisma.package.upsert({
-      where: { code: 'BUSINESS' },
-      update: {},
-      create: {
-        code: 'BUSINESS',
-        name: 'Business',
-        priceMinor: 99900n,
-        creditsPerMonth: 400,
-        unlimited: false,
-      },
-    });
-    await prisma.subscription.upsert({
-      where: { id: subscriptionId },
-      update: { status: 'ACTIVE', expiresAt: new Date(Date.now() + 30 * 86_400_000) },
-      create: {
-        id: subscriptionId,
-        merchantId,
-        packageCode: 'BUSINESS',
-        status: 'ACTIVE',
-        autoRenew: false,
-        startedAt: new Date(),
-        expiresAt: new Date(Date.now() + 30 * 86_400_000),
-      },
-    });
-    await prisma.merchant.update({ where: { id: merchantId }, data: { subscriptionId } });
-    await prisma.device.upsert({
-      where: { id: deviceId },
-      update: { revokedAt: null, pushToken: PUSH_TOKEN },
-      create: {
-        id: deviceId,
-        userId,
-        deviceFingerprint: `e2e-notif-${randomBytes(6).toString('hex')}`,
-        platform: 'ANDROID',
-        pushToken: PUSH_TOKEN,
-      },
-    });
-    await prisma.session.upsert({
-      where: { id: sessionId },
-      update: { revokedAt: null, expiresAt: new Date(Date.now() + 3_600_000) },
-      create: {
-        id: sessionId,
-        userId,
-        deviceId,
-        refreshTokenHash: createHash('sha256')
-          .update(`e2e-notif-refresh-${randomBytes(8).toString('hex')}`)
-          .digest('hex'),
-        expiresAt: new Date(Date.now() + 3_600_000),
-      },
-    });
+    userId = fixture.userId;
+    merchantId = fixture.merchantId;
+    deviceId = fixture.deviceId!;
+    sessionId = fixture.sessionId!;
+    PUSH_TOKEN = fixture.pushToken!;
 
     // A second, bare user with NO device — foreign-ownership + no-device cases.
-    await prisma.user.upsert({
-      where: { id: foreignUserId },
-      update: { status: 'ACTIVE' },
-      create: {
+    await prisma.user.create({
+      data: {
         id: foreignUserId,
-        phone: `+2519${(Date.now() + 1).toString().slice(-8)}`,
+        phone: generatePhone(),
         phoneVerifiedAt: new Date(),
         fullName: 'E2E Notifications Bare User',
         role: 'SUB_MERCHANT',
@@ -170,18 +114,12 @@ describe('Notifications inbox + push (e2e, real DB, mock FCM)', () => {
   }, 60_000);
 
   afterAll(async () => {
-    // Only cheap rows come home: unlike notification/device/session rows,
-    // merchant/subscription/user rows participate in the immutable-ledger
-    // and anti-tamper DB rules (audit_logs FK self-check rewrites deletes),
-    // so they stay behind — harmless with fresh per-run ids, the same
-    // policy as the credits and receipts suites.
-    await prisma.notification
-      .deleteMany({
-        where: { userId: { in: [userId, foreignUserId] } },
-      })
-      .catch(() => undefined);
-    await prisma.device.delete({ where: { id: deviceId } }).catch(() => undefined);
-    await prisma.session.delete({ where: { id: sessionId } }).catch(() => undefined);
+    // Only cheap rows come home (reset helper skips the immutable ledger
+    // and its rule-protected parents) — harmless with fresh per-run ids.
+    await resetFixtureState(prisma, {
+      userIds: [userId, foreignUserId],
+      merchantIds: [merchantId],
+    }).catch(() => undefined);
     await app.close();
   });
 
