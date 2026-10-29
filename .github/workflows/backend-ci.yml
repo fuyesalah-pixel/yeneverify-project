@@ -63,6 +63,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Check error-codes.json mirror sync
+        run: npm run export:error-codes -- --check
+
       - name: Type check
         run: npm run typecheck
 

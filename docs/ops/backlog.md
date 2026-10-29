@@ -47,21 +47,19 @@ Once one real M-Pesa or Zemen PDF is available from a live endpoint,
 replace the synthetic fixtures with sanitized real ones and re-run the
 two parser suites.
 
-## 6. Fix `npm run export:error-codes` (13E.1 follow-up)
+## 6. Fix `npm run export:error-codes` (13E.1 follow-up) — DONE, 2026-10-29
 
-The script execs `src/scripts/export-error-codes.ts`, which does not
-exist — it has never run. Until it does, the
-[shared/contracts/error-codes.json](../../shared/contracts/error-codes.json)
-mirror is maintained by hand and can silently drift from
-[error-codes.ts](../../backend/src/common/constants/error-codes.ts).
-Small fix: write the script (read ERROR_CODES, group by prefix, write
-the JSON).
+[wrote src/scripts/export-error-codes.ts](../../backend/src/scripts/export-error-codes.ts):
+reads ERROR_CODES, groups by prefix, regenerates the mirror with `--check`
+mode for CI. The hand-maintained mirror had drifted (AUTH_DEVICE_LIMIT vs
+AUTH_DEVICE_LIMIT_REACHED, VALIDATION_FAILED vs VALIDATION_ERROR, ~30
+missing codes); the generated shape is codes-only (descriptions were never
+in the TS source), schema v2.
 
-## 7. CI check: error-codes.json mirror sync
+## 7. CI check: error-codes.json mirror sync (DONE, 2026-10-29)
 
-Depends on item 6. Once the export script exists, add a CI check that
-regenerates the mirror from the TS constants and fails on diff — a
-hand-maintained mirror WILL eventually drift otherwise.
+backend-ci.yml lint job runs `npm run export:error-codes -- --check` and
+fails on mirror drift.
 
 ## 8. BullMQ dead-letter dashboard / admin retry UI (13E.3 follow-up)
 

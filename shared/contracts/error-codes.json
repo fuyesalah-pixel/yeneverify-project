@@ -1,122 +1,163 @@
 {
   "_meta": {
-    "description": "Canonical error codes for Yene Verify. Source of truth: backend/src/common/constants/error-codes.ts. Do not add codes here without adding them there first.",
-    "generatedFrom": "backend/src/common/constants/error-codes.ts",
-    "lastUpdated": "2026-10-25",
-    "version": "1.1.0"
+    "description": "Canonical error codes for Yene Verify, grouped by prefix. Source of truth: backend/src/common/constants/error-codes.ts — do not hand-edit.",
+    "generatedBy": "cd backend && npm run export:error-codes",
+    "schema": 2
   },
-
-  "AUTH": {
-    "AUTH_PHONE_INVALID": "Phone number is not a valid Ethiopian number (+251 format).",
-    "AUTH_OTP_SENT": "OTP sent successfully.",
-    "AUTH_OTP_INVALID": "The OTP entered is incorrect.",
-    "AUTH_OTP_EXPIRED": "The OTP has expired. Please request a new one.",
-    "AUTH_OTP_MAX_ATTEMPTS": "Too many incorrect OTP attempts. Please wait before trying again.",
-    "AUTH_OTP_RATE_LIMITED": "Too many OTP requests. Please wait before requesting again.",
-    "AUTH_TOKEN_INVALID": "Access token is invalid or expired.",
-    "AUTH_TOKEN_EXPIRED": "Access token has expired. Please refresh.",
-    "AUTH_REFRESH_INVALID": "Refresh token is invalid or has been revoked.",
-    "AUTH_REFRESH_EXPIRED": "Refresh token has expired. Please log in again.",
-    "AUTH_PIN_INVALID": "Incorrect PIN.",
-    "AUTH_PIN_ALREADY_SET": "PIN is already set. Use change PIN instead.",
-    "AUTH_PIN_NOT_SET": "PIN has not been set for this account.",
-    "AUTH_PIN_LOCKED": "Too many incorrect PIN attempts. Please wait before trying again.",
-    "AUTH_TOKEN_TOO_OLD": "Access token is too old. Please provide a fresh OTP.",
-    "AUTH_STEP_UP_REQUIRED": "Step-up authentication required.",
-    "AUTH_DEVICE_NOT_FOUND": "Device not found or already revoked.",
-    "AUTH_DEVICE_LIMIT_REACHED": "Maximum number of trusted devices reached (3). Please remove an existing device.",
-    "AUTH_DEVICE_MISMATCH": "Device fingerprint does not match.",
-    "AUTH_BIOMETRIC_FAILED": "Biometric authentication failed.",
-    "AUTH_BIOMETRIC_NOT_ENABLED": "Biometric unlock is not enabled.",
-    "AUTH_SESSION_EXPIRED": "Session has expired. Please log in again."
-  },
-
-  "VERIFICATION": {
-    "VERIFICATION_NOT_FOUND": "Verification record not found.",
-    "VERIFICATION_QUEUE_FAILURE": "A queue error occurred on our side. Please retry the verification.",
-    "VERIFICATION_NOT_PENDING": "This verification has already been processed.",
-    "VERIFICATION_NOT_RETRYABLE": "Only failed or under-review verifications can be retried.",
-    "VERIFICATION_NOT_REVIEWABLE": "This verification cannot be flagged for manual review.",
-    "VERIFICATION_MANUAL_REVIEW": "This verification is flagged for manual review by our team.",
-    "VERIFICATION_RECEIPT_MISSING": "The receipt for this verification no longer exists.",
-    "VERIFICATION_PENDING": "Verification is still in progress.",
-    "VERIFICATION_DUPLICATE": "This receipt has already been verified.",
-    "VERIFICATION_FAKE": "Receipt could not be verified against bank records.",
-    "VERIFICATION_BANK_UNREACHABLE": "Could not reach the bank's verification endpoint. Please try again.",
-    "VERIFICATION_OCR_FAILED": "Could not extract text from the receipt image. Please upload a clearer photo.",
-    "VERIFICATION_BANK_NOT_DETECTED": "Could not identify the bank from the receipt. Supported banks: CBE, Telebirr, Awash, Dashen, Abyssinia, M-Pesa, Zemen.",
-    "VERIFICATION_REFERENCE_NOT_FOUND": "Transaction reference not found in bank records.",
-    "VERIFICATION_AMOUNT_MISMATCH": "Receipt amount does not match bank records.",
-    "VERIFICATION_NO_CREDITS": "No verification credits remaining. Please renew your package.",
-    "VERIFICATION_UPLOAD_URL_EXPIRED": "The upload URL has expired. Please request a new one.",
-    "VERIFICATION_IMAGE_TOO_LARGE": "Receipt image is too large. Maximum size is 10MB.",
-    "VERIFICATION_IMAGE_INVALID_FORMAT": "Invalid image format. Please upload a JPEG image."
-  },
-
-  "BILLING": {
-    "BILLING_PAYMENT_NOT_VERIFIED": "Payment receipt could not be verified.",
-    "BILLING_AMOUNT_MISMATCH": "Payment amount does not match the selected package price.",
-    "BILLING_RECEIPT_ALREADY_USED": "This payment receipt has already been used for a subscription.",
-    "BILLING_PACKAGE_NOT_FOUND": "Subscription package not found.",
-    "BILLING_SUBSCRIPTION_ACTIVE": "You already have an active subscription for this package.",
-    "BILLING_MANUAL_REVIEW_REQUIRED": "Your payment is under manual review. You will be notified once approved."
-  },
-
-  "CREDITS": {
-    "CREDITS_INSUFFICIENT": "Insufficient verification credits.",
-    "CREDITS_LEDGER_ERROR": "An error occurred while processing credits. No charges were made.",
-    "CREDITS_INVALID_AMOUNT": "Credit amount must be positive.",
-    "CREDITS_SUBSCRIPTION_EXPIRED": "Your subscription has expired. Renew to continue verifying receipts.",
-    "CREDITS_RECONCILIATION_FAILED": "Could not reconcile the credit balance. Please try again."
-  },
-
-  "MERCHANT": {
-    "MERCHANT_NOT_FOUND": "Merchant not found.",
-    "MERCHANT_SUSPENDED": "This merchant account has been suspended.",
-    "MERCHANT_PROFILE_INCOMPLETE": "Please complete your merchant profile before proceeding.",
-    "MERCHANT_ALREADY_ONBOARDED": "Merchant is already onboarded."
-  },
-
-  "SUB_MERCHANT": {
-    "SUB_MERCHANT_NOT_FOUND": "Team member not found.",
-    "SUB_MERCHANT_ALREADY_EXISTS": "A team member with this phone number already exists.",
-    "SUB_MERCHANT_LIMIT_REACHED": "Maximum number of team members reached for your plan.",
-    "SUB_MERCHANT_PERMISSION_DENIED": "You do not have permission to manage team members.",
-    "SUB_MERCHANT_NOT_ACTIVE": "Sub-merchant profile is not active."
-  },
-
-  "ONBOARDING": {
-    "ONBOARDING_REQUIRED": "Onboarding required to access this resource.",
-    "MERCHANT_ALREADY_ONBOARDED": "Merchant is already onboarded.",
-    "SUB_MERCHANT_EXISTS": "A team member with this phone number already exists.",
-    "SUB_MERCHANT_NOT_ACTIVE": "Sub-merchant profile is not active.",
-    "AUTH_INVITE_EXPIRED": "The invite token has expired. Please request a new invite.",
-    "AUTH_INVITE_CONSUMED": "This invite has already been used.",
-    "AUTH_INVITE_INVALID": "Invalid invite token.",
-    "PLAN_LIMIT_SUB_MERCHANTS": "Your current plan does not allow more team members."
-  },
-
-  "ANALYTICS": {
-    "ANALYTICS_INSUFFICIENT_DATA": "Not enough verified transactions to generate insights.",
-    "ANALYTICS_PERMISSION_DENIED": "Analytics are only available to merchants, not team members."
-  },
-
-  "EXPORT": {
-    "EXPORT_NO_DATA": "No data available for the selected period.",
-    "EXPORT_GENERATING": "Report is being generated. You will be notified when it is ready.",
-    "EXPORT_FAILED": "Report generation failed. Please try again.",
-    "EXPORT_TOO_LARGE": "The export would contain too many rows. Narrow the date range or use CSV.",
-    "EXPORT_NOT_FOUND": "The requested export was not found."
-  },
-
-  "GENERAL": {
-    "VALIDATION_ERROR": "One or more fields failed validation.",
-    "NOT_FOUND": "The requested resource was not found.",
-    "FORBIDDEN": "You do not have permission to perform this action.",
-    "UNAUTHORIZED": "Authentication is required.",
-    "RATE_LIMITED": "Too many requests. Please slow down.",
-    "INTERNAL_ERROR": "An unexpected error occurred. Our team has been notified.",
-    "SERVICE_UNAVAILABLE": "The service is temporarily unavailable. Please try again later.",
-    "TENANT_ISOLATION_VIOLATION": "Access denied. You can only access your own data."
-  }
+  "ANALYTICS": [
+    "ANALYTICS_INSUFFICIENT_DATA",
+    "ANALYTICS_PERMISSION_DENIED"
+  ],
+  "AUTH": [
+    "AUTH_ACCOUNT_BANNED",
+    "AUTH_ACCOUNT_DELETED",
+    "AUTH_ACCOUNT_SUSPENDED",
+    "AUTH_BIOMETRIC_FAILED",
+    "AUTH_BIOMETRIC_NOT_ENABLED",
+    "AUTH_DEVICE_LIMIT",
+    "AUTH_DEVICE_MISMATCH",
+    "AUTH_DEVICE_NOT_FOUND",
+    "AUTH_DEVICE_REVOKED",
+    "AUTH_INVALID_OTP",
+    "AUTH_INVITE_CONSUMED",
+    "AUTH_INVITE_EXPIRED",
+    "AUTH_INVITE_INVALID",
+    "AUTH_OTP_EXPIRED",
+    "AUTH_OTP_INVALID",
+    "AUTH_OTP_MAX_ATTEMPTS",
+    "AUTH_OTP_RATE_LIMITED",
+    "AUTH_OTP_SENT",
+    "AUTH_PHONE_INVALID",
+    "AUTH_PIN_ALREADY_SET",
+    "AUTH_PIN_INVALID",
+    "AUTH_PIN_LOCKED",
+    "AUTH_PIN_MAX_ATTEMPTS",
+    "AUTH_PIN_NOT_SET",
+    "AUTH_REFRESH_EXPIRED",
+    "AUTH_REFRESH_INVALID",
+    "AUTH_REFRESH_REUSE_DETECTED",
+    "AUTH_SESSION_EXPIRED",
+    "AUTH_STEP_UP_REQUIRED",
+    "AUTH_TOKEN_EXPIRED",
+    "AUTH_TOKEN_INVALID",
+    "AUTH_TOKEN_TOO_OLD"
+  ],
+  "BANK": [
+    "BANK_ADAPTER_ERROR",
+    "BANK_ADAPTER_NOT_FOUND",
+    "BANK_ADAPTER_TIMEOUT",
+    "BANK_ADAPTER_UNAVAILABLE",
+    "BANK_REFERENCE_INVALID",
+    "BANK_REFERENCE_NOT_FOUND",
+    "BANK_SUPPLEMENTARY_INVALID",
+    "BANK_SUPPLEMENTARY_REQUIRED"
+  ],
+  "BILLING": [
+    "BILLING_AMOUNT_MISMATCH",
+    "BILLING_MANUAL_REVIEW_REQUIRED",
+    "BILLING_PACKAGE_NOT_FOUND",
+    "BILLING_PACKAGE_NOT_PURCHASABLE",
+    "BILLING_PAYMENT_NOT_VERIFIED",
+    "BILLING_RECEIPT_ALREADY_USED",
+    "BILLING_SESSION_NOT_FOUND",
+    "BILLING_SESSION_NOT_PENDING",
+    "BILLING_SUBSCRIPTION_ACTIVE"
+  ],
+  "CONFLICT": [
+    "CONFLICT"
+  ],
+  "CREDITS": [
+    "CREDITS_INSUFFICIENT",
+    "CREDITS_INVALID_AMOUNT",
+    "CREDITS_LEDGER_ERROR",
+    "CREDITS_RECONCILIATION_FAILED",
+    "CREDITS_SUBSCRIPTION_EXPIRED"
+  ],
+  "EXPORT": [
+    "EXPORT_FAILED",
+    "EXPORT_GENERATING",
+    "EXPORT_NO_DATA",
+    "EXPORT_NOT_FOUND",
+    "EXPORT_TOO_LARGE"
+  ],
+  "FORBIDDEN": [
+    "FORBIDDEN"
+  ],
+  "INTERNAL": [
+    "INTERNAL_ERROR"
+  ],
+  "MERCHANT": [
+    "MERCHANT_ALREADY_ONBOARDED",
+    "MERCHANT_NOT_FOUND",
+    "MERCHANT_NOT_ONBOARDED",
+    "MERCHANT_PROFILE_INCOMPLETE",
+    "MERCHANT_SUSPENDED"
+  ],
+  "NOT": [
+    "NOT_FOUND"
+  ],
+  "OCR": [
+    "OCR_EMPTY_RESULT",
+    "OCR_PROVIDER_ERROR"
+  ],
+  "ONBOARDING": [
+    "ONBOARDING_REQUIRED"
+  ],
+  "PLAN": [
+    "PLAN_LIMIT_SUB_MERCHANTS"
+  ],
+  "RATE": [
+    "RATE_LIMITED"
+  ],
+  "RECEIPT": [
+    "RECEIPT_HASH_MISMATCH",
+    "RECEIPT_INVALID_TYPE",
+    "RECEIPT_NOT_FOUND",
+    "RECEIPT_NOT_UPLOADED",
+    "RECEIPT_TOO_LARGE"
+  ],
+  "SERVICE": [
+    "SERVICE_UNAVAILABLE"
+  ],
+  "STORAGE": [
+    "STORAGE_DRIVER_ERROR"
+  ],
+  "SUB_MERCHANT": [
+    "SUB_MERCHANT_ALREADY_EXISTS",
+    "SUB_MERCHANT_EXISTS",
+    "SUB_MERCHANT_LIMIT_REACHED",
+    "SUB_MERCHANT_NOT_ACTIVE",
+    "SUB_MERCHANT_NOT_FOUND",
+    "SUB_MERCHANT_PERMISSION_DENIED"
+  ],
+  "TENANT": [
+    "TENANT_ISOLATION_VIOLATION"
+  ],
+  "UNAUTHORIZED": [
+    "UNAUTHORIZED"
+  ],
+  "VALIDATION": [
+    "VALIDATION_FAILED"
+  ],
+  "VERIFICATION": [
+    "VERIFICATION_AMOUNT_MISMATCH",
+    "VERIFICATION_BANK_NOT_DETECTED",
+    "VERIFICATION_BANK_UNREACHABLE",
+    "VERIFICATION_DUPLICATE",
+    "VERIFICATION_FAKE",
+    "VERIFICATION_IMAGE_INVALID_FORMAT",
+    "VERIFICATION_IMAGE_TOO_LARGE",
+    "VERIFICATION_MANUAL_REVIEW",
+    "VERIFICATION_NO_CREDITS",
+    "VERIFICATION_NOT_FOUND",
+    "VERIFICATION_NOT_PENDING",
+    "VERIFICATION_NOT_RETRYABLE",
+    "VERIFICATION_NOT_REVIEWABLE",
+    "VERIFICATION_OCR_FAILED",
+    "VERIFICATION_PENDING",
+    "VERIFICATION_QUEUE_FAILURE",
+    "VERIFICATION_RECEIPT_MISSING",
+    "VERIFICATION_REFERENCE_NOT_FOUND",
+    "VERIFICATION_UPLOAD_URL_EXPIRED"
+  ]
 }
