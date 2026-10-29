@@ -802,6 +802,43 @@ paths:
       tags: *ref_11
       security:
         - access-token: []
+  /packages:
+    get:
+      operationId: PackagesController_list
+      summary: List all active packages (public pricing page)
+      parameters: []
+      responses:
+        '200':
+          description: Active packages, displayOrder ASC
+      tags: &ref_12
+        - Packages
+  /packages/{code}:
+    get:
+      operationId: PackagesController_findOne
+      summary: Get one package by code (public)
+      parameters:
+        - name: code
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Package detail
+        '404':
+          description: Unknown or inactive package
+      tags: *ref_12
+  /subscription/me:
+    get:
+      operationId: PackagesController_getMe
+      summary: Get the current merchant's subscription state
+      parameters: []
+      responses:
+        '200':
+          description: Subscription state (all-null pre-onboarding)
+      tags: *ref_12
+      security:
+        - access-token: []
 info:
   title: Yene Verify API
   description: Payment receipt verification for Ethiopian banks

@@ -184,6 +184,21 @@ in place (see below).
       credits notifications all writing through `notify()`.
 - [ ] Email fallback for users with no devices — new item (below).
 
+## 20. Evaluate time-staged credit delivery for multi-month prepayments (Step 17 addition)
+
+Current MVP rule: each approved billing grants the package's credit
+allotment immediately, regardless of timing (two BUSINESS payments in the
+same month = 800 credits, subscription expiry still extends +30d per
+payment). Alternative models:
+
+- (a) stage per-month credits: grant 400 now, 400 when the second month starts (needs a scheduler);
+- (b) extend the subscription without adding credits (current-ish, but credits never stack);
+- (c) keep the MVP rule (credited immediately — merchant-friendly, simplest ledger).
+
+Decide based on real merchant behavior post-launch; refund/void policy for
+over-granting is part of the same decision. Trigger: first multi-payment
+month for the same merchant.
+
 ## 19. Email notification fallback (post-Step 15)
 
 The push step stops at `pushError = 'no successful delivery'`; the row

@@ -31,6 +31,7 @@ import { CreditsModule } from './credits/credits.module';
 import { CreditsJobsModule } from './credits/credits-jobs.module';
 import { BillingModule } from './billing/billing.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { PackagesModule } from './packages/packages.module';
 
 import { RootController } from './root/root.controller';
 import { VersionController } from './version/version.controller';
@@ -94,9 +95,10 @@ import { buildLoggerOptions } from './common/logger/logger.config';
     CreditsModule,
     CreditsJobsModule,
     BillingModule,
+    PackagesModule,
     NotificationsModule,
 
-    // Feature modules added here in Steps 13+:
+    // Feature modules added here in Steps 18+:
     // TransactionsModule,
     // AnalyticsModule,
     // ExportsModule,
