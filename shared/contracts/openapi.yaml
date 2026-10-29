@@ -839,6 +839,95 @@ paths:
       tags: *ref_12
       security:
         - access-token: []
+  /analytics/summary:
+    get:
+      operationId: AnalyticsController_summary
+      summary: Verified volume totals over a date range
+      parameters: []
+      responses:
+        '200':
+          description: Summary metrics
+      tags: &ref_13
+        - Analytics
+      security:
+        - access-token: []
+  /analytics/best-products:
+    get:
+      operationId: AnalyticsController_bestProducts
+      summary: Top products by verified amount (top 10)
+      parameters: []
+      responses:
+        '200':
+          description: Best product list
+      tags: *ref_13
+      security:
+        - access-token: []
+  /analytics/peak-hours:
+    get:
+      operationId: AnalyticsController_peakHours
+      summary: Hourly verified volume (Addis Ababa local time)
+      parameters: []
+      responses:
+        '200':
+          description: 24 hour buckets
+      tags: *ref_13
+      security:
+        - access-token: []
+  /analytics/best-days:
+    get:
+      operationId: AnalyticsController_bestDays
+      summary: Day-of-week verified volume (ISO, Mon=1..Sun=7)
+      parameters: []
+      responses:
+        '200':
+          description: 7 day buckets
+      tags: *ref_13
+      security:
+        - access-token: []
+  /analytics/best-months:
+    get:
+      operationId: AnalyticsController_bestMonths
+      summary: Per-month verified volume in range
+      parameters: []
+      responses:
+        '200':
+          description: Month buckets
+      tags: *ref_13
+      security:
+        - access-token: []
+  /analytics/trend:
+    get:
+      operationId: AnalyticsController_trend
+      summary: Current vs previous equal-length period delta
+      parameters: []
+      responses:
+        '200':
+          description: Trend comparison
+      tags: *ref_13
+      security:
+        - access-token: []
+  /analytics/anomalies:
+    get:
+      operationId: AnalyticsController_anomalies
+      summary: Daily-volume Z-score anomalies (|z| >= 2.5, needs 7+ days)
+      parameters: []
+      responses:
+        '200':
+          description: Anomalous days
+      tags: *ref_13
+      security:
+        - access-token: []
+  /analytics/recommendations:
+    get:
+      operationId: AnalyticsController_recommendations
+      summary: Rule-based recommendations (0-5 items)
+      parameters: []
+      responses:
+        '200':
+          description: Recommendation list
+      tags: *ref_13
+      security:
+        - access-token: []
 info:
   title: Yene Verify API
   description: Payment receipt verification for Ethiopian banks

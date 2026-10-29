@@ -199,6 +199,24 @@ Decide based on real merchant behavior post-launch; refund/void policy for
 over-granting is part of the same decision. Trigger: first multi-payment
 month for the same merchant.
 
+## 22. Extend product analytics to sender/receiver grouping when product_label adoption is low (Step 18)
+
+GET /analytics/best-products groups ONLY by product_label (MVP rule); rows
+with a null label are invisible to that endpoint. If field observation opens
+showing low tagging adoption, add a complementary best-senders /
+best-receivers grouping so the endpoint stops returning near-empty lists.
+Trigger: <30% of rows tagged across the first real merchants.
+
+## 23. Use analytics_snapshots precomputation when query latency matters (Step 18)
+
+Step 18 computes all 8 insight endpoints on demand via the existing
+transactions indexes ((merchant_id, paid_at), (merchant_id, status)) — no
+snapshot writes, no cache. The analytics_snapshots table from Step 5 is
+idle. If p95 endpoint latency degrades once data grows (365-day ranges ×
+tens of thousands of rows/merchant), wire a nightly snapshot writer and
+have the service read snapshots first, compute on demand only when a
+snapshot is stale. Trigger: measured p95 > 500ms on any analytics endpoint.
+
 ## 19. Email notification fallback (post-Step 15)
 
 The push step stops at `pushError = 'no successful delivery'`; the row
