@@ -98,6 +98,9 @@ describe('VerificationProcessor', () => {
     notifyExhausted: jest.fn().mockResolvedValue(undefined),
     notifyLowBalance: jest.fn().mockResolvedValue(undefined),
   };
+  const billingMock = {
+    handleVerificationResultForVerification: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -113,6 +116,7 @@ describe('VerificationProcessor', () => {
       creditsMock as never,
       auditMock as never,
       notificationsMock as never,
+      billingMock as never,
     );
   });
 
@@ -407,5 +411,103 @@ describe('VerificationProcessor', () => {
     // accounting event — consumed_failed must stay reserved for
     // ledger/consume errors.
     expect(auditMock.log).not.toHaveBeenCalled();
+  });
+
+  // ── 16 — source=BILLING routing (the money-in loop) ──────────────────
+
+  describe('source=BILLING', () => {
+    it('routes the verdict to BillingService with the extracted facts', async () => {
+      repoMock.loadForProcessing.mockResolvedValue(pendingLoad(makeRow({ source: 'BILLING' })));
+      serviceMock.process.mockResolvedValue(
+        result({ status: 'VERIFIED', amountMinor: 99900n, bankCode: 'CBE' as never }),
+      );
+
+      await expect(processor.process(makeJob('vid-1', 0))).resolves.toBeUndefined();
+
+      expect(billingMock.handleVerificationResultForVerification).toHaveBeenCalledTimes(1);
+      expect(billingMock.handleVerificationResultForVerification).toHaveBeenCalledWith(
+        'vid-1',
+        expect.objectContaining({
+          status: 'VERIFIED',
+          amountMinor: 99900n,
+          bankCode: 'CBE',
+        }),
+      );
+    });
+
+    it('NEVER consumes credits — the merchant is BUYING credits (Step 16 policy)', async () => {
+      repoMock.loadForProcessing.mockResolvedValue(pendingLoad(makeRow({ source: 'BILLING' })));
+      serviceMock.process.mockResolvedValue(result({ status: 'VERIFIED' }));
+
+      await processor.process(makeJob('vid-1', 0));
+
+      expect(creditsMock.consume).not.toHaveBeenCalled();
+      expect(notificationsMock.notifyExhausted).not.toHaveBeenCalled();
+      expect(notificationsMock.notifyLowBalance).not.toHaveBeenCalled();
+    });
+
+    it('FAKE verdict on a billing: handler fires, no consume, no generic verdict push', async () => {
+      repoMock.loadForProcessing.mockResolvedValue(pendingLoad(makeRow({ source: 'BILLING' })));
+      serviceMock.process.mockResolvedValue(result({ status: 'FAKE' }));
+
+      await processor.process(makeJob('vid-1', 0));
+
+      expect(billingMock.handleVerificationResultForVerification).toHaveBeenCalledWith(
+        'vid-1',
+        expect.objectContaining({ status: 'FAKE' }),
+      );
+      expect(creditsMock.consume).not.toHaveBeenCalled();
+      // Billing copy comes from the handler; the generic verdict push is noise.
+      expect(notificationsMock.notify).not.toHaveBeenCalled();
+    });
+
+    it('retryable ERROR attempt 1 → throws (job retries), billing handler NOT yet called', async () => {
+      repoMock.loadForProcessing.mockResolvedValue(pendingLoad(makeRow({ source: 'BILLING' })));
+      serviceMock.process.mockResolvedValue(
+        result({ status: 'ERROR', errorCode: 'BANK_ADAPTER_TIMEOUT' }),
+      );
+
+      await expect(processor.process(makeJob('vid-1', 0))).rejects.toBeInstanceOf(
+        RetryableJobError,
+      );
+      expect(billingMock.handleVerificationResultForVerification).not.toHaveBeenCalled();
+    });
+
+    it('retryable ERROR attempts exhausted → billing handler called with ERROR', async () => {
+      repoMock.loadForProcessing.mockResolvedValue(pendingLoad(makeRow({ source: 'BILLING' })));
+      serviceMock.process.mockResolvedValue(
+        result({ status: 'ERROR', errorCode: 'BANK_ADAPTER_TIMEOUT' }),
+      );
+
+      await expect(processor.process(makeJob('vid-1', 2))).resolves.toBeUndefined();
+      expect(billingMock.handleVerificationResultForVerification).toHaveBeenCalledWith(
+        'vid-1',
+        expect.objectContaining({ status: 'ERROR' }),
+      );
+    });
+
+    it('a billing-handler crash does NOT fail the job (re-running would re-verify the payment)', async () => {
+      repoMock.loadForProcessing.mockResolvedValue(pendingLoad(makeRow({ source: 'BILLING' })));
+      serviceMock.process.mockResolvedValue(result({ status: 'VERIFIED' }));
+      billingMock.handleVerificationResultForVerification.mockRejectedValue(
+        new Error('ledger write failed'),
+      );
+
+      await expect(processor.process(makeJob('vid-1', 0))).resolves.toBeUndefined();
+      // No markErrorIfPending: the verdict itself committed fine.
+      expect(repoMock.markErrorIfPending).not.toHaveBeenCalled();
+      expect(auditMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'billing.settle_failed',
+          targetType: 'verification',
+          targetId: 'vid-1',
+        }),
+      );
+    });
+
+    it('TRANSACTION source never reaches the billing handler', async () => {
+      await processor.process(makeJob('vid-1', 0));
+      expect(billingMock.handleVerificationResultForVerification).not.toHaveBeenCalled();
+    });
   });
 });

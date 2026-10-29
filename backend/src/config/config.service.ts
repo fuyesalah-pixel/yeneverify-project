@@ -56,6 +56,7 @@ export class AppConfigService {
       features: this.features,
       bankAdapters: this.bankAdapters,
       queue: this.queue,
+      payment: this.payment,
       adminBootstrap: this.adminBootstrap,
     } as const;
   }
@@ -223,6 +224,16 @@ export class AppConfigService {
       // boolean so existing env files keep working unmodified.
       provider: this.value('FCM_PROVIDER'),
       mock: this.value('FCM_MOCK'),
+    } as const;
+  }
+
+  // ── Payment destinations (Step 16 billing flow) ─────────────────────────
+  get payment() {
+    return {
+      accountName: this.value('PAYMENT_ACCOUNT_NAME'),
+      destinationCbe: this.value('PAYMENT_DESTINATION_CBE'),
+      destinationTelebirr: this.value('PAYMENT_DESTINATION_TELEBIRR'),
+      instructionsNote: this.value('PAYMENT_INSTRUCTIONS_NOTE'),
     } as const;
   }
 

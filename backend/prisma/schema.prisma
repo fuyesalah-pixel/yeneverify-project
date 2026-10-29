@@ -521,19 +521,24 @@ model BillingVerification {
   bankCode             BankCode?     @map("bank_code")
   bankReference        String?       @map("bank_reference")
   paidAt               DateTime?     @map("paid_at") @db.Timestamptz(6)
-  receiptId            String        @map("receipt_id") @db.Uuid
+  // Nullable: initiate() creates the session BEFORE the screenshot
+  // exists; submit() fills it in (migration 20261028000000).
+  receiptId            String?       @map("receipt_id") @db.Uuid
   verificationId       String?       @unique @map("verification_id") @db.Uuid
   status               BillingStatus @default(PENDING)
   reviewerUserId       String?       @map("reviewer_user_id") @db.Uuid
   reviewedAt           DateTime?     @map("reviewed_at") @db.Timestamptz(6)
-  reviewNote           String?       @map("review_note")
-  subscriptionId       String?       @unique @map("subscription_id") @db.Uuid
+  reviewNote           String?       @map("review_note")  // NOT unique: one extended (renewed) subscription is the target of
+  // several approved billing rows — a renewal billing links the SAME
+  // subscription id again. Uniqueness here made the second approval
+  // throw U-2350; multiple billings → one subscription, one merchant.
+  subscriptionId       String?       @map("subscription_id") @db.Uuid
   createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt            DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   merchant      Merchant            @relation(fields: [merchantId], references: [id])
   package       Package             @relation(fields: [packageCode], references: [code])
-  receipt       Receipt             @relation(fields: [receiptId], references: [id])
+  receipt       Receipt?            @relation(fields: [receiptId], references: [id])
   verification  Verification?       @relation(fields: [verificationId], references: [id])
   reviewer      User?               @relation("BillingReviewer", fields: [reviewerUserId], references: [id])
   subscription  Subscription?       @relation(fields: [subscriptionId], references: [id])
@@ -546,6 +551,7 @@ model BillingVerification {
   @@index([receiptId])
   @@index([reviewerUserId])
   @@index([bankReference])
+  @@index([subscriptionId])
   @@map("billing_verifications")
 }
 

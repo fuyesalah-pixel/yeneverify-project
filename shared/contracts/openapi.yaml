@@ -230,6 +230,64 @@ paths:
       tags: *ref_2
       security:
         - access-token: []
+  /billing/initiate:
+    post:
+      operationId: BillingController_initiate
+      summary: Get payment instructions and open a billing session
+      parameters: []
+      responses:
+        '200':
+          description: Instructions + billingSessionId
+        '400':
+          description: Package not purchasable (FREE / API / no price)
+      tags: &ref_3
+        - Billing
+      security:
+        - access-token: []
+  /billing/submit:
+    post:
+      operationId: BillingController_submit
+      summary: Submit the payment screenshot for verification
+      parameters: []
+      responses:
+        '202':
+          description: Verification queued
+        '404':
+          description: Billing session or receipt not found
+        '409':
+          description: Session closed or receipt already used
+      tags: *ref_3
+      security:
+        - access-token: []
+  /billing/{id}:
+    get:
+      operationId: BillingController_getById
+      summary: Get one billing session's status
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Billing session detail
+        '404':
+          description: Not found in this tenant
+      tags: *ref_3
+      security:
+        - access-token: []
+  /billing:
+    get:
+      operationId: BillingController_list
+      summary: List the merchant's billing attempts
+      parameters: []
+      responses:
+        '200':
+          description: Paginated billing list
+      tags: *ref_3
+      security:
+        - access-token: []
   /health:
     get:
       operationId: HealthController_liveness
@@ -238,7 +296,7 @@ paths:
       responses:
         '200':
           description: ''
-      tags: &ref_6
+      tags: &ref_7
         - Health
   /health/ready:
     get:
@@ -258,8 +316,8 @@ paths:
                     example: ok
                   info:
                     type: object
-                    example: &ref_3
-                      database: &ref_4
+                    example: &ref_4
+                      database: &ref_5
                         status: up
                     additionalProperties:
                       type: object
@@ -284,7 +342,7 @@ paths:
                     nullable: true
                   details:
                     type: object
-                    example: *ref_3
+                    example: *ref_4
                     additionalProperties:
                       type: object
                       required:
@@ -305,7 +363,7 @@ paths:
                     example: error
                   info:
                     type: object
-                    example: *ref_3
+                    example: *ref_4
                     additionalProperties:
                       type: object
                       required:
@@ -318,7 +376,7 @@ paths:
                   error:
                     type: object
                     example:
-                      redis: &ref_5
+                      redis: &ref_6
                         status: down
                         message: Could not connect
                     additionalProperties:
@@ -333,8 +391,8 @@ paths:
                   details:
                     type: object
                     example:
-                      database: *ref_4
-                      redis: *ref_5
+                      database: *ref_5
+                      redis: *ref_6
                     additionalProperties:
                       type: object
                       required:
@@ -343,7 +401,7 @@ paths:
                         status:
                           type: string
                       additionalProperties: true
-      tags: *ref_6
+      tags: *ref_7
   /auth/request-otp:
     post:
       operationId: AuthController_requestOtp
@@ -354,7 +412,7 @@ paths:
           description: OTP sent successfully
         '429':
           description: Rate limited
-      tags: &ref_7
+      tags: &ref_8
         - Auth
   /auth/verify-otp:
     post:
@@ -368,7 +426,7 @@ paths:
           description: Invalid or expired OTP
         '429':
           description: Rate limited or locked out
-      tags: *ref_7
+      tags: *ref_8
   /auth/refresh:
     post:
       operationId: AuthController_refresh
@@ -379,7 +437,7 @@ paths:
           description: New tokens issued
         '401':
           description: Invalid or expired refresh token
-      tags: *ref_7
+      tags: *ref_8
   /auth/logout:
     post:
       operationId: AuthController_logout
@@ -388,7 +446,7 @@ paths:
       responses:
         '204':
           description: Logged out
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/logout-all:
@@ -399,7 +457,7 @@ paths:
       responses:
         '204':
           description: All sessions revoked
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/devices:
@@ -410,7 +468,7 @@ paths:
       responses:
         '200':
           description: List of active devices
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/devices/{id}:
@@ -426,7 +484,7 @@ paths:
       responses:
         '204':
           description: Device revoked
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/me:
@@ -437,7 +495,7 @@ paths:
       responses:
         '200':
           description: Current user profile
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/me/language:
@@ -448,7 +506,7 @@ paths:
       responses:
         '200':
           description: Language updated
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/pin/set:
@@ -463,7 +521,7 @@ paths:
           description: PIN already set or weak PIN
         '429':
           description: Rate limited or token too old
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/pin/verify:
@@ -478,7 +536,7 @@ paths:
           description: Invalid or expired PIN
         '429':
           description: Locked out
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/pin/change:
@@ -496,7 +554,7 @@ paths:
           description: PIN changed, other sessions revoked
         '401':
           description: Invalid current PIN or missing step-up
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/pin/reset:
@@ -509,7 +567,7 @@ paths:
           description: PIN reset, all sessions revoked
         '400':
           description: Invalid OTP
-      tags: *ref_7
+      tags: *ref_8
   /auth/biometric/enable:
     post:
       operationId: AuthController_enableBiometric
@@ -525,7 +583,7 @@ paths:
           description: Biometric enabled
         '401':
           description: Missing or invalid step-up token
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/biometric/disable:
@@ -543,7 +601,7 @@ paths:
           description: Biometric disabled
         '401':
           description: Missing or invalid step-up token
-      tags: *ref_7
+      tags: *ref_8
       security:
         - access-token: []
   /auth/step-up/biometric:
@@ -556,7 +614,7 @@ paths:
           description: Step-up token issued
         '401':
           description: Invalid refresh token or device mismatch
-      tags: *ref_7
+      tags: *ref_8
   /auth/unlock:
     post:
       operationId: AuthController_unlock
@@ -567,7 +625,7 @@ paths:
           description: New tokens issued
         '401':
           description: Invalid token, device mismatch, or no PIN
-      tags: *ref_7
+      tags: *ref_8
   /onboarding/status:
     get:
       operationId: OnboardingController_getStatus
@@ -576,7 +634,7 @@ paths:
       responses:
         '200':
           description: Onboarding status for the current user
-      tags: &ref_8
+      tags: &ref_9
         - Onboarding
       security:
         - access-token: []
@@ -592,7 +650,7 @@ paths:
           description: Validation failed
         '409':
           description: Merchant already onboarded
-      tags: *ref_8
+      tags: *ref_9
       security:
         - access-token: []
   /sub-merchants/invite:
@@ -607,7 +665,7 @@ paths:
           description: Plan limit reached
         '409':
           description: Sub-merchant already exists
-      tags: &ref_9
+      tags: &ref_10
         - Sub-Merchants
       security:
         - access-token: []
@@ -619,7 +677,7 @@ paths:
       responses:
         '200':
           description: Paginated list (phones masked)
-      tags: *ref_9
+      tags: *ref_10
       security:
         - access-token: []
   /sub-merchants/{id}:
@@ -637,7 +695,7 @@ paths:
           description: Detail (phone masked)
         '404':
           description: Not found
-      tags: *ref_9
+      tags: *ref_10
       security:
         - access-token: []
     patch:
@@ -654,7 +712,7 @@ paths:
           description: Updated
         '404':
           description: Not found
-      tags: *ref_9
+      tags: *ref_10
       security:
         - access-token: []
     delete:
@@ -671,7 +729,7 @@ paths:
           description: Removed
         '404':
           description: Not found
-      tags: *ref_9
+      tags: *ref_10
       security:
         - access-token: []
   /sub-merchants/invites/{id}/resend:
@@ -691,7 +749,7 @@ paths:
           description: Max resends reached
         '404':
           description: Invite not found
-      tags: *ref_9
+      tags: *ref_10
       security:
         - access-token: []
   /sub-merchants/accept:
@@ -706,7 +764,7 @@ paths:
           description: Invalid/expired invite or phone mismatch
         '409':
           description: Invite already used
-      tags: *ref_9
+      tags: *ref_10
       security:
         - access-token: []
   /sub-merchants/decline:
@@ -721,7 +779,7 @@ paths:
           description: Invalid or expired invite
         '409':
           description: Invite already accepted
-      tags: *ref_9
+      tags: *ref_10
   /merchants/me:
     get:
       operationId: MerchantsController_getMe
@@ -730,7 +788,7 @@ paths:
       responses:
         '200':
           description: Merchant profile
-      tags: &ref_10
+      tags: &ref_11
         - Merchants
       security:
         - access-token: []
@@ -741,7 +799,7 @@ paths:
       responses:
         '200':
           description: Profile updated
-      tags: *ref_10
+      tags: *ref_11
       security:
         - access-token: []
 info:

@@ -29,6 +29,7 @@ import { MerchantsModule } from './merchants/merchants.module';
 import { ReceiptsModule } from './receipts/receipts.module';
 import { CreditsModule } from './credits/credits.module';
 import { CreditsJobsModule } from './credits/credits-jobs.module';
+import { BillingModule } from './billing/billing.module';
 import { NotificationsModule } from './notifications/notifications.module';
 
 import { RootController } from './root/root.controller';
@@ -92,11 +93,11 @@ import { buildLoggerOptions } from './common/logger/logger.config';
     ReceiptsModule,
     CreditsModule,
     CreditsJobsModule,
+    BillingModule,
     NotificationsModule,
 
     // Feature modules added here in Steps 13+:
     // TransactionsModule,
-    // BillingModule,
     // AnalyticsModule,
     // ExportsModule,
   ],

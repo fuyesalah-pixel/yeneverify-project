@@ -311,9 +311,28 @@ export const envSchema = z
     // Explicit FCM provider selection; empty defers to FCM_MOCK.
     FCM_PROVIDER: z.union([z.literal('mock'), z.literal('firebase'), z.literal('')]).default(''),
 
+    // ── Payment destinations (Step 16 billing flow) ───────────────────────
+    // Shown to merchants by POST /billing/initiate. MVP: hardcoded env
+    // values (the real CBE/Telebirr accounts are business decisions,
+    // replace before launch); admin-configurable in Step 17.
+    PAYMENT_ACCOUNT_NAME: z.string().min(1, 'must not be empty.').default('Yene Verify'),
+    PAYMENT_DESTINATION_CBE: z.string().min(1, 'must not be empty.').default('1000123456789'),
+    PAYMENT_DESTINATION_TELEBIRR: z.string().min(1, 'must not be empty.').default('+251911000111'),
+    PAYMENT_INSTRUCTIONS_NOTE: z
+      .string()
+      .min(1, 'must not be empty.')
+      .default(
+        'Pay the exact amount. Screenshot your confirmation and upload it in the next step.',
+      ),
+
     // ── SMTP (transactional email; optional for MVP) ─────────────────────
     SMTP_HOST: z.string().min(1, 'must not be empty.').default('localhost'),
-    SMTP_PORT: integerValue(1, 65_535).default(1_025),
+    SMTP_PORT: z.coerce
+      .number()
+      .int()
+      .min(1, 'must be between 1 and 65535.')
+      .max(65535, 'must be between 1 and 65535.')
+      .default(1025),
     SMTP_USER: z.string().optional().default(''),
     SMTP_PASS: z.string().optional().default(''),
     SMTP_FROM: z

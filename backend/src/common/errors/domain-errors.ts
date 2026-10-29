@@ -376,3 +376,38 @@ export class VerificationReceiptMissingError extends AppError {
     );
   }
 }
+
+// ── Billing (Step 16) ─────────────────────────────────────────────────
+
+/** The package exists but cannot be bought (FREE is auto-provisioned; API is custom). */
+export class BillingPackageNotPurchasableError extends AppError {
+  constructor(packageCode: string, reason: string) {
+    super(
+      ERROR_CODES.BILLING_PACKAGE_NOT_PURCHASABLE,
+      `Package ${packageCode} cannot be purchased.`,
+      400,
+      { packageCode, reason },
+    );
+  }
+}
+
+/** No PENDING billing session with this id in this tenant. */
+export class BillingSessionNotFoundError extends AppError {
+  constructor(billingSessionId: string) {
+    super(ERROR_CODES.BILLING_SESSION_NOT_FOUND, 'Billing session not found.', 404, {
+      billingSessionId,
+    });
+  }
+}
+
+/** A non-PENDING billing session cannot accept a screenshot. */
+export class BillingSessionNotPendingError extends AppError {
+  constructor(billingSessionId: string, status: string) {
+    super(
+      ERROR_CODES.BILLING_SESSION_NOT_PENDING,
+      'This billing session is no longer open for submissions.',
+      409,
+      { billingSessionId, status },
+    );
+  }
+}

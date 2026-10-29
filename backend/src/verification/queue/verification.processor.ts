@@ -27,6 +27,8 @@ import { VerificationsService } from '../verifications/verifications.service';
 import { VerificationsRepository } from '../verifications/verifications.repository';
 import { CreditsService, LOW_CREDITS_WARNING_THRESHOLD } from '../../credits/credits.service';
 import { NotificationsService } from '../../notifications/notifications.service';
+import { BillingService } from '../../billing/billing.service';
+import type { BillingVerdict } from '../../billing/billing.repository';
 import { AuditService } from '../../audit/audit.service';
 import { ERROR_CODES } from '../../common/constants/error-codes';
 
@@ -91,6 +93,7 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
     private readonly credits: CreditsService,
     private readonly audit: AuditService,
     private readonly notifications: NotificationsService,
+    private readonly billing: BillingService,
   ) {
     super();
   }
@@ -125,18 +128,18 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
           const attempts = this.config.queue.jobAttempts;
           if (attempt < attempts) {
             // Retry path: NO consume here — the retry re-runs the adapter
-            // and the terminal attempt consumes then.
+            // and the terminal attempt settles then.
             throw new RetryableJobError(result.errorCode);
           }
           this.logger.warn(
             `verification.job.exhausted verificationId=${verificationId} errorCode=${result.errorCode} attempts=${attempt}`,
           );
-          await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
+          await this.settleVerdict(actorFields, result, verificationId);
           this.notifyVerdict(actorFields, result, verificationId);
           return;
         }
         // Non-retryable: verdict is final ERROR already persisted.
-        await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
+        await this.settleVerdict(actorFields, result, verificationId);
         this.notifyVerdict(actorFields, result, verificationId);
         this.logger.log(
           `verification.job.complete (non-retryable ERROR) verificationId=${verificationId} attempt=${attempt} durationMs=${Date.now() - startedAt} status=${result.status}`,
@@ -145,8 +148,8 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
       }
 
       // Any other terminal verdict (VERIFIED/FAKE/DUPLICATE/NEEDS_REVIEW)
-      // is billed according to CREDIT_COST before the job completes.
-      await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
+      // is settled after process() committed it.
+      await this.settleVerdict(actorFields, result, verificationId);
       this.notifyVerdict(actorFields, result, verificationId);
       this.logger.log(
         `verification.job.complete verificationId=${verificationId} attempt=${attempt} durationMs=${Date.now() - startedAt} status=${result.status}`,
@@ -171,7 +174,7 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
    * a verdict or its billing — both have already committed by now.
    */
   private notifyVerdict(
-    actorFields: { merchantId: string; requestedByUserId: string },
+    actorFields: { merchantId: string; requestedByUserId: string; source: string },
     result: {
       status: string;
       bankReference: string | null;
@@ -179,6 +182,10 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
     },
     verificationId: string,
   ): void {
+    // BILLING verifications notify through the billing handler with
+    // billing-specific copy — the generic verdict push would be noise.
+    if (actorFields.source === 'BILLING') return;
+
     const title = VERDICT_NOTIFICATION_TITLE[result.status] ?? 'Verification update';
     this.notifications
       .notify({
@@ -198,6 +205,68 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
           `notification.verification_result.failed verificationId=${verificationId} error=${err instanceof Error ? err.message : String(err)}`,
         );
       });
+  }
+
+  /**
+   * Post-verdict routing, after process() has committed the verdict:
+   *
+   *   source=BILLING      → BillingService (credits/consume path is
+   *   SKIPPED entirely per the Step 16 policy: BILLING verifications
+   *   consume 0 credits — the merchant is BUYING them). Errors must
+   *   never retry the job: re-running would re-verify the payment.
+   *   source=TRANSACTION  → billed per CREDIT_COST, low-balance
+   *   inbox hooks fire exactly as in 14.x.
+   */
+  private async settleVerdict(
+    actorFields: { merchantId: string; requestedByUserId: string; source: string },
+    result: {
+      status: string;
+      errorCode?: string | null;
+      errorMessage?: string | null;
+      amountMinor?: bigint | null;
+      bankCode?: string | null;
+      bankReference?: string | null;
+      senderName?: string | null;
+      receiverName?: string | null;
+      paidAt?: Date | null;
+    },
+    verificationId: string,
+  ): Promise<void> {
+    if (actorFields.source === 'BILLING') {
+      try {
+        await this.billing.handleVerificationResultForVerification(verificationId, {
+          status: result.status as BillingVerdict['status'],
+          amountMinor: result.amountMinor ?? null,
+          bankCode: result.bankCode ?? null,
+          bankReference: result.bankReference ?? null,
+          senderName: result.senderName ?? null,
+          receiverName: result.receiverName ?? null,
+          paidAt: result.paidAt ?? null,
+          errorCode: result.errorCode ?? null,
+          errorMessage: result.errorMessage ?? null,
+        });
+      } catch (err) {
+        // The billing handler is designed not to throw; a failure here is
+        // an infra bug. Log + audit, complete the job — NEVER throw, or
+        // BullMQ would re-verify an already-settled payment.
+        this.logger.error(
+          `billing.settle_failed verificationId=${verificationId} error=${err instanceof Error ? err.message : String(err)}`,
+        );
+        this.audit.log({
+          actorType: 'SYSTEM',
+          action: 'billing.settle_failed',
+          targetType: 'verification',
+          targetId: verificationId,
+          metadata: {
+            merchantId: actorFields.merchantId,
+            verdict: result.status,
+            reason: err instanceof Error ? err.message : String(err),
+          },
+        });
+      }
+      return;
+    }
+    await this.consumeForVerdict(actorFields.merchantId, verificationId, result);
   }
 
   /**
@@ -255,15 +324,16 @@ export class VerificationProcessor extends WorkerHost implements OnModuleInit {
    */
   private async loadActorFields(
     verificationId: string,
-  ): Promise<{ merchantId: string; requestedByUserId: string }> {
+  ): Promise<{ merchantId: string; requestedByUserId: string; source: string }> {
     const loaded = await this.repo.loadForProcessing(verificationId);
     if (!loaded) {
       // Let process() raise VerificationNotFoundError itself.
-      return { merchantId: 'missing', requestedByUserId: 'missing' };
+      return { merchantId: 'missing', requestedByUserId: 'missing', source: 'TRANSACTION' };
     }
     return {
       merchantId: loaded.verification.merchantId,
       requestedByUserId: loaded.verification.verifiedByUserId,
+      source: loaded.verification.source ?? 'TRANSACTION',
     };
   }
 
