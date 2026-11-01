@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app_colors.dart';
+import 'app_colors_extension.dart';
 import 'app_radii.dart';
 import 'app_typography.dart';
 
@@ -100,7 +101,7 @@ abstract final class AppTheme {
       ),
 
       // ── Card ────────────────────────────────────────────────────────────
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: colors.surface,
         elevation: isDark ? 0 : 1,
         shape: RoundedRectangleBorder(
@@ -192,7 +193,7 @@ abstract final class AppTheme {
       ),
 
       // ── Dialog ──────────────────────────────────────────────────────────
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: colors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: AppRadii.radiusLg),

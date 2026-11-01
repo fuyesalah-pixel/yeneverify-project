@@ -129,7 +129,7 @@ class AppColors extends ThemeExtension<AppColors> {
     primaryAction: Color(0xFF16A34A),        // green-700 — WCAG AA on white (large text/buttons)
     primaryActionPressed: Color(0xFF15803D), // green-800
     primaryActionDisabled: Color(0xFFA7D9B8),
-    brandAccent: Color(0xFF39FF14),          // neon — icons/progress only, never text background
+    brandAccent: Color(0xFF00D54B),          // Cash App green — icons/progress only, never text background
     success: Color(0xFF16A34A),
     warning: Color(0xFFF59E0B),
     error: Color(0xFFDC2626),
@@ -152,12 +152,12 @@ class AppColors extends ThemeExtension<AppColors> {
     textPrimary: Color(0xFFFFFFFF),
     textSecondary: Color(0xFFA1A1A1),
     textDisabled: Color(0xFF525252),
-    onPrimary: Color(0xFF0A0A0A),            // near-black text on neon button
-    primaryAction: Color(0xFF39FF14),        // neon is safe on dark (14.8:1 on #0A0A0A)
-    primaryActionPressed: Color(0xFF2EE010),
+    onPrimary: Color(0xFF0A0A0A),            // near-black text on green button
+    primaryAction: Color(0xFF00D54B),        // Cash App green — 9.6:1 on #0A0A0A
+    primaryActionPressed: Color(0xFF00B33F),
     primaryActionDisabled: Color(0xFF1F5A0F),
-    brandAccent: Color(0xFF39FF14),
-    success: Color(0xFF39FF14),
+    brandAccent: Color(0xFF00D54B),
+    success: Color(0xFF00D54B),
     warning: Color(0xFFFBBF24),
     error: Color(0xFFF87171),
     info: Color(0xFF60A5FA),

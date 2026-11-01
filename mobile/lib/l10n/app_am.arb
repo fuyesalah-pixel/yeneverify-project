@@ -320,5 +320,11 @@
 
   "onboardingStep3Body": "ከፍተኛ ሰዓቶችዎን፣ ምርጥ ምርቶችዎን እና የሽያጭ አዝማሚያዎችዎን ያውቁ።",
 
-  "getStarted": "ጀምር"
+  "getStarted": "ጀምር",
+
+  "learnMoreLabel": "ተጨማሪ ይወቁ",
+
+  "authComingSoon": "የምስገት ፍሰት — በStep 21 ይመጣል",
+
+  "debugDesignSystem": "ዴበግ: የንድፍ ስርዓት"
 }

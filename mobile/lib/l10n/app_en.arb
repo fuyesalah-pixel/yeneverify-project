@@ -542,5 +542,14 @@
   "@onboardingStep3Body": {},
 
   "getStarted": "Get started",
-  "@getStarted": {}
+  "@getStarted": {},
+
+  "learnMoreLabel": "Learn more",
+  "@learnMoreLabel": {},
+
+  "authComingSoon": "Auth flow — coming Step 21",
+  "@authComingSoon": { "description": "Step 20 placeholder snackbar" },
+
+  "debugDesignSystem": "Debug: Design System",
+  "@debugDesignSystem": { "description": "Step 20 debug link to the design-system showcase" }
 }
