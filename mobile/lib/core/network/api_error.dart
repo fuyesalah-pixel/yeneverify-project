@@ -69,6 +69,9 @@ abstract final class ApiErrorCodes {
   /// Codes that mean "the PIN the user entered is wrong".
   static const wrongPin = <String>{'AUTH_PIN_INVALID'};
 
+  /// Codes that mean "the chosen PIN fails the strength policy".
+  static const weakPin = <String>{'AUTH_WEAK_PIN'};
+
   /// Codes that mean "too many attempts, wait before retrying".
   static const attemptsExhausted = <String>{
     'AUTH_OTP_MAX_ATTEMPTS',
@@ -211,6 +214,10 @@ extension ApiErrorX on ApiError {
     }
     if (code != null && ApiErrorCodes.wrongPin.contains(code)) {
       return l10n?.pinIncorrect ?? 'Incorrect PIN. Try again.';
+    }
+    if (code != null && ApiErrorCodes.weakPin.contains(code)) {
+      return l10n?.authWeakPin ??
+          'PIN is too weak. Use 4 or 6 digits, avoid sequential or repeated numbers.';
     }
     if (code != null && ApiErrorCodes.phoneInvalid.contains(code)) {
       return l10n?.phoneInvalid ?? 'Enter a valid Ethiopian phone number';

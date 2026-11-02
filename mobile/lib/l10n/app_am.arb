@@ -62,6 +62,8 @@
 
   "pinIncorrect": "የPIN ኮድ ስህተት ነው። እንደገና ይሞክሩ።",
 
+  "authWeakPin": "PIN በጣም ደካማ ነው። 4 ወይም 6 አሃዞችን ይጠቀሙ፤ ተከታታይ ወይም የሚደጋገሙ ቁጥሮችን ያስወግዱ።",
+
   "pinLocked": "በጣም ብዙ ሙከራዎች። እንደገና በ{minutes} ደቂቃ ውስጥ ይሞክሩ።",
   "@pinLocked": {
     "placeholders": {

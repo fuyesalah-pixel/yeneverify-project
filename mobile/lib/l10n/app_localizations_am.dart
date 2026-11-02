@@ -103,6 +103,10 @@ class AppLocalizationsAm extends AppLocalizations {
   String get pinIncorrect => 'የPIN ኮድ ስህተት ነው። እንደገና ይሞክሩ።';
 
   @override
+  String get authWeakPin =>
+      'PIN በጣም ደካማ ነው። 4 ወይም 6 አሃዞችን ይጠቀሙ፤ ተከታታይ ወይም የሚደጋገሙ ቁጥሮችን ያስወግዱ።';
+
+  @override
   String pinLocked(int minutes) {
     return 'በጣም ብዙ ሙከራዎች። እንደገና በ$minutes ደቂቃ ውስጥ ይሞክሩ።';
   }

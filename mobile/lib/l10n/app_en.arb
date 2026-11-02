@@ -100,6 +100,9 @@
   "pinIncorrect": "Incorrect PIN. Try again.",
   "@pinIncorrect": {},
 
+  "authWeakPin": "PIN is too weak. Use 4 or 6 digits, avoid sequential or repeated numbers.",
+  "@authWeakPin": {},
+
   "pinLocked": "Too many attempts. Try again in {minutes} minutes.",
   "@pinLocked": {
     "placeholders": {

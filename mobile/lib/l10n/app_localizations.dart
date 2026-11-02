@@ -278,6 +278,12 @@ abstract class AppLocalizations {
   /// **'Incorrect PIN. Try again.'**
   String get pinIncorrect;
 
+  /// No description provided for @authWeakPin.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN is too weak. Use 4 or 6 digits, avoid sequential or repeated numbers.'**
+  String get authWeakPin;
+
   /// No description provided for @pinLocked.
   ///
   /// In en, this message translates to:

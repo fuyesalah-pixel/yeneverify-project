@@ -104,6 +104,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pinIncorrect => 'Incorrect PIN. Try again.';
 
   @override
+  String get authWeakPin =>
+      'PIN is too weak. Use 4 or 6 digits, avoid sequential or repeated numbers.';
+
+  @override
   String pinLocked(int minutes) {
     return 'Too many attempts. Try again in $minutes minutes.';
   }

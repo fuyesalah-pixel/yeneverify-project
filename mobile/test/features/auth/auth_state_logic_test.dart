@@ -106,6 +106,12 @@ void main() {
       expect(err.userFacingMessage(), contains('15 minutes'));
     });
 
+    test('maps AUTH_WEAK_PIN to the PIN strength message', () {
+      const err = ApiError(code: 'AUTH_WEAK_PIN');
+      expect(err.userFacingMessage(), contains('too weak'));
+      expect(err.userFacingMessage(), contains('sequential'));
+    });
+
     test('maps network errors to connection message', () {
       const err = ApiError(kind: ApiErrorKind.network);
       expect(err.userFacingMessage(), contains('connection'));
