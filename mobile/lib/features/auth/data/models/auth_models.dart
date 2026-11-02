@@ -58,11 +58,11 @@ class User {
   final bool needsOnboarding;
 
   factory User.fromJson(Map<String, dynamic> json) {
-    // GET /auth/me currently returns the RAW Prisma user record (verified
-    // against the running backend): top-level fields + pinHash/pinSetAt,
-    // ownedMerchant, subMerchantProfile — WITHOUT the DTO-computed
-    // needsPinSetup / needsOnboarding. Derive them client-side; also accept
-    // the documented DTO shape in case the backend adds it later.
+    // GET /auth/me returns the RAW Prisma user record (verified against the
+    // running backend): top-level fields + pinHash/pinSetAt, ownedMerchant,
+    // subMerchantProfile — WITHOUT the DTO-computed needsPinSetup /
+    // needsOnboarding. Onboarding routing comes ONLY from /onboarding/status
+    // (see AuthNotifier); /auth/me is identity + real PIN state.
     final isRawShape = json['needsPinSetup'] == null && json.containsKey('pinHash');
     if (!isRawShape) {
       return User(
@@ -76,21 +76,18 @@ class User {
         needsOnboarding: json['needsOnboarding'] as bool? ?? false,
       );
     }
-    final role = (json['role'] as String?) ?? 'MERCHANT';
-    final needsOnboarding = switch (role) {
-      'MERCHANT' => json['ownedMerchant'] == null,
-      'SUB_MERCHANT' => json['subMerchantProfile'] == null,
-      _ => false,
-    };
     return User(
       id: json['id'] as String,
       phone: json['phone'] as String,
       fullName: (json['fullName'] as String?) ?? (json['name'] as String?) ?? '',
-      role: role,
+      role: (json['role'] as String?) ?? 'MERCHANT',
       status: (json['status'] as String?) ?? 'ACTIVE',
       preferredLanguage: json['preferredLanguage'] as String?,
       needsPinSetup: json['pinSetAt'] == null,
-      needsOnboarding: needsOnboarding,
+      // Deliberately not derived from ownedMerchant: the guard on /auth/me
+      // used to make this the only source pre-onboarding, which is why it
+      // diverged from /onboarding/status.
+      needsOnboarding: json['needsOnboarding'] as bool? ?? false,
     );
   }
 
@@ -179,13 +176,40 @@ class FlatTokensResponse {
       FlatTokensResponse(tokens: AuthTokens.fromJson(json));
 }
 
-/// GET /onboarding/status contract.
+/// Pending sub-merchant invite carried by GET /onboarding/status.
+/// Contract: backend OnboardingStatusService (`pendingInvite`).
+class PendingInvite {
+  const PendingInvite({
+    required this.id,
+    required this.merchantName,
+    this.branchLabel,
+  });
+
+  final String id;
+  final String merchantName;
+  final String? branchLabel;
+
+  factory PendingInvite.fromJson(Map<String, dynamic> json) => PendingInvite(
+        id: json['id'] as String,
+        merchantName: (json['merchantName'] as String?) ?? '',
+        branchLabel: json['branchLabel'] as String?,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'merchantName': merchantName,
+        if (branchLabel != null) 'branchLabel': branchLabel,
+      };
+}
+
+/// GET /onboarding/status contract — the single source of truth for
+/// onboarding routing. `/auth/me` is identity only.
 @freezed
 class OnboardingStatus with _$OnboardingStatus {
   const factory OnboardingStatus({
     @Default(false) bool needsOnboarding,
     @Default('COMPLETE') String step, // 'COMPLETE' | 'MERCHANT_PROFILE' | ...
-    Map<String, dynamic>? pendingInvite,
+    PendingInvite? pendingInvite,
   }) = _OnboardingStatus;
 
   factory OnboardingStatus.fromJson(Map<String, dynamic> json) =>

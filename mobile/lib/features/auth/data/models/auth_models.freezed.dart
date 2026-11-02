@@ -667,7 +667,7 @@ mixin _$OnboardingStatus {
   bool get needsOnboarding => throw _privateConstructorUsedError;
   String get step =>
       throw _privateConstructorUsedError; // 'COMPLETE' | 'MERCHANT_PROFILE' | ...
-  Map<String, dynamic>? get pendingInvite => throw _privateConstructorUsedError;
+  PendingInvite? get pendingInvite => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -681,8 +681,7 @@ abstract class $OnboardingStatusCopyWith<$Res> {
           OnboardingStatus value, $Res Function(OnboardingStatus) then) =
       _$OnboardingStatusCopyWithImpl<$Res, OnboardingStatus>;
   @useResult
-  $Res call(
-      {bool needsOnboarding, String step, Map<String, dynamic>? pendingInvite});
+  $Res call({bool needsOnboarding, String step, PendingInvite? pendingInvite});
 }
 
 /// @nodoc
@@ -714,7 +713,7 @@ class _$OnboardingStatusCopyWithImpl<$Res, $Val extends OnboardingStatus>
       pendingInvite: freezed == pendingInvite
           ? _value.pendingInvite
           : pendingInvite // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
+              as PendingInvite?,
     ) as $Val);
   }
 }
@@ -727,8 +726,7 @@ abstract class _$$OnboardingStatusImplCopyWith<$Res>
       __$$OnboardingStatusImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {bool needsOnboarding, String step, Map<String, dynamic>? pendingInvite});
+  $Res call({bool needsOnboarding, String step, PendingInvite? pendingInvite});
 }
 
 /// @nodoc
@@ -756,9 +754,9 @@ class __$$OnboardingStatusImplCopyWithImpl<$Res>
           : step // ignore: cast_nullable_to_non_nullable
               as String,
       pendingInvite: freezed == pendingInvite
-          ? _value._pendingInvite
+          ? _value.pendingInvite
           : pendingInvite // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
+              as PendingInvite?,
     ));
   }
 }
@@ -769,8 +767,7 @@ class _$OnboardingStatusImpl implements _OnboardingStatus {
   const _$OnboardingStatusImpl(
       {this.needsOnboarding = false,
       this.step = 'COMPLETE',
-      final Map<String, dynamic>? pendingInvite})
-      : _pendingInvite = pendingInvite;
+      this.pendingInvite});
 
   factory _$OnboardingStatusImpl.fromJson(Map<String, dynamic> json) =>
       _$$OnboardingStatusImplFromJson(json);
@@ -782,16 +779,8 @@ class _$OnboardingStatusImpl implements _OnboardingStatus {
   @JsonKey()
   final String step;
 // 'COMPLETE' | 'MERCHANT_PROFILE' | ...
-  final Map<String, dynamic>? _pendingInvite;
-// 'COMPLETE' | 'MERCHANT_PROFILE' | ...
   @override
-  Map<String, dynamic>? get pendingInvite {
-    final value = _pendingInvite;
-    if (value == null) return null;
-    if (_pendingInvite is EqualUnmodifiableMapView) return _pendingInvite;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(value);
-  }
+  final PendingInvite? pendingInvite;
 
   @override
   String toString() {
@@ -806,14 +795,14 @@ class _$OnboardingStatusImpl implements _OnboardingStatus {
             (identical(other.needsOnboarding, needsOnboarding) ||
                 other.needsOnboarding == needsOnboarding) &&
             (identical(other.step, step) || other.step == step) &&
-            const DeepCollectionEquality()
-                .equals(other._pendingInvite, _pendingInvite));
+            (identical(other.pendingInvite, pendingInvite) ||
+                other.pendingInvite == pendingInvite));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, needsOnboarding, step,
-      const DeepCollectionEquality().hash(_pendingInvite));
+  int get hashCode =>
+      Object.hash(runtimeType, needsOnboarding, step, pendingInvite);
 
   @JsonKey(ignore: true)
   @override
@@ -834,7 +823,7 @@ abstract class _OnboardingStatus implements OnboardingStatus {
   const factory _OnboardingStatus(
       {final bool needsOnboarding,
       final String step,
-      final Map<String, dynamic>? pendingInvite}) = _$OnboardingStatusImpl;
+      final PendingInvite? pendingInvite}) = _$OnboardingStatusImpl;
 
   factory _OnboardingStatus.fromJson(Map<String, dynamic> json) =
       _$OnboardingStatusImpl.fromJson;
@@ -844,7 +833,7 @@ abstract class _OnboardingStatus implements OnboardingStatus {
   @override
   String get step;
   @override // 'COMPLETE' | 'MERCHANT_PROFILE' | ...
-  Map<String, dynamic>? get pendingInvite;
+  PendingInvite? get pendingInvite;
   @override
   @JsonKey(ignore: true)
   _$$OnboardingStatusImplCopyWith<_$OnboardingStatusImpl> get copyWith =>

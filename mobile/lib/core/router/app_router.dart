@@ -10,6 +10,7 @@ import '../../features/auth/presentation/screens/pin_entry_screen.dart';
 import '../../features/auth/presentation/screens/pin_setup_screen.dart';
 import '../../features/design_system/presentation/screens/design_system_showcase_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_placeholder_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_placeholder_screen.dart';
 import '../../features/verification/presentation/screens/verify_placeholder_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import 'auth_redirect.dart';
@@ -71,7 +72,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: Routes.onboarding,
-      builder: (_, __) => const _PlaceholderScreen(title: 'Onboarding'),
+      builder: (_, __) => const OnboardingPlaceholderScreen(),
     ),
     GoRoute(
       path: Routes.verify,
@@ -92,17 +93,3 @@ final appRouter = GoRouter(
     return authRedirect(auth, state.matchedLocation);
   },
 );
-
-/// Placeholder for screens arriving in Steps 22-27.
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.title});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: const Center(child: Text('Coming soon (Steps 22-27)')),
-    );
-  }
-}

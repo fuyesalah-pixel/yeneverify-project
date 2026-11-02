@@ -61,7 +61,10 @@ _$OnboardingStatusImpl _$$OnboardingStatusImplFromJson(
     _$OnboardingStatusImpl(
       needsOnboarding: json['needsOnboarding'] as bool? ?? false,
       step: json['step'] as String? ?? 'COMPLETE',
-      pendingInvite: json['pendingInvite'] as Map<String, dynamic>?,
+      pendingInvite: json['pendingInvite'] == null
+          ? null
+          : PendingInvite.fromJson(
+              json['pendingInvite'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$$OnboardingStatusImplToJson(

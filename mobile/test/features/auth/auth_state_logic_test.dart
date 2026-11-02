@@ -20,7 +20,9 @@ void main() {
 
     test('unauthenticated users go to login', () {
       const auth = AuthState(status: AuthStatus.unauthenticated);
-      expect(authRedirect(auth, '/'), '/login');
+      // Splash is a transient flow route, so it is allowed to render while
+      // its timer navigates to /login.
+      expect(authRedirect(auth, '/'), isNull);
       expect(authRedirect(auth, '/dashboard'), '/login');
       expect(authRedirect(auth, '/login'), isNull);
       expect(authRedirect(auth, '/otp'), isNull);
@@ -49,7 +51,7 @@ void main() {
   });
 
   group('User.fromJson', () {
-    test('derives needsPinSetup from the raw /auth/me record', () {
+    test('reads PIN state from raw /auth/me without deriving onboarding', () {
       final user = User.fromJson({
         'id': 'u1',
         'phone': '+251911555001',
@@ -62,7 +64,27 @@ void main() {
       });
 
       expect(user.needsPinSetup, isTrue);
-      expect(user.needsOnboarding, isTrue);
+      // /auth/me is identity + PIN state only; /onboarding/status decides
+      // onboarding routing.
+      expect(user.needsOnboarding, isFalse);
+    });
+
+    test('parses a pending sub-merchant invite from /onboarding/status', () {
+      final status = OnboardingStatus.fromJson({
+        'needsOnboarding': true,
+        'step': 'SUB_MERCHANT_ACCEPT',
+        'pendingInvite': {
+          'id': 'inv-1',
+          'merchantName': 'Kebede Trading',
+          'branchLabel': 'Bole',
+        },
+      });
+
+      expect(status.needsOnboarding, isTrue);
+      expect(status.step, 'SUB_MERCHANT_ACCEPT');
+      expect(status.pendingInvite?.id, 'inv-1');
+      expect(status.pendingInvite?.merchantName, 'Kebede Trading');
+      expect(status.pendingInvite?.branchLabel, 'Bole');
     });
 
     test('honours an explicit needsPinSetup from the verify-otp DTO', () {

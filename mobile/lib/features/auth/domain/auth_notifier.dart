@@ -29,6 +29,9 @@ class AuthState {
     this.biometricEnabled = false,
     this.errorMessage,
     this.lastLoginPhone,
+    this.needsOnboarding = false,
+    this.onboardingStep,
+    this.pendingInvite,
   });
 
   final AuthStatus status;
@@ -39,6 +42,12 @@ class AuthState {
   final String? errorMessage;
   final String? lastLoginPhone;
 
+  /// Onboarding routing flags, fetched from GET /onboarding/status once the
+  /// session unlocks. Never derived from /auth/me.
+  final bool needsOnboarding;
+  final String? onboardingStep;
+  final PendingInvite? pendingInvite;
+
   AuthState copyWith({
     AuthStatus? status,
     User? user,
@@ -47,9 +56,13 @@ class AuthState {
     bool? biometricEnabled,
     String? errorMessage,
     String? lastLoginPhone,
+    bool? needsOnboarding,
+    String? onboardingStep,
+    PendingInvite? pendingInvite,
     bool clearError = false,
     bool clearAccessToken = false,
     bool clearUser = false,
+    bool clearPendingInvite = false,
   }) =>
       AuthState(
         status: status ?? this.status,
@@ -59,6 +72,10 @@ class AuthState {
         biometricEnabled: biometricEnabled ?? this.biometricEnabled,
         errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
         lastLoginPhone: lastLoginPhone ?? this.lastLoginPhone,
+        needsOnboarding: needsOnboarding ?? this.needsOnboarding,
+        onboardingStep: onboardingStep ?? this.onboardingStep,
+        pendingInvite:
+            clearPendingInvite ? null : (pendingInvite ?? this.pendingInvite),
       );
 }
 
@@ -161,12 +178,54 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   /// Called after the optional biometric-enrollment step (enabled OR skipped).
-  void completeEnrollment() {
+  /// Fetches /onboarding/status before flipping to `unlocked` so the router
+  /// never briefly shows the dashboard to a merchant who still needs
+  /// onboarding.
+  Future<void> completeEnrollment() async {
     final current = state.valueOrNull;
     if (current == null) return;
+    final onboarding = await _loadOnboardingStatus();
     state = AsyncValue.data(
-      current.copyWith(status: AuthStatus.unlocked, clearError: true),
+      current.copyWith(
+        status: AuthStatus.unlocked,
+        needsOnboarding:
+            onboarding?.needsOnboarding ?? current.needsOnboarding,
+        onboardingStep: onboarding?.step ?? current.onboardingStep,
+        pendingInvite: onboarding?.pendingInvite,
+        clearPendingInvite: onboarding?.pendingInvite == null,
+        clearError: true,
+      ),
     );
+  }
+
+  /// Fetches GET /onboarding/status (single source of truth for onboarding
+  /// routing) and stores it on [AuthState]. Returns the typed error when the
+  /// call fails; callers that only want best-effort hydration ignore it.
+  Future<ApiError?> refreshOnboardingStatus() async {
+    final result = await repo.onboardingStatus();
+    switch (result) {
+      case Failure<OnboardingStatus>(:final error):
+        return error;
+      case Success<OnboardingStatus>(:final data):
+        final current = state.valueOrNull;
+        if (current == null) return null;
+        state = AsyncValue.data(
+          current.copyWith(
+            needsOnboarding: data.needsOnboarding,
+            onboardingStep: data.step,
+            pendingInvite: data.pendingInvite,
+            clearPendingInvite: data.pendingInvite == null,
+          ),
+        );
+        return null;
+    }
+  }
+
+  /// Best-effort onboarding hydration for the unlock paths. A failure leaves
+  /// the previous flags in place; the dashboard's dev refresh can retry.
+  Future<OnboardingStatus?> _loadOnboardingStatus() async {
+    final result = await repo.onboardingStatus();
+    return result is Success<OnboardingStatus> ? result.data : null;
   }
 
   Future<ApiError?> unlockWithPin(String pin) async {
@@ -186,6 +245,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       case Success<AuthStateResult>(:final data):
         final fingerprint =
             state.valueOrNull?.deviceFingerprint ?? await repo.getOrCreateFingerprint();
+        final onboarding = await _loadOnboardingStatus();
         state = AsyncValue.data(
           AuthState(
             status: AuthStatus.unlocked,
@@ -194,6 +254,9 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
             deviceFingerprint: fingerprint,
             biometricEnabled: await repo.biometricEnabled(),
             lastLoginPhone: data.user.phone,
+            needsOnboarding: onboarding?.needsOnboarding ?? false,
+            onboardingStep: onboarding?.step,
+            pendingInvite: onboarding?.pendingInvite,
           ),
         );
         return null;

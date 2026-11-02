@@ -67,9 +67,13 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen> {
     final colors = context.colors;
     final l10n = AppLocalizations.of(context);
 
-    // On successful unlock (PIN or biometric), move on to the dashboard.
+    // On successful unlock (PIN or biometric), move on to onboarding if the
+    // merchant profile is still missing, otherwise the dashboard.
     ref.listen<AuthStatus>(authStatusProvider, (prev, next) {
-      if (next == AuthStatus.unlocked) context.go(Routes.dashboard);
+      if (next != AuthStatus.unlocked) return;
+      final needsOnboarding =
+          ref.read(authProvider).valueOrNull?.needsOnboarding ?? false;
+      context.go(needsOnboarding ? Routes.onboarding : Routes.dashboard);
     });
 
     final flow = ref.watch(pinEntryFlowProvider);

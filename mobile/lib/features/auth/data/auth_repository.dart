@@ -197,13 +197,12 @@ class AuthRepository {
     }
   }
 
-  /// GET /auth/me is the only endpoint that reports the real PIN state, but it
-  /// is guarded by the onboarding check: a merchant without a profile gets a
-  /// 403 `MERCHANT_NOT_ONBOARDED`. verify-otp's user DTO hardcodes
-  /// `needsPinSetup: false`, so trusting it would send a first-time user to
-  /// PIN entry instead of PIN setup. For that 403 we rebuild the flags from
-  /// the local session, whose has-pin mirror is written whenever the PIN is
-  /// set. Other failures are returned untouched.
+  /// GET /auth/me is the only endpoint that reports the real PIN state. Older
+  /// backend builds guarded it with the onboarding check, so a merchant
+  /// without a profile could get a 403 `MERCHANT_NOT_ONBOARDED`; that is fixed
+  /// on the backend (@SkipOnboarding), but the local-session fallback stays
+  /// for resilience. Onboarding flags themselves now come from
+  /// /onboarding/status — never from `/me`.
   Future<ApiResult<User>> _meOrLocalFallback({User? fallback}) async {
     final result = await me();
     if (result is Success<User>) return result;
@@ -228,7 +227,8 @@ class AuthRepository {
         role: 'MERCHANT',
         status: 'ACTIVE',
         needsPinSetup: !hasPin,
-        needsOnboarding: true,
+        // Not used for routing; /onboarding/status is the only source.
+        needsOnboarding: fallback?.needsOnboarding ?? false,
       ),
     );
   }
@@ -236,11 +236,10 @@ class AuthRepository {
   /// Called after successful verifyOtp. Persists tokens + user summary and
   /// reports whether the user still needs to set a PIN.
   ///
-  /// The backend's verify-otp DTO hardcodes `needsPinSetup: false` (Step 11
-  /// stub), so we re-fetch GET /auth/me — whose raw record carries pinSetAt /
-  /// ownedMerchant — and derive the real flags from it. If /me is rejected
-  /// (e.g. the onboarded guard 403s a brand-new merchant), fall back to the
-  /// OTP payload's user instead of failing the login.
+  /// verify-otp's DTO is not trusted for PIN state, so we re-fetch GET
+  /// /auth/me — whose raw record carries pinSetAt — and use its real value.
+  /// Onboarding state is deliberately NOT read here; AuthNotifier asks
+  /// /onboarding/status once the session unlocks.
   Future<ApiResult<AuthStateResult>> _persistSession(
       AuthResponse response) async {
     try {

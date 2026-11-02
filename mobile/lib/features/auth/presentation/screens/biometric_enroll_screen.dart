@@ -31,9 +31,13 @@ class _BiometricEnrollScreenState extends ConsumerState<BiometricEnrollScreen> {
   String? _error;
 
   Future<void> _finish() async {
-    ref.read(authProvider.notifier).completeEnrollment();
+    await ref.read(authProvider.notifier).completeEnrollment();
     ref.read(pinSetupFlowProvider.notifier).reset();
-    if (mounted) context.go(Routes.dashboard);
+    final needsOnboarding =
+        ref.read(authProvider).valueOrNull?.needsOnboarding ?? false;
+    if (mounted) {
+      context.go(needsOnboarding ? Routes.onboarding : Routes.dashboard);
+    }
   }
 
   Future<void> _enable({required String pin}) async {

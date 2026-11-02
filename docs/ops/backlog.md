@@ -268,3 +268,20 @@ project's AGP). Before Step 23 wires camera capture: confirm the
 controller API used in the Step 2 widget (photo_source_picker.dart)
 still matches, and add the Android permission_handler / manifest entries
 for CAMERA (plus storage on pre-13, per Step 22's doc) if missing.
+
+## 29. Normalize onboarding status sourcing (DONE, 2026-11-02)
+
+`GET /onboarding/status` is now the only onboarding-routing source; `/auth/me`
+is identity + PIN state only. `AuthNotifier` hydrates `needsOnboarding`,
+`onboardingStep`, and `pendingInvite` on unlock, and the router redirects
+`unlocked + needsOnboarding` to `/onboarding`. Decision recorded in
+[docs/architecture/onboarding-status.md](../architecture/onboarding-status.md).
+
+## 30. Physical-device e2e for new-user signup (Step 22+)
+
+Fresh-user signup (OTP → PIN setup → onboarding) is covered by
+`backend/test/auth.e2e-spec.ts`; manual emulator verification is still
+pending. No automated test runs the real app end to end. Add a
+device-farm/integration test that installs the app, signs up a fresh phone,
+completes PIN setup, and reaches the dashboard. Trigger: first physical-device
+build, before beta.
