@@ -29,6 +29,8 @@ import { SubMerchantsService } from './sub-merchants.service';
 import { SubMerchantInvitesService } from './sub-merchant-invites.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
+import { SkipOnboarding } from '../common/decorators/skip-onboarding.decorator';
+import { SkipTenant } from '../common/decorators/skip-tenant.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CurrentTenant, TenantScope } from '../common/decorators/current-tenant.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -160,6 +162,10 @@ export class SubMerchantsController {
   // Invitee side
   // ============================================================
 
+  // Accept is how a user LEAVES the onboarding gate — it cannot itself
+  // require onboarding or a tenant (a pending invitee has no merchant yet).
+  @SkipOnboarding()
+  @SkipTenant()
   @Post('accept')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('access-token')
@@ -177,6 +183,8 @@ export class SubMerchantsController {
   }
 
   @Public()
+  @SkipOnboarding()
+  @SkipTenant()
   @Post('decline')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Decline a sub-merchant invite (token-only, idempotent)' })

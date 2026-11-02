@@ -295,7 +295,7 @@ Add deep-link routing, store the token, and land directly on the invite card.
 Trigger: Step 27 polish, or first merchant complaint about pasting a long
 code.
 
-## 32. Backend: invite step unreachable + accept blocked (Step 22A)
+## 32. Backend: invite step unreachable + accept blocked (DONE, 2026-11-02)
 
 Runtime verification (2026-11-02) found two backend gaps in the sub-merchant
 onboarding path:
@@ -312,3 +312,12 @@ onboarding path:
 Fix: surface pending invites for MERCHANT users in the status service (or set
 the role at invite time) and exempt the accept route from OnboardedGuard.
 Trigger: Step 22A invite flow before Step 23.
+
+Resolved in v1.3.1: `OnboardingStatusService` now looks for a pending INVITED
+row regardless of role (pending invite outranks `MERCHANT_PROFILE`), and
+`accept`/`decline` carry `@SkipOnboarding()` + `@SkipTenant()`. Role still
+transitions at accept time, per Step 9's provisional `MERCHANT` model.
+Regression coverage: `backend/test/sub-merchants.e2e-spec.ts` (invited MERCHANT
+sees `SUB_MERCHANT_ACCEPT`, accept → `COMPLETE` + role `SUB_MERCHANT`, decline
+falls back to `MERCHANT_PROFILE`). All three fail on the pre-fix code (403 on
+accept; `MERCHANT_PROFILE` while invited).
