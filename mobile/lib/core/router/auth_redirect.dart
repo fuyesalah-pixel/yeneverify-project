@@ -31,12 +31,24 @@ String? authRedirect(AuthState auth, String location) {
     case AuthStatus.unlocked:
       if (auth.needsOnboarding) {
         // Onboarding owns the session until the merchant profile (or invite
-        // acceptance) exists. Dev tooling stays reachable.
-        return const {'/onboarding', '/design-system'}.contains(location)
+        // acceptance) exists. Dev tooling and the brief success celebration
+        // stay reachable.
+        return const {
+          '/onboarding',
+          '/onboarding/success',
+          '/design-system',
+        }.contains(location)
             ? null
             : '/onboarding';
       }
-      if (const {'/dashboard', '/verify', '/design-system'}.contains(location)) {
+      // The success screen outlives the status flip (it refreshes status
+      // before showing), so keep it reachable for its 2-second handover.
+      if (const {
+        '/dashboard',
+        '/verify',
+        '/design-system',
+        '/onboarding/success',
+      }.contains(location)) {
         return null;
       }
       // Auth-flow screens, the transient splash, and the onboarding screen

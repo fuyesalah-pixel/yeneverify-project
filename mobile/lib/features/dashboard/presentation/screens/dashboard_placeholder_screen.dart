@@ -23,11 +23,16 @@ class DashboardPlaceholderScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final auth = ref.watch(authProvider).valueOrNull;
 
-    // Identity comes from /auth/me. fullName is empty until the merchant
-    // onboards, so fall back to the masked login phone.
+    // Prefer the business just created during onboarding, then the person's
+    // name (empty for fresh accounts), then the masked login phone.
+    final businessName = auth?.businessName?.trim() ?? '';
     final fullName = auth?.user?.fullName.trim() ?? '';
     final phone = auth?.user?.phone ?? auth?.lastLoginPhone ?? '';
-    final displayName = fullName.isNotEmpty ? fullName : _maskPhone(phone);
+    final displayName = businessName.isNotEmpty
+        ? businessName
+        : fullName.isNotEmpty
+            ? fullName
+            : _maskPhone(phone);
 
     return Scaffold(
       appBar: AppBar(

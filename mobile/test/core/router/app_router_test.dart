@@ -119,6 +119,14 @@ void main() {
         '/onboarding',
       );
     });
+
+    test('the success celebration stays reachable', () {
+      expect(
+        _redirect(AuthStatus.unlocked, '/onboarding/success',
+            needsOnboarding: true),
+        isNull,
+      );
+    });
   });
 
   group('unlocked + onboarding complete', () {
@@ -141,6 +149,10 @@ void main() {
 
     test('onboarding redirects to dashboard once complete', () {
       expect(_redirect(AuthStatus.unlocked, '/onboarding'), '/dashboard');
+    });
+
+    test('the success celebration stays reachable during handover', () {
+      expect(_redirect(AuthStatus.unlocked, '/onboarding/success'), isNull);
     });
 
     test('other authenticated routes are allowed', () {

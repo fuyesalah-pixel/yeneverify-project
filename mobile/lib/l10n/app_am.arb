@@ -253,6 +253,93 @@
 
   "businessType": "የንግድ ዓይነት",
 
+  "onboardingMerchantTitle": "ንግድዎን እናስተካክል",
+
+  "onboardingMerchantSubtitle": "የYene Verify ተሞክሮዎን ለማበጀት ይህን እንጠቀምበታለን",
+
+  "businessNameHint": "ለምሳሌ፦ ሰላም ካፌ፣ አዲስ ኤሌክትሮኒክስ",
+
+  "businessNameRequired": "የንግድ ስም ያስገቡ",
+
+  "businessNameTooShort": "የንግድ ስም ቢያንስ 2 ፊደሎች መሆን አለበት",
+
+  "businessNameTooLong": "የንግድ ስም ከ80 ፊደሎች መብለጥ የለበትም",
+
+  "addMoreDetails": "ተጨማሪ ዝርዝሮችን ያክሉ",
+
+  "businessTypeCafe": "ካፌ",
+
+  "businessTypeRestaurant": "ምግብ ቤት",
+
+  "businessTypeRetail": "ችርቻሮ",
+
+  "businessTypeServices": "አገልግሎቶች",
+
+  "businessTypeOther": "ሌላ",
+
+  "tinLabel": "TIN (የታክስ መለያ)",
+
+  "addressLabel": "አድራሻ",
+
+  "cityLabel": "ከተማ",
+
+  "createBusiness": "ንግድ ይፍጠሩ",
+
+  "onboardingSuccessTitle": "ሁሉም ዝግጁ ነው",
+
+  "onboardingSuccessSubtitle": "ንግድዎ {businessName} አሁን በYene Verify ላይ ነው።",
+  "@onboardingSuccessSubtitle": {
+    "placeholders": {
+      "businessName": { "type": "String" }
+    }
+  },
+
+  "inviteTitle": "ተጋብዘዋል",
+
+  "inviteBody": "{merchantName} ቡድናቸውን እንዲቀላቀሉ ጋብዘውዎታል",
+  "@inviteBody": {
+    "placeholders": {
+      "merchantName": { "type": "String" }
+    }
+  },
+
+  "inviteBranch": "ቅርንጫፍ፦ {branchLabel}",
+  "@inviteBranch": {
+    "placeholders": {
+      "branchLabel": { "type": "String" }
+    }
+  },
+
+  "inviteAbility": "ለዚህ ንግድ ክፍያዎችን ማረጋገጥ ይችላሉ።",
+
+  "inviteCodeLabel": "ከSMS የመጣውን ኮድ ያስገቡ",
+
+  "inviteCodeHint": "የግብዣ ኮድዎን ይለጥፉ",
+
+  "acceptInvite": "ግብዣውን ተቀበል",
+
+  "declineInvite": "አትቀበል",
+
+  "declineInviteConfirmTitle": "ይህን ግብዣ ውድቅ ይላሉ?",
+
+  "declineInviteConfirmBody": "ወደ {merchantName} ለመቀላቀል አዲስ ግብዣ ያስፈልግዎታል።",
+  "@declineInviteConfirmBody": {
+    "placeholders": {
+      "merchantName": { "type": "String" }
+    }
+  },
+
+  "inviteExpired": "ይህ ግብዣ ጊዜው አልፏል። ከ{merchantName} አዲስ ይጠይቁ።",
+  "@inviteExpired": {
+    "placeholders": {
+      "merchantName": { "type": "String" }
+    }
+  },
+
+  "inviteConsumed": "ይህ ግብዣ አስቀድሞ ጥቅም ላይ ውሏል።",
+
+  "inviteInvalid": "ኮዱ አልተስማማም። SMSውን ይመልከቱ።",
+
   "fullName": "ሙሉ ስም",
 
   "language": "ቋንቋ",

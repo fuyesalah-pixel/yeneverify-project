@@ -285,3 +285,30 @@ pending. No automated test runs the real app end to end. Add a
 device-farm/integration test that installs the app, signs up a fresh phone,
 completes PIN setup, and reaches the dashboard. Trigger: first physical-device
 build, before beta.
+
+## 31. Deep link for invite tokens (Step 22A follow-up)
+
+The sub-merchant invite token is a signed 15-minute JWT delivered in the SMS
+invite URL (`yeneverify://invite/<token>` planned). Step 22A ships manual
+paste-from-SMS entry because `/onboarding/status` exposes only the invite id.
+Add deep-link routing, store the token, and land directly on the invite card.
+Trigger: Step 27 polish, or first merchant complaint about pasting a long
+code.
+
+## 32. Backend: invite step unreachable + accept blocked (Step 22A)
+
+Runtime verification (2026-11-02) found two backend gaps in the sub-merchant
+onboarding path:
+
+1. `GET /onboarding/status` only looks for INVITED rows when
+   `user.role === 'SUB_MERCHANT'`, but invitees are existing `MERCHANT`
+   accounts (role is only changed to SUB_MERCHANT on accept). An invited
+   `MERCHANT` with no profile still reports `MERCHANT_PROFILE`, so
+   `SUB_MERCHANT_ACCEPT` is never reached.
+2. `POST /sub-merchants/accept` has no `@SkipOnboarding()`, so the global
+   OnboardedGuard 403s it for the very users who need to accept
+   (verified: 403 in an e2e run).
+
+Fix: surface pending invites for MERCHANT users in the status service (or set
+the role at invite time) and exempt the accept route from OnboardedGuard.
+Trigger: Step 22A invite flow before Step 23.

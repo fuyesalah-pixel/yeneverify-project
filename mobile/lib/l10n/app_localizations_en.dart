@@ -412,6 +412,113 @@ class AppLocalizationsEn extends AppLocalizations {
   String get businessType => 'Business type';
 
   @override
+  String get onboardingMerchantTitle => 'Let\'s set up your business';
+
+  @override
+  String get onboardingMerchantSubtitle =>
+      'We\'ll use this to personalize your Yene Verify experience';
+
+  @override
+  String get businessNameHint => 'e.g., Selam Coffee, Addis Electronics';
+
+  @override
+  String get businessNameRequired => 'Enter your business name';
+
+  @override
+  String get businessNameTooShort =>
+      'Business name must be at least 2 characters';
+
+  @override
+  String get businessNameTooLong =>
+      'Business name must be 80 characters or less';
+
+  @override
+  String get addMoreDetails => 'Add more details';
+
+  @override
+  String get businessTypeCafe => 'Cafe';
+
+  @override
+  String get businessTypeRestaurant => 'Restaurant';
+
+  @override
+  String get businessTypeRetail => 'Retail';
+
+  @override
+  String get businessTypeServices => 'Services';
+
+  @override
+  String get businessTypeOther => 'Other';
+
+  @override
+  String get tinLabel => 'TIN (Tax ID)';
+
+  @override
+  String get addressLabel => 'Address';
+
+  @override
+  String get cityLabel => 'City';
+
+  @override
+  String get createBusiness => 'Create business';
+
+  @override
+  String get onboardingSuccessTitle => 'You\'re all set';
+
+  @override
+  String onboardingSuccessSubtitle(String businessName) {
+    return 'Your business $businessName is now on Yene Verify.';
+  }
+
+  @override
+  String get inviteTitle => 'You\'re invited';
+
+  @override
+  String inviteBody(String merchantName) {
+    return '$merchantName invited you to join their team';
+  }
+
+  @override
+  String inviteBranch(String branchLabel) {
+    return 'Branch: $branchLabel';
+  }
+
+  @override
+  String get inviteAbility =>
+      'You\'ll be able to verify payments for this business.';
+
+  @override
+  String get inviteCodeLabel => 'Enter the code from your SMS';
+
+  @override
+  String get inviteCodeHint => 'Paste your invite code';
+
+  @override
+  String get acceptInvite => 'Accept invite';
+
+  @override
+  String get declineInvite => 'Decline';
+
+  @override
+  String get declineInviteConfirmTitle => 'Decline this invite?';
+
+  @override
+  String declineInviteConfirmBody(String merchantName) {
+    return 'You\'ll need a new invite to join $merchantName.';
+  }
+
+  @override
+  String inviteExpired(String merchantName) {
+    return 'This invite has expired. Ask $merchantName for a new one.';
+  }
+
+  @override
+  String get inviteConsumed => 'This invite was already used.';
+
+  @override
+  String get inviteInvalid => 'That code doesn\'t match. Check the SMS.';
+
+  @override
   String get fullName => 'Full name';
 
   @override

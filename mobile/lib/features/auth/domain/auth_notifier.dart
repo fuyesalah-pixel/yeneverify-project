@@ -32,6 +32,7 @@ class AuthState {
     this.needsOnboarding = false,
     this.onboardingStep,
     this.pendingInvite,
+    this.businessName,
   });
 
   final AuthStatus status;
@@ -48,6 +49,10 @@ class AuthState {
   final String? onboardingStep;
   final PendingInvite? pendingInvite;
 
+  /// Business name from the create-merchant response. Transient: used by the
+  /// dashboard right after onboarding; not persisted across cold starts yet.
+  final String? businessName;
+
   AuthState copyWith({
     AuthStatus? status,
     User? user,
@@ -59,6 +64,7 @@ class AuthState {
     bool? needsOnboarding,
     String? onboardingStep,
     PendingInvite? pendingInvite,
+    String? businessName,
     bool clearError = false,
     bool clearAccessToken = false,
     bool clearUser = false,
@@ -76,6 +82,7 @@ class AuthState {
         onboardingStep: onboardingStep ?? this.onboardingStep,
         pendingInvite:
             clearPendingInvite ? null : (pendingInvite ?? this.pendingInvite),
+        businessName: businessName ?? this.businessName,
       );
 }
 
@@ -196,6 +203,14 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         clearError: true,
       ),
     );
+  }
+
+  /// Stores the business name returned by onboarding so the dashboard can
+  /// greet the merchant immediately (transient, not persisted).
+  void setBusinessName(String name) {
+    final current = state.valueOrNull;
+    if (current == null) return;
+    state = AsyncValue.data(current.copyWith(businessName: name));
   }
 
   /// Fetches GET /onboarding/status (single source of truth for onboarding

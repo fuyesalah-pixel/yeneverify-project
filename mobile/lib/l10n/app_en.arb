@@ -413,6 +413,119 @@
   "businessType": "Business type",
   "@businessType": {},
 
+  "onboardingMerchantTitle": "Let's set up your business",
+  "@onboardingMerchantTitle": {},
+
+  "onboardingMerchantSubtitle": "We'll use this to personalize your Yene Verify experience",
+  "@onboardingMerchantSubtitle": {},
+
+  "businessNameHint": "e.g., Selam Coffee, Addis Electronics",
+  "@businessNameHint": {},
+
+  "businessNameRequired": "Enter your business name",
+  "@businessNameRequired": {},
+
+  "businessNameTooShort": "Business name must be at least 2 characters",
+  "@businessNameTooShort": {},
+
+  "businessNameTooLong": "Business name must be 80 characters or less",
+  "@businessNameTooLong": {},
+
+  "addMoreDetails": "Add more details",
+  "@addMoreDetails": {},
+
+  "businessTypeCafe": "Cafe",
+  "@businessTypeCafe": {},
+
+  "businessTypeRestaurant": "Restaurant",
+  "@businessTypeRestaurant": {},
+
+  "businessTypeRetail": "Retail",
+  "@businessTypeRetail": {},
+
+  "businessTypeServices": "Services",
+  "@businessTypeServices": {},
+
+  "businessTypeOther": "Other",
+  "@businessTypeOther": {},
+
+  "tinLabel": "TIN (Tax ID)",
+  "@tinLabel": {},
+
+  "addressLabel": "Address",
+  "@addressLabel": {},
+
+  "cityLabel": "City",
+  "@cityLabel": {},
+
+  "createBusiness": "Create business",
+  "@createBusiness": {},
+
+  "onboardingSuccessTitle": "You're all set",
+  "@onboardingSuccessTitle": {},
+
+  "onboardingSuccessSubtitle": "Your business {businessName} is now on Yene Verify.",
+  "@onboardingSuccessSubtitle": {
+    "placeholders": {
+      "businessName": { "type": "String" }
+    }
+  },
+
+  "inviteTitle": "You're invited",
+  "@inviteTitle": {},
+
+  "inviteBody": "{merchantName} invited you to join their team",
+  "@inviteBody": {
+    "placeholders": {
+      "merchantName": { "type": "String" }
+    }
+  },
+
+  "inviteBranch": "Branch: {branchLabel}",
+  "@inviteBranch": {
+    "placeholders": {
+      "branchLabel": { "type": "String" }
+    }
+  },
+
+  "inviteAbility": "You'll be able to verify payments for this business.",
+  "@inviteAbility": {},
+
+  "inviteCodeLabel": "Enter the code from your SMS",
+  "@inviteCodeLabel": {},
+
+  "inviteCodeHint": "Paste your invite code",
+  "@inviteCodeHint": {},
+
+  "acceptInvite": "Accept invite",
+  "@acceptInvite": {},
+
+  "declineInvite": "Decline",
+  "@declineInvite": {},
+
+  "declineInviteConfirmTitle": "Decline this invite?",
+  "@declineInviteConfirmTitle": {},
+
+  "declineInviteConfirmBody": "You'll need a new invite to join {merchantName}.",
+  "@declineInviteConfirmBody": {
+    "placeholders": {
+      "merchantName": { "type": "String" }
+    }
+  },
+
+  "inviteExpired": "This invite has expired. Ask {merchantName} for a new one.",
+  "@inviteExpired": {
+    "placeholders": {
+      "merchantName": { "type": "String" }
+    }
+  },
+
+  "inviteConsumed": "This invite was already used.",
+  "@inviteConsumed": {},
+
+  "inviteInvalid": "That code doesn't match. Check the SMS.",
+  "@inviteInvalid": {},
+
   "fullName": "Full name",
   "@fullName": {},
 

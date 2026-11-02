@@ -10,7 +10,8 @@ import '../../features/auth/presentation/screens/pin_entry_screen.dart';
 import '../../features/auth/presentation/screens/pin_setup_screen.dart';
 import '../../features/design_system/presentation/screens/design_system_showcase_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_placeholder_screen.dart';
-import '../../features/onboarding/presentation/screens/onboarding_placeholder_screen.dart';
+import '../../features/onboarding/presentation/screens/merchant_setup_success_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import '../../features/verification/presentation/screens/verify_placeholder_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import 'auth_redirect.dart';
@@ -25,6 +26,7 @@ abstract final class Routes {
   static const String biometricEnroll = '/biometric-enroll';
   static const String dashboard = '/dashboard';
   static const String onboarding = '/onboarding';
+  static const String onboardingSuccess = '/onboarding/success';
   static const String verify = '/verify';
   static const String designSystem = '/design-system';
 }
@@ -72,7 +74,13 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: Routes.onboarding,
-      builder: (_, __) => const OnboardingPlaceholderScreen(),
+      builder: (_, __) => const OnboardingFlowScreen(),
+    ),
+    GoRoute(
+      path: Routes.onboardingSuccess,
+      builder: (_, state) => MerchantSetupSuccessScreen(
+        businessName: (state.extra as String?) ?? '',
+      ),
     ),
     GoRoute(
       path: Routes.verify,

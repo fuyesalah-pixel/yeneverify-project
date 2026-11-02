@@ -398,6 +398,110 @@ class AppLocalizationsAm extends AppLocalizations {
   String get businessType => 'የንግድ ዓይነት';
 
   @override
+  String get onboardingMerchantTitle => 'ንግድዎን እናስተካክል';
+
+  @override
+  String get onboardingMerchantSubtitle =>
+      'የYene Verify ተሞክሮዎን ለማበጀት ይህን እንጠቀምበታለን';
+
+  @override
+  String get businessNameHint => 'ለምሳሌ፦ ሰላም ካፌ፣ አዲስ ኤሌክትሮኒክስ';
+
+  @override
+  String get businessNameRequired => 'የንግድ ስም ያስገቡ';
+
+  @override
+  String get businessNameTooShort => 'የንግድ ስም ቢያንስ 2 ፊደሎች መሆን አለበት';
+
+  @override
+  String get businessNameTooLong => 'የንግድ ስም ከ80 ፊደሎች መብለጥ የለበትም';
+
+  @override
+  String get addMoreDetails => 'ተጨማሪ ዝርዝሮችን ያክሉ';
+
+  @override
+  String get businessTypeCafe => 'ካፌ';
+
+  @override
+  String get businessTypeRestaurant => 'ምግብ ቤት';
+
+  @override
+  String get businessTypeRetail => 'ችርቻሮ';
+
+  @override
+  String get businessTypeServices => 'አገልግሎቶች';
+
+  @override
+  String get businessTypeOther => 'ሌላ';
+
+  @override
+  String get tinLabel => 'TIN (የታክስ መለያ)';
+
+  @override
+  String get addressLabel => 'አድራሻ';
+
+  @override
+  String get cityLabel => 'ከተማ';
+
+  @override
+  String get createBusiness => 'ንግድ ይፍጠሩ';
+
+  @override
+  String get onboardingSuccessTitle => 'ሁሉም ዝግጁ ነው';
+
+  @override
+  String onboardingSuccessSubtitle(String businessName) {
+    return 'ንግድዎ $businessName አሁን በYene Verify ላይ ነው።';
+  }
+
+  @override
+  String get inviteTitle => 'ተጋብዘዋል';
+
+  @override
+  String inviteBody(String merchantName) {
+    return '$merchantName ቡድናቸውን እንዲቀላቀሉ ጋብዘውዎታል';
+  }
+
+  @override
+  String inviteBranch(String branchLabel) {
+    return 'ቅርንጫፍ፦ $branchLabel';
+  }
+
+  @override
+  String get inviteAbility => 'ለዚህ ንግድ ክፍያዎችን ማረጋገጥ ይችላሉ።';
+
+  @override
+  String get inviteCodeLabel => 'ከSMS የመጣውን ኮድ ያስገቡ';
+
+  @override
+  String get inviteCodeHint => 'የግብዣ ኮድዎን ይለጥፉ';
+
+  @override
+  String get acceptInvite => 'ግብዣውን ተቀበል';
+
+  @override
+  String get declineInvite => 'አትቀበል';
+
+  @override
+  String get declineInviteConfirmTitle => 'ይህን ግብዣ ውድቅ ይላሉ?';
+
+  @override
+  String declineInviteConfirmBody(String merchantName) {
+    return 'ወደ $merchantName ለመቀላቀል አዲስ ግብዣ ያስፈልግዎታል።';
+  }
+
+  @override
+  String inviteExpired(String merchantName) {
+    return 'ይህ ግብዣ ጊዜው አልፏል። ከ$merchantName አዲስ ይጠይቁ።';
+  }
+
+  @override
+  String get inviteConsumed => 'ይህ ግብዣ አስቀድሞ ጥቅም ላይ ውሏል።';
+
+  @override
+  String get inviteInvalid => 'ኮዱ አልተስማማም። SMSውን ይመልከቱ።';
+
+  @override
   String get fullName => 'ሙሉ ስም';
 
   @override

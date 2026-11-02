@@ -824,6 +824,192 @@ abstract class AppLocalizations {
   /// **'Business type'**
   String get businessType;
 
+  /// No description provided for @onboardingMerchantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s set up your business'**
+  String get onboardingMerchantTitle;
+
+  /// No description provided for @onboardingMerchantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll use this to personalize your Yene Verify experience'**
+  String get onboardingMerchantSubtitle;
+
+  /// No description provided for @businessNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Selam Coffee, Addis Electronics'**
+  String get businessNameHint;
+
+  /// No description provided for @businessNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your business name'**
+  String get businessNameRequired;
+
+  /// No description provided for @businessNameTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Business name must be at least 2 characters'**
+  String get businessNameTooShort;
+
+  /// No description provided for @businessNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Business name must be 80 characters or less'**
+  String get businessNameTooLong;
+
+  /// No description provided for @addMoreDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more details'**
+  String get addMoreDetails;
+
+  /// No description provided for @businessTypeCafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Cafe'**
+  String get businessTypeCafe;
+
+  /// No description provided for @businessTypeRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get businessTypeRestaurant;
+
+  /// No description provided for @businessTypeRetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Retail'**
+  String get businessTypeRetail;
+
+  /// No description provided for @businessTypeServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get businessTypeServices;
+
+  /// No description provided for @businessTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get businessTypeOther;
+
+  /// No description provided for @tinLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TIN (Tax ID)'**
+  String get tinLabel;
+
+  /// No description provided for @addressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get addressLabel;
+
+  /// No description provided for @cityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get cityLabel;
+
+  /// No description provided for @createBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Create business'**
+  String get createBusiness;
+
+  /// No description provided for @onboardingSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set'**
+  String get onboardingSuccessTitle;
+
+  /// No description provided for @onboardingSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your business {businessName} is now on Yene Verify.'**
+  String onboardingSuccessSubtitle(String businessName);
+
+  /// No description provided for @inviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re invited'**
+  String get inviteTitle;
+
+  /// No description provided for @inviteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{merchantName} invited you to join their team'**
+  String inviteBody(String merchantName);
+
+  /// No description provided for @inviteBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch: {branchLabel}'**
+  String inviteBranch(String branchLabel);
+
+  /// No description provided for @inviteAbility.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll be able to verify payments for this business.'**
+  String get inviteAbility;
+
+  /// No description provided for @inviteCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code from your SMS'**
+  String get inviteCodeLabel;
+
+  /// No description provided for @inviteCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your invite code'**
+  String get inviteCodeHint;
+
+  /// No description provided for @acceptInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept invite'**
+  String get acceptInvite;
+
+  /// No description provided for @declineInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineInvite;
+
+  /// No description provided for @declineInviteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline this invite?'**
+  String get declineInviteConfirmTitle;
+
+  /// No description provided for @declineInviteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll need a new invite to join {merchantName}.'**
+  String declineInviteConfirmBody(String merchantName);
+
+  /// No description provided for @inviteExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This invite has expired. Ask {merchantName} for a new one.'**
+  String inviteExpired(String merchantName);
+
+  /// No description provided for @inviteConsumed.
+  ///
+  /// In en, this message translates to:
+  /// **'This invite was already used.'**
+  String get inviteConsumed;
+
+  /// No description provided for @inviteInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That code doesn\'t match. Check the SMS.'**
+  String get inviteInvalid;
+
   /// No description provided for @fullName.
   ///
   /// In en, this message translates to:
