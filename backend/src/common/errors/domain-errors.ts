@@ -112,6 +112,17 @@ export class PinLockedError extends AppError {
   }
 }
 
+export class AuthWeakPinError extends AppError {
+  constructor(details?: Record<string, unknown>) {
+    super(
+      ERROR_CODES.AUTH_WEAK_PIN,
+      'PIN is too weak. Use 4 or 6 digits, avoid sequential or repeated numbers.',
+      400,
+      details,
+    );
+  }
+}
+
 export class TokenTooOldError extends AppError {
   constructor(message = 'Access token is too old. Please provide a fresh OTP.') {
     super('AUTH_TOKEN_TOO_OLD', message, 401);

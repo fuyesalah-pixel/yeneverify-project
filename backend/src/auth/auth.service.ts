@@ -245,7 +245,9 @@ export class AuthService {
     });
 
     // Determine onboarding/pin flags
-    const needsPinSetup = false; // PIN setup in Step 11
+    // A user without pinSetAt must create a PIN before the app can unlock.
+    // (Previously hardcoded false, which told first-time users to skip setup.)
+    const needsPinSetup = !user.pinSetAt;
     const needsOnboarding =
       (user.role === 'MERCHANT' && !user.ownedMerchant?.id) ||
       (user.role === 'SUB_MERCHANT' && user.subMerchantProfile?.status === 'INVITED');

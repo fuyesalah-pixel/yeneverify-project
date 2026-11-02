@@ -24,6 +24,8 @@ import { AuthUser } from './guards/jwt-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { SkipOnboarding } from '../common/decorators/skip-onboarding.decorator';
+import { SkipTenant } from '../common/decorators/skip-tenant.decorator';
 import { RequireStepUp } from './step-up';
 import {
   RequestOtpDto,
@@ -91,6 +93,8 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiBearerAuth('access-token')
@@ -101,6 +105,8 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @Post('logout-all')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiBearerAuth('access-token')
@@ -111,6 +117,8 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @Get('devices')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'List active devices' })
@@ -120,6 +128,8 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @Delete('devices/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiBearerAuth('access-token')
@@ -130,6 +140,8 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @Get('/me')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get current user profile' })
@@ -139,6 +151,8 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @Patch('/me/language')
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Update preferred language' })
@@ -153,6 +167,8 @@ export class AuthController {
   // ============================================================
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @Post('pin/set')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('access-token')
@@ -172,6 +188,8 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @Post('pin/verify')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('access-token')
@@ -193,6 +211,8 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @RequireStepUp()
   @Post('pin/change')
   @HttpCode(HttpStatus.OK)
@@ -214,6 +234,8 @@ export class AuthController {
   }
 
   @Public()
+  @SkipOnboarding()
+  @SkipTenant()
   @Post('pin/reset')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reset PIN via OTP (forgot PIN)' })
@@ -228,6 +250,8 @@ export class AuthController {
   // ============================================================
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @RequireStepUp()
   @Post('biometric/enable')
   @HttpCode(HttpStatus.OK)
@@ -246,6 +270,8 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @SkipOnboarding()
+  @SkipTenant()
   @RequireStepUp()
   @Post('biometric/disable')
   @HttpCode(HttpStatus.OK)
@@ -268,6 +294,8 @@ export class AuthController {
   // ============================================================
 
   @Public()
+  @SkipOnboarding()
+  @SkipTenant()
   @Post('step-up/biometric')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get step-up token after biometric unlock' })
@@ -291,6 +319,8 @@ export class AuthController {
   // ============================================================
 
   @Public()
+  @SkipOnboarding()
+  @SkipTenant()
   @Post('unlock')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Unlock session (refresh + device verification)' })
