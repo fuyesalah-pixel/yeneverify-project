@@ -119,13 +119,13 @@ class DesignSystemShowcaseScreen extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         AppButton(label: 'Danger', variant: AppButtonVariant.danger, onPressed: () {}),
         const SizedBox(height: AppSpacing.xl),
-        AppButton(label: 'Primary disabled'),
+        const AppButton(label: 'Primary disabled'),
         const SizedBox(height: AppSpacing.lg),
-        AppButton(label: 'Secondary disabled', variant: AppButtonVariant.secondary),
+        const AppButton(label: 'Secondary disabled', variant: AppButtonVariant.secondary),
         const SizedBox(height: AppSpacing.lg),
-        AppButton(label: 'Ghost disabled', variant: AppButtonVariant.ghost),
+        const AppButton(label: 'Ghost disabled', variant: AppButtonVariant.ghost),
         const SizedBox(height: AppSpacing.lg),
-        AppButton(label: 'Danger disabled', variant: AppButtonVariant.danger),
+        const AppButton(label: 'Danger disabled', variant: AppButtonVariant.danger),
         const SizedBox(height: AppSpacing.xl),
         const AppButton(label: 'Primary loading', isLoading: true),
         const SizedBox(height: AppSpacing.lg),
@@ -184,7 +184,7 @@ class DesignSystemShowcaseScreen extends StatelessWidget {
   }
 
   Widget _fintechSection(BuildContext context) {
-    final verdicts = VerificationVerdict.values;
+    const verdicts = VerificationVerdict.values;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -221,10 +221,10 @@ class DesignSystemShowcaseScreen extends StatelessWidget {
   Widget _feedbackSection(BuildContext context) {
     return Column(
       children: [
-        AppCard(
+        const AppCard(
           child: Column(
             children: [
-              const AppEmptyState(
+              AppEmptyState(
                 icon: Icons.receipt_long_outlined,
                 title: 'No verifications yet',
                 body: 'Verified payments will appear here.',
@@ -236,8 +236,8 @@ class DesignSystemShowcaseScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        AppCard(
-          child: const AppErrorState(
+        const AppCard(
+          child: AppErrorState(
             message: 'No internet connection. Please check your network.',
             retryLabel: 'Try again',
             onRetry: null,
@@ -249,9 +249,9 @@ class DesignSystemShowcaseScreen extends StatelessWidget {
           child: Column(
             children: [
               AppSkeleton.text(width: 180, height: 16),
-              SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.md),
               AppSkeleton.text(height: 14),
-              SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.sm),
               AppSkeleton.text(width: 220, height: 14),
             ],
           ),

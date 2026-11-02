@@ -1,0 +1,296 @@
+// Mobile-only. Orchestrates AuthApi + SecureStorage + SessionStore.
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/network/api_error.dart';
+import '../../../core/network/api_result.dart';
+import '../../../core/network/dio_client.dart';
+import '../../../core/storage/device_fingerprint.dart';
+import '../../../core/storage/secure_storage.dart';
+import '../../../core/storage/session_store.dart';
+import 'auth_api.dart';
+import 'device_info.dart';
+import 'models/auth_models.dart';
+
+class AuthRepository {
+  AuthRepository({
+    required SessionStore sessionStore,
+    required AuthApi api,
+  })  : _sessionStore = sessionStore,
+        _api = api;
+
+  static const pinLength = 4;
+
+  final SessionStore _sessionStore;
+  final AuthApi _api;
+
+  // -- device ----------------------------------------------------------------
+  Future<DeviceIdentity> deviceIdentity() async {
+    final fingerprint = await getOrCreateFingerprint();
+    return collectDeviceInfo(fingerprint);
+  }
+
+  /// Public entrypoint used at startup to obtain the stable fingerprint.
+  Future<String> getOrCreateFingerprint() async {
+    final existing = await _sessionStore.readFingerprint();
+    if (existing != null && existing.isNotEmpty) return existing;
+    return DeviceFingerprint(_sessionStore).getOrCreate();
+  }
+
+  // -- login flow ------------------------------------------------------------
+  Future<ApiResult<OtpRequestResponse>> requestOtp(String phone) {
+    return _api.requestOtp(phone);
+  }
+
+  Future<ApiResult<AuthStateResult>> verifyOtp({
+    required String phone,
+    required String code,
+  }) async {
+    final device = await deviceIdentity();
+    final result = await _api.verifyOtp(
+      phone: phone,
+      code: code,
+      device: device.toJson(),
+    );
+    return switch (result) {
+      Failure<AuthResponse>() => Failure<AuthStateResult>(result.error),
+      Success<AuthResponse>() => await _persistSession(result.data),
+    };
+  }
+
+  /// Unlock via /auth/unlock. Backend verifies device + refresh token; the
+  /// unlockMethod tells the backend which path was used.
+  Future<ApiResult<AuthStateResult>> unlock(
+      {required UnlockMethod method}) async {
+    final device = await deviceIdentity();
+    final refreshToken = await _sessionStore.readRefreshToken();
+    if (refreshToken == null) {
+      return const Failure(ApiError(
+        code: 'AUTH_NO_SESSION',
+        message: 'No session on device',
+        kind: ApiErrorKind.auth,
+      ));
+    }
+    final result = await _api.unlock(
+      refreshToken: refreshToken,
+      device: device.toJson(),
+      method: method,
+    );
+    return switch (result) {
+      Failure<FlatTokensResponse>() => Failure<AuthStateResult>(result.error),
+      Success<FlatTokensResponse>() =>
+        await _persistTokensThenFetchUser(result.data.tokens),
+    };
+  }
+
+  /// PIN unlock: first obtain a session (/auth/unlock with the stored
+  /// refresh token), THEN server-verify the PIN via POST /auth/pin/verify
+  /// using the fresh access token. Without the second call any 4 digits
+  /// would unlock — the /unlock endpoint verifies device + token only.
+  Future<ApiResult<AuthStateResult>> unlockWithPin({required String pin}) async {
+    final hasPin = await _sessionStore.readHasPin();
+    if (!hasPin) {
+      return const Failure(ApiError(
+        code: 'AUTH_PIN_NOT_SET',
+        message: 'No PIN is set on this account',
+      ));
+    }
+    final session = await unlock(method: UnlockMethod.pin);
+    if (session is Failure<AuthStateResult>) return session;
+    final verify = await _api.verifyPin(pin: pin);
+    return switch (verify) {
+      Failure<StepUpResponse>() => Failure<AuthStateResult>(verify.error),
+      Success<StepUpResponse>() => session,
+    };
+  }
+
+  Future<ApiResult<StepUpResponse>> verifyPin({required String pin}) {
+    return _api.verifyPin(pin: pin);
+  }
+
+  /// POST /auth/pin/set, then mirror `has_pin` locally so the next app launch
+  /// shows the unlock screen instead of PIN setup.
+  Future<ApiResult<void>> setPin({required String pin}) async {
+    final result = await _api.setPin(pin: pin);
+    if (result is Success<void>) {
+      await _sessionStore.setHasPin(true);
+    }
+    return result;
+  }
+
+  /// PIN step-up + biometric enable. The step-up token is bound to the
+  /// caller's session/device, and the backend expects the server device row
+  /// id (UUID) — not the fingerprint.
+  Future<ApiResult<void>> enableBiometric({required String pin}) async {
+    final stepUp = await _api.verifyPin(pin: pin);
+    if (stepUp is Failure<StepUpResponse>) {
+      return Failure<void>(stepUp.error);
+    }
+    final token = (stepUp as Success<StepUpResponse>).data.stepUpToken;
+    return _enableBiometricWithToken(token);
+  }
+
+  Future<ApiResult<void>> _enableBiometricWithToken(String stepUpToken) async {
+    final deviceId = await _sessionStore.readDeviceId();
+    if (deviceId == null || deviceId.isEmpty) {
+      return const Failure(ApiError(
+        code: 'AUTH_DEVICE_NOT_FOUND',
+        message: 'Device is not registered on the server',
+      ));
+    }
+    return _api.enableBiometric(deviceId: deviceId, stepUpToken: stepUpToken);
+  }
+
+  Future<bool> markBiometricEnabled() async {
+    await _sessionStore.setBiometricEnabled(true);
+    return true;
+  }
+
+  Future<ApiResult<User>> me() => _api.me();
+
+  Future<ApiResult<OnboardingStatus>> onboardingStatus() =>
+      _api.onboardingStatus();
+
+  Future<ApiResult<void>> logoutApi({required String refreshToken}) =>
+      _api.logout(refreshToken: refreshToken);
+
+  // -- startup / storage ------------------------------------------------------
+  Future<bool> hasStoredSession() async =>
+      await _sessionStore.readRefreshToken() != null;
+
+  Future<bool> biometricEnabled() => _sessionStore.readBiometricEnabled();
+
+  Future<bool> hasPin() => _sessionStore.readHasPin();
+
+  Future<String?> getRefreshToken() => _sessionStore.readRefreshToken();
+
+  Future<String?> readStoredPhone() => _sessionStore.readUserPhone();
+
+  Future<String?> readStoredUserId() => _sessionStore.readUserId();
+
+  Future<void> clearAuthData() => _sessionStore.logout();
+
+  /// Unlock/refresh responses carry FLAT tokens without user data; after
+  /// persisting them we fetch the user via GET /auth/me (the new access
+  /// token authorizes it) and surface the combined session result.
+  Future<ApiResult<AuthStateResult>> _persistTokensThenFetchUser(
+    AuthTokens tokens,
+  ) async {
+    try {
+      _sessionStore.setAccessToken(tokens.accessToken);
+      await _sessionStore.setRefreshToken(tokens.refreshToken);
+      final meResult = await _meOrLocalFallback();
+      switch (meResult) {
+        case Failure<User>():
+          // Tokens persisted (next cold start will re-unlock); surface the
+          // /me failure so the flow shows a real error instead of hanging.
+          return Failure<AuthStateResult>(meResult.error);
+        case Success<User>():
+          final user = meResult.data;
+          await _sessionStore.setUserId(user.id);
+          await _sessionStore.setUserPhone(user.phone);
+          await _sessionStore.setHasPin(!user.needsPinSetup);
+          await _sessionStore.touchUnlock();
+          return Success(AuthStateResult(user: user, tokens: tokens));
+      }
+    } catch (e) {
+      return Failure(ApiError(message: 'Storage write failed: $e'));
+    }
+  }
+
+  /// GET /auth/me is the only endpoint that reports the real PIN state, but it
+  /// is guarded by the onboarding check: a merchant without a profile gets a
+  /// 403 `MERCHANT_NOT_ONBOARDED`. verify-otp's user DTO hardcodes
+  /// `needsPinSetup: false`, so trusting it would send a first-time user to
+  /// PIN entry instead of PIN setup. For that 403 we rebuild the flags from
+  /// the local session, whose has-pin mirror is written whenever the PIN is
+  /// set. Other failures are returned untouched.
+  Future<ApiResult<User>> _meOrLocalFallback({User? fallback}) async {
+    final result = await me();
+    if (result is Success<User>) return result;
+
+    final error = (result as Failure<User>).error;
+    final blockedByOnboarding =
+        error.httpStatus == 403 || error.code == 'MERCHANT_NOT_ONBOARDED';
+    if (!blockedByOnboarding) return result;
+
+    final hasPin = await _sessionStore.readHasPin();
+    if (fallback != null) {
+      return Success(fallback.copyWith(needsPinSetup: !hasPin));
+    }
+
+    final id = await _sessionStore.readUserId();
+    if (id == null || id.isEmpty) return result;
+    return Success(
+      User(
+        id: id,
+        phone: await _sessionStore.readUserPhone() ?? '',
+        fullName: '',
+        role: 'MERCHANT',
+        status: 'ACTIVE',
+        needsPinSetup: !hasPin,
+        needsOnboarding: true,
+      ),
+    );
+  }
+
+  /// Called after successful verifyOtp. Persists tokens + user summary and
+  /// reports whether the user still needs to set a PIN.
+  ///
+  /// The backend's verify-otp DTO hardcodes `needsPinSetup: false` (Step 11
+  /// stub), so we re-fetch GET /auth/me — whose raw record carries pinSetAt /
+  /// ownedMerchant — and derive the real flags from it. If /me is rejected
+  /// (e.g. the onboarded guard 403s a brand-new merchant), fall back to the
+  /// OTP payload's user instead of failing the login.
+  Future<ApiResult<AuthStateResult>> _persistSession(
+      AuthResponse response) async {
+    try {
+      _sessionStore.setAccessToken(response.tokens.accessToken);
+      await _sessionStore.setRefreshToken(response.tokens.refreshToken);
+      final deviceId = response.device.id;
+      if (deviceId != null && deviceId.isNotEmpty) {
+        await _sessionStore.setDeviceId(deviceId);
+      }
+      await _sessionStore.touchUnlock();
+
+      final meResult = await _meOrLocalFallback(fallback: response.user);
+      final user = switch (meResult) {
+        Success<User>(:final data) => data,
+        // A real failure (network, server) must not be papered over: the
+        // caller needs to see the error rather than a half-built session.
+        Failure<User>(:final error) => throw _MeFailure(error),
+      };
+      await _sessionStore.setUserId(user.id);
+      await _sessionStore.setUserPhone(user.phone);
+      await _sessionStore.setHasPin(!user.needsPinSetup);
+      return Success(AuthStateResult(user: user, tokens: response.tokens));
+    } on _MeFailure catch (e) {
+      return Failure<AuthStateResult>(e.error);
+    } catch (e) {
+      return Failure(ApiError(message: 'Storage write failed: $e'));
+    }
+  }
+}
+
+/// Internal signal: the post-login profile fetch failed for a reason the user
+/// must see, so the session is not reported as ready.
+class _MeFailure implements Exception {
+  const _MeFailure(this.error);
+  final ApiError error;
+}
+
+class AuthStateResult {
+  const AuthStateResult({required this.user, required this.tokens});
+  final User user;
+  final AuthTokens tokens;
+}
+
+final authApiProvider = Provider<AuthApi>((ref) {
+  return AuthApi(ref.watch(dioProvider));
+});
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return AuthRepository(
+    sessionStore: ref.watch(sessionStoreProvider),
+    api: ref.watch(authApiProvider),
+  );
+});

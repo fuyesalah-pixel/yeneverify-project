@@ -1,25 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/presentation/screens/login_placeholder_screen.dart';
+import '../../features/auth/domain/auth_notifier.dart';
+import '../../features/auth/presentation/screens/biometric_enroll_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/otp_screen.dart';
+import '../../features/auth/presentation/screens/pin_entry_screen.dart';
+import '../../features/auth/presentation/screens/pin_setup_screen.dart';
 import '../../features/design_system/presentation/screens/design_system_showcase_screen.dart';
+import '../../features/dashboard/presentation/screens/dashboard_placeholder_screen.dart';
+import '../../features/verification/presentation/screens/verify_placeholder_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
+import 'auth_redirect.dart';
 
-/// App navigation routes.
-///
-/// Step 20 wires three placeholder-level destinations:
-/// - `/` — splash (auto-advances to `/login`)
-/// - `/login` — login placeholder (Step 21 replaces the internals)
-/// - `/design-system` — the Step 2 widget gallery demo
+/// App navigation routes (Step 21).
 abstract final class Routes {
   static const String splash = '/';
   static const String login = '/login';
+  static const String otp = '/otp';
+  static const String pinSetup = '/pin-setup';
+  static const String unlock = '/unlock';
+  static const String biometricEnroll = '/biometric-enroll';
+  static const String dashboard = '/dashboard';
+  static const String onboarding = '/onboarding';
+  static const String verify = '/verify';
   static const String designSystem = '/design-system';
+}
+
+/// Bridges Riverpod auth state into GoRouter's refreshListenable. The gate
+/// widget (see app.dart) notifies this whenever auth state changes.
+final authRedirectRelay = AuthRedirectRelay();
+
+/// Subclass so calling notifyListeners is not flagged as a protected access.
+class AuthRedirectRelay extends ChangeNotifier {
+  void refresh() => notifyListeners();
 }
 
 final appRouter = GoRouter(
   initialLocation: Routes.splash,
-  refreshListenable: _NoopListenable(),
+  refreshListenable: authRedirectRelay,
   routes: [
     GoRoute(
       path: Routes.splash,
@@ -27,15 +47,62 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: Routes.login,
-      builder: (_, __) => const LoginPlaceholderScreen(),
+      builder: (_, __) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: Routes.otp,
+      builder: (_, state) => OtpScreen(phone: (state.extra as String?) ?? ''),
+    ),
+    GoRoute(
+      path: Routes.pinSetup,
+      builder: (_, __) => const PinSetupScreen(),
+    ),
+    GoRoute(
+      path: Routes.unlock,
+      builder: (_, __) => const PinEntryScreen(),
+    ),
+    GoRoute(
+      path: Routes.biometricEnroll,
+      builder: (_, __) => const BiometricEnrollScreen(),
+    ),
+    GoRoute(
+      path: Routes.dashboard,
+      builder: (_, __) => const DashboardPlaceholderScreen(),
+    ),
+    GoRoute(
+      path: Routes.onboarding,
+      builder: (_, __) => const _PlaceholderScreen(title: 'Onboarding'),
+    ),
+    GoRoute(
+      path: Routes.verify,
+      builder: (_, __) => const VerifyPlaceholderScreen(),
     ),
     GoRoute(
       path: Routes.designSystem,
       builder: (_, __) => const DesignSystemShowcaseScreen(),
     ),
   ],
+  redirect: (context, state) {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final auth = container.read(authProvider).valueOrNull;
+    if (auth == null) {
+      // Auth state not resolved yet: only the splash remains.
+      return state.matchedLocation == Routes.splash ? null : Routes.splash;
+    }
+    return authRedirect(auth, state.matchedLocation);
+  },
 );
 
-/// Placeholder listenable so later steps (e.g. auth-state redirects) can
-/// swap it in without changing the router construction.
-class _NoopListenable extends ChangeNotifier {}
+/// Placeholder for screens arriving in Steps 22-27.
+class _PlaceholderScreen extends StatelessWidget {
+  const _PlaceholderScreen({required this.title});
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: const Center(child: Text('Coming soon (Steps 22-27)')),
+    );
+  }
+}

@@ -5,6 +5,12 @@
   "appName": "Yene Verify",
   "@appName": { "description": "Application name" },
 
+  "loginTitle": "Yene Verify",
+  "@loginTitle": {},
+
+  "loginSubtitle": "Enter your phone number to get started",
+  "@loginSubtitle": {},
+
   "taglinePrimary": "Verify any Ethiopian bank payment. In seconds.",
   "@taglinePrimary": { "description": "Primary marketing tagline" },
 
@@ -85,11 +91,39 @@
     }
   },
 
-  "otpInvalid": "Invalid code. Please try again.",
+  "otpInvalid": "Incorrect code. Try again.",
   "@otpInvalid": {},
 
   "otpExpired": "Code has expired. Request a new one.",
   "@otpExpired": {},
+
+  "pinIncorrect": "Incorrect PIN. Try again.",
+  "@pinIncorrect": {},
+
+  "pinLocked": "Too many attempts. Try again in {minutes} minutes.",
+  "@pinLocked": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "errorDeviceLimit": "Too many devices. Remove one from settings.",
+  "@errorDeviceLimit": {},
+
+  "errorAccountBanned": "This account has been suspended. Contact support.",
+  "@errorAccountBanned": {},
+
+  "pinSetupTitle": "Create your PIN",
+  "@pinSetupTitle": {},
+
+  "pinSetupSubtitle": "You'll use this every time you open Yene Verify",
+  "@pinSetupSubtitle": {},
+
+  "pinEntryTitle": "Welcome back",
+  "@pinEntryTitle": {},
+
+  "pinEntryForgot": "Forgot PIN?",
+  "@pinEntryForgot": {},
 
   "otpMaxAttempts": "Too many attempts. Please wait before trying again.",
   "@otpMaxAttempts": {},

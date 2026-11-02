@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app_colors.dart';
-import 'app_colors_extension.dart';
 import 'app_radii.dart';
 import 'app_typography.dart';
 

@@ -4,6 +4,10 @@
 
   "appName": "ዬን ቨሪፋይ",
 
+  "loginTitle": "ዬን ቨሪፋይ",
+
+  "loginSubtitle": "ለመጀመር የስልክ ቁጥርዎን ያስገቡ",
+
   "taglinePrimary": "ማንኛውንም የኢትዮጵያ ባንክ ክፍያ ያረጋግጡ። በሰከንዶች።",
 
   "taglineShort": "ያረጋግጡ። ይምኑ። ያድጉ።",
@@ -52,9 +56,22 @@
 
   "otpResendIn": "በ{seconds} ሰከንድ ውስጥ እንደገና ላክ",
 
-  "otpInvalid": "ኮዱ ትክክል አይደለም። እባክዎ እንደገና ይሞክሩ።",
+  "otpInvalid": "ኮዱ ስህተት ነው። እንደገና ይሞክሩ።",
 
-  "otpExpired": "ኮዱ ጊዜው አልፏል። አዲስ ይጠይቁ።",
+  "otpExpired": "ኮዱ ጊዜው አልፏል። አዲስ ኮድ ይጠይቁ።",
+
+  "pinIncorrect": "የPIN ኮድ ስህተት ነው። እንደገና ይሞክሩ።",
+
+  "pinLocked": "በጣም ብዙ ሙከራዎች። እንደገና በ{minutes} ደቂቃ ውስጥ ይሞክሩ።",
+  "@pinLocked": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "errorDeviceLimit": "በጣም ብዙ መሳሪያዎች። ከቅንብሮች ውስጥ አንዱን ያስወግዱ።",
+
+  "errorAccountBanned": "ይህ መለያ ታግዷል። ድጋፍን ያግኙ።",
 
   "otpMaxAttempts": "ብዙ ሙከራዎች። ከጥቂት ጊዜ በኋላ እንደገና ይሞክሩ።",
 
@@ -67,6 +84,18 @@
   "pinMismatch": "PINs አይዛመዱም። እንደገና ይሞክሩ።",
 
   "pinWrong": "PIN ትክክል አይደለም። {attemptsLeft} ሙከራ ቀርቷል።",
+
+  "pinSetupTitle": "PIN ይፍጠሩ",
+  "@pinSetupTitle": {},
+
+  "pinSetupSubtitle": "Yene Verify ን በየጊዜው ሲከፍቱ ይህን PIN ይጠቀሙ",
+  "@pinSetupSubtitle": {},
+
+  "pinEntryTitle": "እንኳን ደህና መጡ",
+  "@pinEntryTitle": {},
+
+  "pinEntryForgot": "PIN ረስዋል?",
+  "@pinEntryForgot": {},
 
   "enterPin": "PINዎን ያስገቡ",
 

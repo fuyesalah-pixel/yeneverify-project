@@ -32,9 +32,19 @@ class AppEnv {
     'APP_ENV',
     defaultValue: 'development',
   );
+  /// API root for the versioned backend (`/api/v1`). The app only ever
+  /// calls endpoints beneath this path.
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://10.0.2.2:3000/api/v1',
+  );
+
+  /// Origin used for ops/monitoring probes (`/health`, `/health/ready`).
+  /// Health lives OUTSIDE the version prefix, so it is a separate URL and is
+  /// not consumed by the app itself.
+  static const String healthBaseUrl = String.fromEnvironment(
+    'HEALTH_BASE_URL',
+    defaultValue: 'http://10.0.2.2:3000',
   );
   static const int apiTimeoutMs = int.fromEnvironment(
     'API_TIMEOUT_MS',

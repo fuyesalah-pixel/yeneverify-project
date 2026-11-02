@@ -12,6 +12,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'Yene Verify';
 
   @override
+  String get loginTitle => 'Yene Verify';
+
+  @override
+  String get loginSubtitle => 'Enter your phone number to get started';
+
+  @override
   String get taglinePrimary => 'Verify any Ethiopian bank payment. In seconds.';
 
   @override
@@ -89,10 +95,38 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get otpInvalid => 'Invalid code. Please try again.';
+  String get otpInvalid => 'Incorrect code. Try again.';
 
   @override
   String get otpExpired => 'Code has expired. Request a new one.';
+
+  @override
+  String get pinIncorrect => 'Incorrect PIN. Try again.';
+
+  @override
+  String pinLocked(int minutes) {
+    return 'Too many attempts. Try again in $minutes minutes.';
+  }
+
+  @override
+  String get errorDeviceLimit => 'Too many devices. Remove one from settings.';
+
+  @override
+  String get errorAccountBanned =>
+      'This account has been suspended. Contact support.';
+
+  @override
+  String get pinSetupTitle => 'Create your PIN';
+
+  @override
+  String get pinSetupSubtitle =>
+      'You\'ll use this every time you open Yene Verify';
+
+  @override
+  String get pinEntryTitle => 'Welcome back';
+
+  @override
+  String get pinEntryForgot => 'Forgot PIN?';
 
   @override
   String get otpMaxAttempts =>

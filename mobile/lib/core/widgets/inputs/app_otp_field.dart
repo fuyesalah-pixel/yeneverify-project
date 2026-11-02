@@ -147,7 +147,7 @@ class _AppOtpFieldState extends State<AppOtpField>
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(widget.length, (index) {
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             child: SizedBox(
               width: 48,
               height: 56,

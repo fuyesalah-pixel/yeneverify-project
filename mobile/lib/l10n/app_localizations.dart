@@ -104,6 +104,18 @@ abstract class AppLocalizations {
   /// **'Yene Verify'**
   String get appName;
 
+  /// No description provided for @loginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Yene Verify'**
+  String get loginTitle;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number to get started'**
+  String get loginSubtitle;
+
   /// Primary marketing tagline
   ///
   /// In en, this message translates to:
@@ -251,7 +263,7 @@ abstract class AppLocalizations {
   /// No description provided for @otpInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Invalid code. Please try again.'**
+  /// **'Incorrect code. Try again.'**
   String get otpInvalid;
 
   /// No description provided for @otpExpired.
@@ -259,6 +271,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Code has expired. Request a new one.'**
   String get otpExpired;
+
+  /// No description provided for @pinIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect PIN. Try again.'**
+  String get pinIncorrect;
+
+  /// No description provided for @pinLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again in {minutes} minutes.'**
+  String pinLocked(int minutes);
+
+  /// No description provided for @errorDeviceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many devices. Remove one from settings.'**
+  String get errorDeviceLimit;
+
+  /// No description provided for @errorAccountBanned.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been suspended. Contact support.'**
+  String get errorAccountBanned;
+
+  /// No description provided for @pinSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your PIN'**
+  String get pinSetupTitle;
+
+  /// No description provided for @pinSetupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll use this every time you open Yene Verify'**
+  String get pinSetupSubtitle;
+
+  /// No description provided for @pinEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get pinEntryTitle;
+
+  /// No description provided for @pinEntryForgot.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot PIN?'**
+  String get pinEntryForgot;
 
   /// No description provided for @otpMaxAttempts.
   ///

@@ -12,6 +12,12 @@ class AppLocalizationsAm extends AppLocalizations {
   String get appName => 'ዬን ቨሪፋይ';
 
   @override
+  String get loginTitle => 'ዬን ቨሪፋይ';
+
+  @override
+  String get loginSubtitle => 'ለመጀመር የስልክ ቁጥርዎን ያስገቡ';
+
+  @override
   String get taglinePrimary => 'ማንኛውንም የኢትዮጵያ ባንክ ክፍያ ያረጋግጡ። በሰከንዶች።';
 
   @override
@@ -88,10 +94,36 @@ class AppLocalizationsAm extends AppLocalizations {
   }
 
   @override
-  String get otpInvalid => 'ኮዱ ትክክል አይደለም። እባክዎ እንደገና ይሞክሩ።';
+  String get otpInvalid => 'ኮዱ ስህተት ነው። እንደገና ይሞክሩ።';
 
   @override
-  String get otpExpired => 'ኮዱ ጊዜው አልፏል። አዲስ ይጠይቁ።';
+  String get otpExpired => 'ኮዱ ጊዜው አልፏል። አዲስ ኮድ ይጠይቁ።';
+
+  @override
+  String get pinIncorrect => 'የPIN ኮድ ስህተት ነው። እንደገና ይሞክሩ።';
+
+  @override
+  String pinLocked(int minutes) {
+    return 'በጣም ብዙ ሙከራዎች። እንደገና በ$minutes ደቂቃ ውስጥ ይሞክሩ።';
+  }
+
+  @override
+  String get errorDeviceLimit => 'በጣም ብዙ መሳሪያዎች። ከቅንብሮች ውስጥ አንዱን ያስወግዱ።';
+
+  @override
+  String get errorAccountBanned => 'ይህ መለያ ታግዷል። ድጋፍን ያግኙ።';
+
+  @override
+  String get pinSetupTitle => 'PIN ይፍጠሩ';
+
+  @override
+  String get pinSetupSubtitle => 'Yene Verify ን በየጊዜው ሲከፍቱ ይህን PIN ይጠቀሙ';
+
+  @override
+  String get pinEntryTitle => 'እንኳን ደህና መጡ';
+
+  @override
+  String get pinEntryForgot => 'PIN ረስዋል?';
 
   @override
   String get otpMaxAttempts => 'ብዙ ሙከራዎች። ከጥቂት ጊዜ በኋላ እንደገና ይሞክሩ።';

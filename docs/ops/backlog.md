@@ -244,3 +244,27 @@ alerted off-app. If support volume once arrives here, decide: SMTP
 digest (there is unused SMTP config already) vs. a resend of CREDIT_LOW
 via SMS through AfroMessage. Trigger: first "I never got an alert"
 support ticket.
+
+## 26. Re-add isar for offline caching (Step 25+)
+
+isar was removed from mobile/pubspec.yaml during the Step 20 build fix —
+its Android Gradle Plugin compatibility lagged the scaffold's AGP and it
+was active in no screen (nothing imported it). Re-add a compatible
+version when the offline cache feature is actually implemented so the
+version chosen is driven from real usage.
+
+## 27. Re-add printing for receipt export (Step 23)
+
+printing was removed alongside isar for the same reason (unused +
+API-level mismatch with modern AGP). Re-add when the receipt view in
+Step 23 gets its print/share action; at that point the plugin's minSdk
+and compileSdk demands can be reconciled with the app build knowingly.
+
+## 28. Verify camera 0.12 API matches Step 23 usage
+
+camera was bumped to ^0.12 during Step 20 solely to unblock the Gradle
+build (older 0.10.x pinned deps that could not compile under the
+project's AGP). Before Step 23 wires camera capture: confirm the
+controller API used in the Step 2 widget (photo_source_picker.dart)
+still matches, and add the Android permission_handler / manifest entries
+for CAMERA (plus storage on pre-13, per Step 22's doc) if missing.
