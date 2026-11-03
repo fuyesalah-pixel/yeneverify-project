@@ -321,3 +321,25 @@ Regression coverage: `backend/test/sub-merchants.e2e-spec.ts` (invited MERCHANT
 sees `SUB_MERCHANT_ACCEPT`, accept → `COMPLETE` + role `SUB_MERCHANT`, decline
 falls back to `MERCHANT_PROFILE`). All three fail on the pre-fix code (403 on
 accept; `MERCHANT_PROFILE` while invited).
+
+## 34. Manual visual QA for Step 22B.2 verdict screen — pending fast AVD
+
+The default `yene-pixel` AVD (API 33, 1080x2400, 2 GB, software GL) renders at
+1-7 FPS (launcher p50 150 ms, 89.84% janky) and in one session never presented
+the app's first frame at all, so a "does the verdict screen feel right" review
+is impossible on it. Fuad to create `yene-pixel-fast` per
+[emulator-setup.md](emulator-setup.md) (Pixel 4, API 30/31, 720x1280, 3 GB,
+hardware GL); confirm with `scripts/check-emulator-health.ps1` (p50 ~16 ms)
+before the visual pass. Integration tests cover the verdict logic in the
+meantime; visual review is separate. Trigger: fast AVD booted.
+
+## 35. Profile build requires storage.googleapis.com access
+
+`flutter run --profile` failed in Gradle at `:app:checkProfileDuplicateClasses`
+with `Connect to storage.googleapis.com:443 ... Connection timed out`. A retry
+via `flutter build apk --profile` never reached that error but did not finish
+`assembleProfile` within 10 minutes either, so no profile-mode frame numbers
+exist yet. Dependency-fetch budget + build time, not code. Fixes to try:
+pin/pre-populate the Gradle dependency cache, or ship `--release` with debug
+signing for on-device timing work. Trigger: next profile-mode measurement, or
+first offline CI run of a profile build.
