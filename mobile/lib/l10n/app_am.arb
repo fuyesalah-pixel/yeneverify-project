@@ -526,5 +526,71 @@
 
   "statusError": "ስህተት",
 
-  "viewPlans": "እቅዶችን ይመልከቱ"
+  "viewPlans": "እቅዶችን ይመልከቱ",
+
+  "verdictVerifiedLabel": "ክፍያ ተረጋግጧል",
+  "verdictFakeLabel": "ሐሰተኛ ደረሰኝ",
+  "verdictDuplicateLabel": "አስቀድሞ ተረጋግጧል",
+  "verdictReviewLabel": "በግምገማ ላይ",
+  "verdictErrorLabel": "ማረጋገጫ አልተሳካም",
+
+  "verdictVerifiedSubtitle": "በ{name} የተከፈለ",
+  "@verdictVerifiedSubtitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "verdictFakeSubtitle": "ይህ ደረሰኝ በባንኩ አገልጋይ ላይ አልተገኘም።",
+
+  "verdictDuplicateSubtitle": "ይህ ደረሰኝ ቀድሞ በ{date} ተረጋግጧል።",
+  "@verdictDuplicateSubtitle": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "verdictReviewSubtitle": "የቡድን አባል ይህን ደረሰኝ በ24 ሰዓት ውስጥ ይገመግማል።",
+
+  "verdictReviewSupplementarySubtitle": "ይህን ደረሰኝ ለማረጋገጥ የበለጠ ግልጽ ፎቶ ያስፈልገናል።",
+
+  "verdictBankLabel": "ባንክ",
+  "verdictReferenceLabel": "ማጣቀሻ",
+  "verdictSenderLabel": "ላኪ",
+  "verdictReceiverLabel": "ተቀባይ",
+  "verdictPaidAtLabel": "የተከፈለበት",
+  "verdictVerifiedAtLabel": "የተረጋገጠበት",
+  "verdictDurationLabel": "ቆይታ",
+  "verdictFirstVerifiedLabel": "በመጀመሪያ የተረጋገጠበት",
+
+  "verdictDurationSeconds": "{seconds} ሰከንድ",
+  "@verdictDurationSeconds": {
+    "placeholders": { "seconds": { "type": "String" } }
+  },
+
+  "verdictDoneButton": "ተጠናቀቀ",
+  "verdictTryAgainButton": "እንደገና ሞክር",
+  "verdictReportButton": "ችግር አሳውቅ",
+  "verdictViewOriginalButton": "ዋናውን ይመልከቱ",
+  "verdictViewReceiptButton": "ደረሰኙን ይመልከቱ",
+
+  "verdictCopySuccess": "ማጣቀሻ ተቀድቷል",
+  "verdictStillVerifying": "አሁንም እያረጋገጠ ነው…",
+
+  "verdictReportTitle": "ችግር አሳውቅ",
+  "verdictReportBody": "በዚህ ማረጋገጫ ላይ ያለውን ችግር ይንገሩን። ቡድናችን ይገመግማል።",
+  "verdictReportReasonHint": "ችግሩ ምንድን ነው?",
+  "verdictReportReasonRequired": "ከመላክዎ በፊት ችግሩን ይግለጹ።",
+  "verdictReportSubmitButton": "ሪፖርት ላክ",
+  "verdictReportSubmitted": "ሪፖርቱ ተልኳል። እንመለከተዋለን።",
+  "verdictCancelButton": "ሰርዝ",
+
+  "verdictReviewNotificationInfo": "ግምገማው ሲጠናቀቅ ማሳወቂያ ይደርስዎታል።",
+
+  "verdictReceiptUnavailable": "የደረሰኝ ምስል አይገኝም",
+  "verdictReceiptRetry": "ምስሉን እንደገና ጫን",
+
+  "verdictOriginalUnavailable": "ይህ ደረሰኝ የሌላ ንግድ ነው።",
+
+  "verdictErrorBankNotDetected": "በዚህ ደረሰኝ ላይ ባንኩን ማወቅ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።",
+  "verdictErrorBankTimeout": "የባንኩ አገልጋይ አሁን ቀርፋፋ ነው። እንደገና ይሞክሩ።",
+  "verdictErrorBankUnavailable": "ባንኩ አሁን አይገኝም። በኋላ ይሞክሩ።",
+  "verdictErrorOcrEmpty": "ይህን ደረሰኝ ማንበብ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።",
+  "verdictErrorDefault": "ችግር ተፈጥሯል። እንደገና ይሞክሩ።"
 }

@@ -820,5 +820,71 @@
   "@statusError": {},
 
   "viewPlans": "View plans",
-  "@viewPlans": {}
+  "@viewPlans": {},
+
+  "verdictVerifiedLabel": "Payment verified",
+  "verdictFakeLabel": "Fake receipt",
+  "verdictDuplicateLabel": "Already verified",
+  "verdictReviewLabel": "Under review",
+  "verdictErrorLabel": "Verification failed",
+
+  "verdictVerifiedSubtitle": "Paid by {name}",
+  "@verdictVerifiedSubtitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "verdictFakeSubtitle": "This receipt was not found on the bank's server.",
+
+  "verdictDuplicateSubtitle": "This receipt was already verified on {date}.",
+  "@verdictDuplicateSubtitle": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "verdictReviewSubtitle": "A team member will review this receipt within 24 hours.",
+
+  "verdictReviewSupplementarySubtitle": "We need a clearer photo of this receipt to finish verifying it.",
+
+  "verdictBankLabel": "Bank",
+  "verdictReferenceLabel": "Reference",
+  "verdictSenderLabel": "Sender",
+  "verdictReceiverLabel": "Receiver",
+  "verdictPaidAtLabel": "Paid at",
+  "verdictVerifiedAtLabel": "Verified at",
+  "verdictDurationLabel": "Duration",
+  "verdictFirstVerifiedLabel": "First verified",
+
+  "verdictDurationSeconds": "{seconds} seconds",
+  "@verdictDurationSeconds": {
+    "placeholders": { "seconds": { "type": "String" } }
+  },
+
+  "verdictDoneButton": "Done",
+  "verdictTryAgainButton": "Try again",
+  "verdictReportButton": "Report a problem",
+  "verdictViewOriginalButton": "View original",
+  "verdictViewReceiptButton": "View receipt",
+
+  "verdictCopySuccess": "Reference copied",
+  "verdictStillVerifying": "Still verifying…",
+
+  "verdictReportTitle": "Report a problem",
+  "verdictReportBody": "Tell us what is wrong with this verification. Our team will review it.",
+  "verdictReportReasonHint": "What is wrong?",
+  "verdictReportReasonRequired": "Tell us what is wrong before submitting.",
+  "verdictReportSubmitButton": "Submit report",
+  "verdictReportSubmitted": "Report submitted. We will look into it.",
+  "verdictCancelButton": "Cancel",
+
+  "verdictReviewNotificationInfo": "You will be notified when the review is complete.",
+
+  "verdictReceiptUnavailable": "Receipt image unavailable",
+  "verdictReceiptRetry": "Reload image",
+
+  "verdictOriginalUnavailable": "This receipt belongs to another business.",
+
+  "verdictErrorBankNotDetected": "We could not identify the bank on this receipt. Try a clearer photo.",
+  "verdictErrorBankTimeout": "The bank's server is slow right now. Try again.",
+  "verdictErrorBankUnavailable": "The bank is unavailable right now. Try again later.",
+  "verdictErrorOcrEmpty": "We could not read this receipt. Try a clearer photo.",
+  "verdictErrorDefault": "Something went wrong. Try again."
 }

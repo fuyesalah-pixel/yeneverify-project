@@ -1555,6 +1555,258 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View plans'**
   String get viewPlans;
+
+  /// No description provided for @verdictVerifiedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment verified'**
+  String get verdictVerifiedLabel;
+
+  /// No description provided for @verdictFakeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake receipt'**
+  String get verdictFakeLabel;
+
+  /// No description provided for @verdictDuplicateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Already verified'**
+  String get verdictDuplicateLabel;
+
+  /// No description provided for @verdictReviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get verdictReviewLabel;
+
+  /// No description provided for @verdictErrorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed'**
+  String get verdictErrorLabel;
+
+  /// No description provided for @verdictVerifiedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by {name}'**
+  String verdictVerifiedSubtitle(String name);
+
+  /// No description provided for @verdictFakeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This receipt was not found on the bank\'s server.'**
+  String get verdictFakeSubtitle;
+
+  /// No description provided for @verdictDuplicateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This receipt was already verified on {date}.'**
+  String verdictDuplicateSubtitle(String date);
+
+  /// No description provided for @verdictReviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A team member will review this receipt within 24 hours.'**
+  String get verdictReviewSubtitle;
+
+  /// No description provided for @verdictReviewSupplementarySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We need a clearer photo of this receipt to finish verifying it.'**
+  String get verdictReviewSupplementarySubtitle;
+
+  /// No description provided for @verdictBankLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get verdictBankLabel;
+
+  /// No description provided for @verdictReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get verdictReferenceLabel;
+
+  /// No description provided for @verdictSenderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender'**
+  String get verdictSenderLabel;
+
+  /// No description provided for @verdictReceiverLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiver'**
+  String get verdictReceiverLabel;
+
+  /// No description provided for @verdictPaidAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid at'**
+  String get verdictPaidAtLabel;
+
+  /// No description provided for @verdictVerifiedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified at'**
+  String get verdictVerifiedAtLabel;
+
+  /// No description provided for @verdictDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get verdictDurationLabel;
+
+  /// No description provided for @verdictFirstVerifiedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First verified'**
+  String get verdictFirstVerifiedLabel;
+
+  /// No description provided for @verdictDurationSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} seconds'**
+  String verdictDurationSeconds(String seconds);
+
+  /// No description provided for @verdictDoneButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get verdictDoneButton;
+
+  /// No description provided for @verdictTryAgainButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get verdictTryAgainButton;
+
+  /// No description provided for @verdictReportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get verdictReportButton;
+
+  /// No description provided for @verdictViewOriginalButton.
+  ///
+  /// In en, this message translates to:
+  /// **'View original'**
+  String get verdictViewOriginalButton;
+
+  /// No description provided for @verdictViewReceiptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'View receipt'**
+  String get verdictViewReceiptButton;
+
+  /// No description provided for @verdictCopySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference copied'**
+  String get verdictCopySuccess;
+
+  /// No description provided for @verdictStillVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Still verifying…'**
+  String get verdictStillVerifying;
+
+  /// No description provided for @verdictReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get verdictReportTitle;
+
+  /// No description provided for @verdictReportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what is wrong with this verification. Our team will review it.'**
+  String get verdictReportBody;
+
+  /// No description provided for @verdictReportReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong?'**
+  String get verdictReportReasonHint;
+
+  /// No description provided for @verdictReportReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what is wrong before submitting.'**
+  String get verdictReportReasonRequired;
+
+  /// No description provided for @verdictReportSubmitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit report'**
+  String get verdictReportSubmitButton;
+
+  /// No description provided for @verdictReportSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted. We will look into it.'**
+  String get verdictReportSubmitted;
+
+  /// No description provided for @verdictCancelButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get verdictCancelButton;
+
+  /// No description provided for @verdictReviewNotificationInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be notified when the review is complete.'**
+  String get verdictReviewNotificationInfo;
+
+  /// No description provided for @verdictReceiptUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt image unavailable'**
+  String get verdictReceiptUnavailable;
+
+  /// No description provided for @verdictReceiptRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload image'**
+  String get verdictReceiptRetry;
+
+  /// No description provided for @verdictOriginalUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This receipt belongs to another business.'**
+  String get verdictOriginalUnavailable;
+
+  /// No description provided for @verdictErrorBankNotDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not identify the bank on this receipt. Try a clearer photo.'**
+  String get verdictErrorBankNotDetected;
+
+  /// No description provided for @verdictErrorBankTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The bank\'s server is slow right now. Try again.'**
+  String get verdictErrorBankTimeout;
+
+  /// No description provided for @verdictErrorBankUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The bank is unavailable right now. Try again later.'**
+  String get verdictErrorBankUnavailable;
+
+  /// No description provided for @verdictErrorOcrEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not read this receipt. Try a clearer photo.'**
+  String get verdictErrorOcrEmpty;
+
+  /// No description provided for @verdictErrorDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Try again.'**
+  String get verdictErrorDefault;
 }
 
 class _AppLocalizationsDelegate

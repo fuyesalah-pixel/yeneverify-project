@@ -103,6 +103,67 @@ class VerificationSubmitted {
   }
 }
 
+/// DUPLICATE only: the verification whose receipt this one repeats.
+///
+/// The merchant id is included because it decides whether the original is
+/// readable from this tenant — the backend 404s a foreign verification, so
+/// the "View original" action treats a 404 as "another business".
+class DuplicateReference {
+  const DuplicateReference({
+    required this.verificationId,
+    required this.merchantId,
+  });
+
+  final String verificationId;
+  final String merchantId;
+
+  factory DuplicateReference.fromJson(Map<String, dynamic> json) {
+    return DuplicateReference(
+      verificationId: json['verificationId'] as String,
+      merchantId: json['merchantId'] as String? ?? '',
+    );
+  }
+}
+
+/// NEEDS_REVIEW only: what the backend still needs from the user.
+///
+/// The supplementary data flow (POST /verifications/:id/supplementary) does
+/// not exist yet — the screen explains the prompt but collects nothing.
+class SupplementaryPrompt {
+  const SupplementaryPrompt({required this.field, required this.hint});
+
+  final String field;
+  final String hint;
+
+  factory SupplementaryPrompt.fromJson(Map<String, dynamic> json) {
+    return SupplementaryPrompt(
+      field: json['field'] as String? ?? '',
+      hint: json['hint'] as String? ?? '',
+    );
+  }
+}
+
+/// POST /verifications/:id/request-review response (200).
+class ReviewRequested {
+  const ReviewRequested({
+    required this.verificationId,
+    required this.reviewId,
+    required this.status,
+  });
+
+  final String verificationId;
+  final String reviewId;
+  final VerificationStatus status;
+
+  factory ReviewRequested.fromJson(Map<String, dynamic> json) {
+    return ReviewRequested(
+      verificationId: json['verificationId'] as String? ?? '',
+      reviewId: json['reviewId'] as String? ?? '',
+      status: VerificationStatus.fromWire(json['status'] as String?),
+    );
+  }
+}
+
 /// GET /verifications/:id response.
 class VerificationResult {
   const VerificationResult({
@@ -119,6 +180,8 @@ class VerificationResult {
     this.errorCode,
     this.errorMessage,
     this.durationMs,
+    this.duplicateOf,
+    this.needsSupplementary,
     this.receiptId,
     this.receiptMimeType,
     this.createdAt,
@@ -141,6 +204,13 @@ class VerificationResult {
   final String? errorMessage;
 
   final int? durationMs;
+
+  /// DUPLICATE only — null for every other status.
+  final DuplicateReference? duplicateOf;
+
+  /// NEEDS_REVIEW only — null when the resolver needs nothing extra.
+  final SupplementaryPrompt? needsSupplementary;
+
   final String? receiptId;
   final String? receiptMimeType;
   final DateTime? createdAt;
@@ -148,8 +218,13 @@ class VerificationResult {
 
   bool get isTerminal => status.isTerminal;
 
+  /// `amountMinor` as an int for display widgets that take minor units.
+  int? get amountMinorValue => int.tryParse(amountMinor ?? '');
+
   factory VerificationResult.fromJson(Map<String, dynamic> json) {
     final receipt = json['receipt'];
+    final duplicateOf = json['duplicateOf'];
+    final supplementary = json['needsSupplementary'];
     return VerificationResult(
       id: json['id'] as String,
       status: VerificationStatus.fromWire(json['status'] as String?),
@@ -164,6 +239,12 @@ class VerificationResult {
       errorCode: json['errorCode'] as String?,
       errorMessage: json['errorMessage'] as String?,
       durationMs: (json['durationMs'] as num?)?.toInt(),
+      duplicateOf: duplicateOf is Map<String, dynamic>
+          ? DuplicateReference.fromJson(duplicateOf)
+          : null,
+      needsSupplementary: supplementary is Map<String, dynamic>
+          ? SupplementaryPrompt.fromJson(supplementary)
+          : null,
       receiptId: receipt is Map ? receipt['id'] as String? : null,
       receiptMimeType: receipt is Map ? receipt['mimeType'] as String? : null,
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),

@@ -1,9 +1,10 @@
 // Mobile-only. Wraps the verification lifecycle used by the verify screen:
 //
-//   POST /verifications       → enqueue (202) + credit snapshot
-//   GET  /verifications/:id   → poll status/result
+//   POST /verifications                  → enqueue (202) + credit snapshot
+//   GET  /verifications/:id              → poll status/result
+//   POST /verifications/:id/request-review → escalate a disputed verdict
 //
-// Retry / request-review are Part 2 concerns and live on the verdict screen.
+// Retry is not an API call: it re-runs the local pick/upload pipeline.
 import 'package:dio/dio.dart';
 
 import '../../../core/network/api_error.dart';
@@ -33,6 +34,22 @@ class VerificationsApi {
       '/verifications/$verificationId',
       method: 'GET',
       fromJson: VerificationResult.fromJson,
+    );
+  }
+
+  /// Escalates a verdict to a human reviewer ("Report a problem").
+  ///
+  /// MERCHANT only — a sub-merchant token gets AUTH_FORBIDDEN, which the
+  /// report sheet surfaces through [ApiErrorX.userFacingMessage].
+  Future<ApiResult<ReviewRequested>> requestReview(
+    String verificationId, {
+    required String reason,
+  }) async {
+    return _request<ReviewRequested>(
+      '/verifications/$verificationId/request-review',
+      method: 'POST',
+      data: {'reason': reason},
+      fromJson: ReviewRequested.fromJson,
     );
   }
 

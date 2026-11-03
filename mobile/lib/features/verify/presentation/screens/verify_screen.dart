@@ -43,7 +43,7 @@ class VerifyScreen extends ConsumerWidget {
       if (value is! ResultState) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        context.push(Routes.verdict, extra: value.result);
+        context.push(Routes.verdictFor(value.result.id));
         ref.read(verifyControllerProvider.notifier).retry();
       });
     });

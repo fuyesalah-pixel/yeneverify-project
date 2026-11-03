@@ -62,11 +62,9 @@ Widget _app(_FakeVerifyController fake) {
             builder: (_, __) => const Scaffold(body: Text('CAMERA_ROUTE')),
           ),
           GoRoute(
-            path: 'verdict',
+            path: 'result/:id',
             builder: (_, state) => Scaffold(
-              body: Text(
-                'VERDICT_ROUTE:${(state.extra as VerificationResult).status.wire}',
-              ),
+              body: Text('VERDICT_ROUTE:${state.pathParameters['id']}'),
             ),
           ),
         ],
@@ -184,7 +182,7 @@ void main() {
     fake.emit(ResultState(_verifiedResult()));
     await tester.pumpAndSettle();
 
-    expect(find.text('VERDICT_ROUTE:VERIFIED'), findsOneWidget);
+    expect(find.text('VERDICT_ROUTE:v-42'), findsOneWidget);
   });
 
   testWidgets('polling shows the verifying skeleton and the expectation caption',

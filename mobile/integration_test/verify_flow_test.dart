@@ -70,9 +70,9 @@ void main() {
             builder: (_, __) => const VerifyScreen(),
             routes: [
               GoRoute(
-                path: 'verdict',
+                path: 'result/:id',
                 builder: (_, state) => Scaffold(
-                  body: Text('VERDICT_PAGE:${state.extra.runtimeType}'),
+                  body: Text('VERDICT_PAGE:${state.pathParameters['id']}'),
                 ),
               ),
             ],

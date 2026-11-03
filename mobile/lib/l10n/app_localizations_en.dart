@@ -817,4 +817,148 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewPlans => 'View plans';
+
+  @override
+  String get verdictVerifiedLabel => 'Payment verified';
+
+  @override
+  String get verdictFakeLabel => 'Fake receipt';
+
+  @override
+  String get verdictDuplicateLabel => 'Already verified';
+
+  @override
+  String get verdictReviewLabel => 'Under review';
+
+  @override
+  String get verdictErrorLabel => 'Verification failed';
+
+  @override
+  String verdictVerifiedSubtitle(String name) {
+    return 'Paid by $name';
+  }
+
+  @override
+  String get verdictFakeSubtitle =>
+      'This receipt was not found on the bank\'s server.';
+
+  @override
+  String verdictDuplicateSubtitle(String date) {
+    return 'This receipt was already verified on $date.';
+  }
+
+  @override
+  String get verdictReviewSubtitle =>
+      'A team member will review this receipt within 24 hours.';
+
+  @override
+  String get verdictReviewSupplementarySubtitle =>
+      'We need a clearer photo of this receipt to finish verifying it.';
+
+  @override
+  String get verdictBankLabel => 'Bank';
+
+  @override
+  String get verdictReferenceLabel => 'Reference';
+
+  @override
+  String get verdictSenderLabel => 'Sender';
+
+  @override
+  String get verdictReceiverLabel => 'Receiver';
+
+  @override
+  String get verdictPaidAtLabel => 'Paid at';
+
+  @override
+  String get verdictVerifiedAtLabel => 'Verified at';
+
+  @override
+  String get verdictDurationLabel => 'Duration';
+
+  @override
+  String get verdictFirstVerifiedLabel => 'First verified';
+
+  @override
+  String verdictDurationSeconds(String seconds) {
+    return '$seconds seconds';
+  }
+
+  @override
+  String get verdictDoneButton => 'Done';
+
+  @override
+  String get verdictTryAgainButton => 'Try again';
+
+  @override
+  String get verdictReportButton => 'Report a problem';
+
+  @override
+  String get verdictViewOriginalButton => 'View original';
+
+  @override
+  String get verdictViewReceiptButton => 'View receipt';
+
+  @override
+  String get verdictCopySuccess => 'Reference copied';
+
+  @override
+  String get verdictStillVerifying => 'Still verifying…';
+
+  @override
+  String get verdictReportTitle => 'Report a problem';
+
+  @override
+  String get verdictReportBody =>
+      'Tell us what is wrong with this verification. Our team will review it.';
+
+  @override
+  String get verdictReportReasonHint => 'What is wrong?';
+
+  @override
+  String get verdictReportReasonRequired =>
+      'Tell us what is wrong before submitting.';
+
+  @override
+  String get verdictReportSubmitButton => 'Submit report';
+
+  @override
+  String get verdictReportSubmitted =>
+      'Report submitted. We will look into it.';
+
+  @override
+  String get verdictCancelButton => 'Cancel';
+
+  @override
+  String get verdictReviewNotificationInfo =>
+      'You will be notified when the review is complete.';
+
+  @override
+  String get verdictReceiptUnavailable => 'Receipt image unavailable';
+
+  @override
+  String get verdictReceiptRetry => 'Reload image';
+
+  @override
+  String get verdictOriginalUnavailable =>
+      'This receipt belongs to another business.';
+
+  @override
+  String get verdictErrorBankNotDetected =>
+      'We could not identify the bank on this receipt. Try a clearer photo.';
+
+  @override
+  String get verdictErrorBankTimeout =>
+      'The bank\'s server is slow right now. Try again.';
+
+  @override
+  String get verdictErrorBankUnavailable =>
+      'The bank is unavailable right now. Try again later.';
+
+  @override
+  String get verdictErrorOcrEmpty =>
+      'We could not read this receipt. Try a clearer photo.';
+
+  @override
+  String get verdictErrorDefault => 'Something went wrong. Try again.';
 }

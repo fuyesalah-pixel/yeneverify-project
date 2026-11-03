@@ -12,9 +12,8 @@ import '../../features/design_system/presentation/screens/design_system_showcase
 import '../../features/dashboard/presentation/screens/dashboard_placeholder_screen.dart';
 import '../../features/onboarding/presentation/screens/merchant_setup_success_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_flow_screen.dart';
-import '../../features/verify/data/models/verification_result.dart';
 import '../../features/verify/presentation/screens/camera_capture_screen.dart';
-import '../../features/verify/presentation/screens/placeholder_verdict_screen.dart';
+import '../../features/verify/presentation/screens/verdict_screen.dart';
 import '../../features/verify/presentation/screens/verify_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import 'auth_redirect.dart';
@@ -32,7 +31,11 @@ abstract final class Routes {
   static const String onboardingSuccess = '/onboarding/success';
   static const String verify = '/verify';
   static const String cameraCapture = '/verify/camera';
-  static const String verdict = '/verify/verdict';
+  static const String verdict = '/verify/result';
+
+  /// Route to one verdict. The screen refetches by id, so nothing but the
+  /// id travels through navigation.
+  static String verdictFor(String verificationId) => '$verdict/$verificationId';
   static const String designSystem = '/design-system';
 }
 
@@ -96,11 +99,14 @@ final appRouter = GoRouter(
           path: 'camera',
           builder: (_, __) => const CameraCaptureScreen(),
         ),
-        // Terminal verdict. Part 2 replaces the placeholder internals.
+        // Terminal verdict, full screen and instant: the verdict hero is the
+        // first thing painted, with no route transition in the way.
         GoRoute(
-          path: 'verdict',
-          builder: (_, state) => PlaceholderVerdictScreen(
-            result: state.extra as VerificationResult,
+          path: 'result/:id',
+          pageBuilder: (_, state) => NoTransitionPage(
+            child: VerdictScreen(
+              verificationId: state.pathParameters['id'] ?? '',
+            ),
           ),
         ),
       ],

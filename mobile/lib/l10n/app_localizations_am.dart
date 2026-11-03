@@ -793,4 +793,138 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get viewPlans => 'እቅዶችን ይመልከቱ';
+
+  @override
+  String get verdictVerifiedLabel => 'ክፍያ ተረጋግጧል';
+
+  @override
+  String get verdictFakeLabel => 'ሐሰተኛ ደረሰኝ';
+
+  @override
+  String get verdictDuplicateLabel => 'አስቀድሞ ተረጋግጧል';
+
+  @override
+  String get verdictReviewLabel => 'በግምገማ ላይ';
+
+  @override
+  String get verdictErrorLabel => 'ማረጋገጫ አልተሳካም';
+
+  @override
+  String verdictVerifiedSubtitle(String name) {
+    return 'በ$name የተከፈለ';
+  }
+
+  @override
+  String get verdictFakeSubtitle => 'ይህ ደረሰኝ በባንኩ አገልጋይ ላይ አልተገኘም።';
+
+  @override
+  String verdictDuplicateSubtitle(String date) {
+    return 'ይህ ደረሰኝ ቀድሞ በ$date ተረጋግጧል።';
+  }
+
+  @override
+  String get verdictReviewSubtitle => 'የቡድን አባል ይህን ደረሰኝ በ24 ሰዓት ውስጥ ይገመግማል።';
+
+  @override
+  String get verdictReviewSupplementarySubtitle =>
+      'ይህን ደረሰኝ ለማረጋገጥ የበለጠ ግልጽ ፎቶ ያስፈልገናል።';
+
+  @override
+  String get verdictBankLabel => 'ባንክ';
+
+  @override
+  String get verdictReferenceLabel => 'ማጣቀሻ';
+
+  @override
+  String get verdictSenderLabel => 'ላኪ';
+
+  @override
+  String get verdictReceiverLabel => 'ተቀባይ';
+
+  @override
+  String get verdictPaidAtLabel => 'የተከፈለበት';
+
+  @override
+  String get verdictVerifiedAtLabel => 'የተረጋገጠበት';
+
+  @override
+  String get verdictDurationLabel => 'ቆይታ';
+
+  @override
+  String get verdictFirstVerifiedLabel => 'በመጀመሪያ የተረጋገጠበት';
+
+  @override
+  String verdictDurationSeconds(String seconds) {
+    return '$seconds ሰከንድ';
+  }
+
+  @override
+  String get verdictDoneButton => 'ተጠናቀቀ';
+
+  @override
+  String get verdictTryAgainButton => 'እንደገና ሞክር';
+
+  @override
+  String get verdictReportButton => 'ችግር አሳውቅ';
+
+  @override
+  String get verdictViewOriginalButton => 'ዋናውን ይመልከቱ';
+
+  @override
+  String get verdictViewReceiptButton => 'ደረሰኙን ይመልከቱ';
+
+  @override
+  String get verdictCopySuccess => 'ማጣቀሻ ተቀድቷል';
+
+  @override
+  String get verdictStillVerifying => 'አሁንም እያረጋገጠ ነው…';
+
+  @override
+  String get verdictReportTitle => 'ችግር አሳውቅ';
+
+  @override
+  String get verdictReportBody => 'በዚህ ማረጋገጫ ላይ ያለውን ችግር ይንገሩን። ቡድናችን ይገመግማል።';
+
+  @override
+  String get verdictReportReasonHint => 'ችግሩ ምንድን ነው?';
+
+  @override
+  String get verdictReportReasonRequired => 'ከመላክዎ በፊት ችግሩን ይግለጹ።';
+
+  @override
+  String get verdictReportSubmitButton => 'ሪፖርት ላክ';
+
+  @override
+  String get verdictReportSubmitted => 'ሪፖርቱ ተልኳል። እንመለከተዋለን።';
+
+  @override
+  String get verdictCancelButton => 'ሰርዝ';
+
+  @override
+  String get verdictReviewNotificationInfo => 'ግምገማው ሲጠናቀቅ ማሳወቂያ ይደርስዎታል።';
+
+  @override
+  String get verdictReceiptUnavailable => 'የደረሰኝ ምስል አይገኝም';
+
+  @override
+  String get verdictReceiptRetry => 'ምስሉን እንደገና ጫን';
+
+  @override
+  String get verdictOriginalUnavailable => 'ይህ ደረሰኝ የሌላ ንግድ ነው።';
+
+  @override
+  String get verdictErrorBankNotDetected =>
+      'በዚህ ደረሰኝ ላይ ባንኩን ማወቅ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።';
+
+  @override
+  String get verdictErrorBankTimeout => 'የባንኩ አገልጋይ አሁን ቀርፋፋ ነው። እንደገና ይሞክሩ።';
+
+  @override
+  String get verdictErrorBankUnavailable => 'ባንኩ አሁን አይገኝም። በኋላ ይሞክሩ።';
+
+  @override
+  String get verdictErrorOcrEmpty => 'ይህን ደረሰኝ ማንበብ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።';
+
+  @override
+  String get verdictErrorDefault => 'ችግር ተፈጥሯል። እንደገና ይሞክሩ።';
 }

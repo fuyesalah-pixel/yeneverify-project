@@ -343,3 +343,21 @@ exist yet. Dependency-fetch budget + build time, not code. Fixes to try:
 pin/pre-populate the Gradle dependency cache, or ship `--release` with debug
 signing for on-device timing work. Trigger: next profile-mode measurement, or
 first offline CI run of a profile build.
+
+## 36. Supplementary data collection for NEEDS_REVIEW (Step 22B.2 follow-up)
+
+The verdict screen explains what the resolver still needs
+(`needsSupplementary.field`, e.g. `accountSuffix`) and offers "Try again" so
+the merchant can re-shoot the receipt, but collects nothing: there is no
+`POST /verifications/:id/supplementary` endpoint. Add that endpoint (validate
+the field against the stored prompt, tenant-scoped, one submission per
+verification), then a small input on `NeedsSupplementaryCard` that posts the
+value and re-polls. Trigger: the first NEEDS_REVIEW verdict a clearer photo
+cannot resolve.
+
+## 37. Share receipt from the verdict screen (Step 22B.2 follow-up)
+
+Deferred out of the verdict brief, so the preview is view-only. Add a share
+action (image + verdict summary) once the export surface exists (see item 27),
+reusing the 300 s presigned GET from `GET /receipts/:id` rather than
+re-uploading bytes. Trigger: Step 23 receipt export/print work.

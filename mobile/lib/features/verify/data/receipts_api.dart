@@ -16,6 +16,7 @@ import '../../../core/network/api_error.dart';
 import '../../../core/network/api_result.dart';
 import '../../../core/network/bare_dio.dart';
 import 'models/presign_response.dart';
+import 'models/receipt_download.dart';
 import 'models/receipt_response.dart';
 
 /// How the image reached the app. Persisted on the receipt row and used by
@@ -138,6 +139,24 @@ class ReceiptsApi {
       },
       fromJson: ReceiptResponse.fromJson,
     );
+  }
+
+  /// Resolves the short-lived download URL for a stored receipt.
+  ///
+  /// The URL is a presigned GET (300 s TTL) — hand it straight to the image
+  /// widget and never persist it.
+  Future<ApiResult<ReceiptDownload>> getById(String receiptId) async {
+    final result = await _request<ReceiptDownload>(
+      '/receipts/$receiptId',
+      method: 'GET',
+      fromJson: ReceiptDownload.fromJson,
+    );
+    return switch (result) {
+      Success(:final data) => Success(
+          data.copyWith(downloadUrl: _reachableUploadUrl(data.downloadUrl)),
+        ),
+      Failure(:final error) => Failure(error),
+    };
   }
 
   // ── internals ──────────────────────────────────────────────────────────
