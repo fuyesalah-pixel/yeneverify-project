@@ -10,7 +10,6 @@ import 'package:yene_verify/core/theme/app_theme.dart';
 import 'package:yene_verify/core/widgets/buttons/app_button.dart';
 import 'package:yene_verify/features/auth/data/models/auth_models.dart';
 import 'package:yene_verify/features/auth/domain/auth_notifier.dart';
-import 'package:yene_verify/features/dashboard/presentation/screens/dashboard_placeholder_screen.dart';
 import 'package:yene_verify/features/onboarding/data/models/create_merchant_request.dart';
 import 'package:yene_verify/features/onboarding/data/models/create_merchant_response.dart';
 import 'package:yene_verify/features/onboarding/data/onboarding_repository.dart';
@@ -241,31 +240,6 @@ void main() {
 
       expect(find.text('Dashboard stub'), findsOneWidget);
     });
-  });
-
-  testWidgets('dashboard greets the merchant with the new business name',
-      (tester) async {
-    final auth = _FakeAuthNotifier(
-      _merchantState.copyWith(
-        needsOnboarding: false,
-        onboardingStep: 'COMPLETE',
-        businessName: 'Test Coffee Shop',
-      ),
-    );
-
-    await tester.pumpWidget(ProviderScope(
-      overrides: [authProvider.overrideWith(() => auth)],
-      child: MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('en'),
-        theme: AppTheme.lightTheme(),
-        home: const DashboardPlaceholderScreen(),
-      ),
-    ));
-    await tester.pump();
-
-    expect(find.text('Welcome, Test Coffee Shop'), findsOneWidget);
   });
 
   group('OnboardingFlowScreen step dispatch', () {

@@ -8,17 +8,19 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/pin_entry_screen.dart';
 import '../../features/auth/presentation/screens/pin_setup_screen.dart';
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/design_system/presentation/screens/design_system_showcase_screen.dart';
-import '../../features/dashboard/presentation/screens/dashboard_placeholder_screen.dart';
 import '../../features/onboarding/presentation/screens/merchant_setup_success_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_flow_screen.dart';
+import '../../features/shell/presentation/screens/shell_placeholder_screen.dart';
+import '../../features/shell/shell_screen.dart';
+import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/verify/presentation/screens/camera_capture_screen.dart';
 import '../../features/verify/presentation/screens/verdict_screen.dart';
 import '../../features/verify/presentation/screens/verify_screen.dart';
-import '../../features/splash/presentation/screens/splash_screen.dart';
 import 'auth_redirect.dart';
 
-/// App navigation routes (Step 21).
+/// App navigation routes (Step 21, extended in Step 23A).
 abstract final class Routes {
   static const String splash = '/';
   static const String login = '/login';
@@ -32,6 +34,9 @@ abstract final class Routes {
   static const String verify = '/verify';
   static const String cameraCapture = '/verify/camera';
   static const String verdict = '/verify/result';
+  static const String history = '/history';
+  static const String insights = '/insights';
+  static const String profile = '/profile';
 
   /// Route to one verdict. The screen refetches by id, so nothing but the
   /// id travels through navigation.
@@ -48,7 +53,12 @@ class AuthRedirectRelay extends ChangeNotifier {
   void refresh() => notifyListeners();
 }
 
+/// Camera and verdict must cover the bottom navigation, so they are pushed
+/// on the root navigator even though they are path-children of `/verify`.
+final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+
 final appRouter = GoRouter(
+  navigatorKey: _rootNavigatorKey,
   initialLocation: Routes.splash,
   refreshListenable: authRedirectRelay,
   routes: [
@@ -76,9 +86,72 @@ final appRouter = GoRouter(
       path: Routes.biometricEnroll,
       builder: (_, __) => const BiometricEnrollScreen(),
     ),
-    GoRoute(
-      path: Routes.dashboard,
-      builder: (_, __) => const DashboardPlaceholderScreen(),
+    // Every signed-in tab lives inside the shell. Branch order is fixed and
+    // mirrored by features/shell/shell_controller.dart.
+    StatefulShellRoute.indexedStack(
+      builder: (_, __, navigationShell) =>
+          ShellScreen(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.dashboard,
+              builder: (_, __) => const DashboardScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.verify,
+              builder: (_, __) => const VerifyScreen(),
+              routes: [
+                GoRoute(
+                  path: 'camera',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (_, __) => const CameraCaptureScreen(),
+                ),
+                GoRoute(
+                  path: 'result/:id',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  pageBuilder: (_, state) => NoTransitionPage(
+                    child: VerdictScreen(
+                      verificationId: state.pathParameters['id'] ?? '',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.history,
+              builder: (_, __) =>
+                  const ShellPlaceholderScreen(section: ShellSection.history),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.insights,
+              builder: (_, __) =>
+                  const ShellPlaceholderScreen(section: ShellSection.insights),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.profile,
+              builder: (_, __) =>
+                  const ShellPlaceholderScreen(section: ShellSection.profile),
+            ),
+          ],
+        ),
+      ],
     ),
     GoRoute(
       path: Routes.onboarding,
@@ -89,27 +162,6 @@ final appRouter = GoRouter(
       builder: (_, state) => MerchantSetupSuccessScreen(
         businessName: (state.extra as String?) ?? '',
       ),
-    ),
-    GoRoute(
-      path: Routes.verify,
-      builder: (_, __) => const VerifyScreen(),
-      routes: [
-        // Pushed on top of /verify (full-screen camera, no tab chrome).
-        GoRoute(
-          path: 'camera',
-          builder: (_, __) => const CameraCaptureScreen(),
-        ),
-        // Terminal verdict, full screen and instant: the verdict hero is the
-        // first thing painted, with no route transition in the way.
-        GoRoute(
-          path: 'result/:id',
-          pageBuilder: (_, state) => NoTransitionPage(
-            child: VerdictScreen(
-              verificationId: state.pathParameters['id'] ?? '',
-            ),
-          ),
-        ),
-      ],
     ),
     GoRoute(
       path: Routes.designSystem,

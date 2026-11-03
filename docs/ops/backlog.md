@@ -322,7 +322,7 @@ sees `SUB_MERCHANT_ACCEPT`, accept → `COMPLETE` + role `SUB_MERCHANT`, decline
 falls back to `MERCHANT_PROFILE`). All three fail on the pre-fix code (403 on
 accept; `MERCHANT_PROFILE` while invited).
 
-## 34. Manual visual QA for Step 22B.2 verdict screen — pending fast AVD
+## 34. Manual visual QA for Step 22B.2 verdict screen (DONE, 2026-11-03)
 
 The default `yene-pixel` AVD (API 33, 1080x2400, 2 GB, software GL) renders at
 1-7 FPS (launcher p50 150 ms, 89.84% janky) and in one session never presented
@@ -332,6 +332,14 @@ is impossible on it. Fuad to create `yene-pixel-fast` per
 hardware GL); confirm with `scripts/check-emulator-health.ps1` (p50 ~16 ms)
 before the visual pass. Integration tests cover the verdict logic in the
 meantime; visual review is separate. Trigger: fast AVD booted.
+
+Resolved 2026-11-03: `yene-pixel-fast` exists and measures p50 17 ms /
+p90 31 ms / 7.22 % janky (720x1280 @320 dpi, 3 GB, hw GL, API 33 — the
+only image installed). All five verdict states were captured on-device
+(`.diag/qa/`) and reviewed, which produced the polish pass shipped in
+v1.5.1 (unified outline glyphs in discs, duplicated NEEDS_REVIEW sentence
+removed, one Try again action, meaningful duplicate card, bank row that
+no longer wraps, AppBar title removed).
 
 ## 35. Profile build requires storage.googleapis.com access
 
@@ -361,3 +369,27 @@ Deferred out of the verdict brief, so the preview is view-only. Add a share
 action (image + verdict summary) once the export surface exists (see item 27),
 reusing the 300 s presigned GET from `GET /receipts/:id` rather than
 re-uploading bytes. Trigger: Step 23 receipt export/print work.
+
+## 38. Bank logos for the 7 banks (Step 23A finding)
+
+`assets/banks/` contains only `README.md` and is not declared in
+`mobile/pubspec.yaml`, so `BankLogo` always renders its initials fallback
+("CB", "DA", "AW") — on the verdict screen and in the dashboard's recent
+activity. It reads as an intentional avatar rather than a broken image, so
+it is shippable. Legal review needed before replacing it: are the seven
+banks' logos trademarked in Ethiopia, and do we have permission to display
+them in a commercial app? Options: (a) request written permission from each
+bank, (b) commission seven custom abstract bank icons, (c) keep the
+initials fallback if permission is refused. Decision needed before launch,
+not before Step 23B.
+
+## 39. Sub-merchant scoped dashboard stats (Step 23A finding)
+
+`/analytics/*` is MERCHANT-only, so a SUB_MERCHANT token gets 403 and the
+dashboard renders "—" for volume and count; the shell also hides the
+Insights tab for that role. For MVP the Home tab intentionally shows
+merchant-level data (other sub-merchants' activity included). Add a
+sub-merchant-scoped variant (`/analytics/summary` scoped by
+`verifiedByUserId`) and surface "your verifications" on Home. Trigger:
+first merchant who invites staff and asks why the numbers look like the
+whole business.
