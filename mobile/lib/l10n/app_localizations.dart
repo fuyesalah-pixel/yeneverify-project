@@ -1616,6 +1616,18 @@ abstract class AppLocalizations {
   /// **'We need a clearer photo of this receipt to finish verifying it.'**
   String get verdictReviewSupplementarySubtitle;
 
+  /// No description provided for @verdictReviewFixTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake the receipt'**
+  String get verdictReviewFixTitle;
+
+  /// No description provided for @verdictReviewRetakeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the whole receipt in frame, flat and evenly lit.'**
+  String get verdictReviewRetakeHint;
+
   /// No description provided for @verdictBankLabel.
   ///
   /// In en, this message translates to:
@@ -1663,6 +1675,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'First verified'**
   String get verdictFirstVerifiedLabel;
+
+  /// No description provided for @verdictFirstVerifiedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see the original receipt.'**
+  String get verdictFirstVerifiedHint;
 
   /// No description provided for @verdictDurationSeconds.
   ///
@@ -1807,6 +1825,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong. Try again.'**
   String get verdictErrorDefault;
+
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get navVerify;
+
+  /// No description provided for @navTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get navTransactions;
+
+  /// No description provided for @navInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Insights'**
+  String get navInsights;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get navProfile;
+
+  /// No description provided for @greetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning, {name}'**
+  String greetingMorning(String name);
+
+  /// No description provided for @greetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon, {name}'**
+  String greetingAfternoon(String name);
+
+  /// No description provided for @greetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening, {name}'**
+  String greetingEvening(String name);
+
+  /// No description provided for @dashboardWelcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get dashboardWelcomeBack;
+
+  /// No description provided for @dashboardBusinessFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Your business'**
+  String get dashboardBusinessFallback;
+
+  /// No description provided for @dashboardCreditsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} verifications left'**
+  String dashboardCreditsLeft(int count);
+
+  /// No description provided for @dashboardUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited verifications'**
+  String get dashboardUnlimited;
+
+  /// No description provided for @dashboardTopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Top up'**
+  String get dashboardTopUp;
+
+  /// No description provided for @dashboardThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get dashboardThisMonth;
+
+  /// No description provided for @dashboardVerifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifications'**
+  String get dashboardVerifications;
+
+  /// No description provided for @dashboardRange7.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get dashboardRange7;
+
+  /// No description provided for @dashboardRange30.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get dashboardRange30;
+
+  /// No description provided for @dashboardRange90.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 90 days'**
+  String get dashboardRange90;
+
+  /// No description provided for @dashboardRange365.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months'**
+  String get dashboardRange365;
+
+  /// No description provided for @dashboardQuickVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify a payment'**
+  String get dashboardQuickVerifyTitle;
+
+  /// No description provided for @dashboardQuickVerifyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a bank receipt'**
+  String get dashboardQuickVerifyBody;
+
+  /// No description provided for @dashboardQuickHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get dashboardQuickHistoryTitle;
+
+  /// No description provided for @dashboardQuickHistoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every verification in one place'**
+  String get dashboardQuickHistoryBody;
+
+  /// No description provided for @dashboardRecentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get dashboardRecentTitle;
+
+  /// No description provided for @dashboardSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get dashboardSeeAll;
+
+  /// No description provided for @dashboardEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No verifications yet'**
+  String get dashboardEmptyTitle;
+
+  /// No description provided for @dashboardEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified payments will appear here.'**
+  String get dashboardEmptyBody;
+
+  /// No description provided for @dashboardStaleBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Some of this data couldn\'t load. Tap to retry.'**
+  String get dashboardStaleBanner;
+
+  /// No description provided for @dashboardErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your dashboard.'**
+  String get dashboardErrorBody;
+
+  /// No description provided for @dashboardNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get dashboardNotifications;
+
+  /// No description provided for @dashboardInboxSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Your inbox arrives in Step 26.'**
+  String get dashboardInboxSoon;
+
+  /// No description provided for @dashboardBillingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing arrives in Step 25.'**
+  String get dashboardBillingSoon;
+
+  /// No description provided for @shellComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get shellComingSoon;
+
+  /// No description provided for @shellHistoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Full transaction history arrives in Step 24.'**
+  String get shellHistoryBody;
+
+  /// No description provided for @shellInsightsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Insights arrive in Step 26.'**
+  String get shellInsightsBody;
+
+  /// No description provided for @shellProfileBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile and settings arrive in Step 27.'**
+  String get shellProfileBody;
+
+  /// No description provided for @relativeTimeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get relativeTimeJustNow;
+
+  /// No description provided for @relativeTimeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m ago'**
+  String relativeTimeMinutes(int count);
+
+  /// No description provided for @relativeTimeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String relativeTimeHours(int count);
+
+  /// No description provided for @relativeTimeYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get relativeTimeYesterday;
+
+  /// No description provided for @relativeTimeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d ago'**
+  String relativeTimeDays(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -856,6 +856,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'We need a clearer photo of this receipt to finish verifying it.';
 
   @override
+  String get verdictReviewFixTitle => 'Retake the receipt';
+
+  @override
+  String get verdictReviewRetakeHint =>
+      'Keep the whole receipt in frame, flat and evenly lit.';
+
+  @override
   String get verdictBankLabel => 'Bank';
 
   @override
@@ -878,6 +885,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verdictFirstVerifiedLabel => 'First verified';
+
+  @override
+  String get verdictFirstVerifiedHint => 'Tap to see the original receipt.';
 
   @override
   String verdictDurationSeconds(String seconds) {
@@ -961,4 +971,142 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verdictErrorDefault => 'Something went wrong. Try again.';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navVerify => 'Verify';
+
+  @override
+  String get navTransactions => 'Transactions';
+
+  @override
+  String get navInsights => 'Insights';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String greetingMorning(String name) {
+    return 'Good morning, $name';
+  }
+
+  @override
+  String greetingAfternoon(String name) {
+    return 'Good afternoon, $name';
+  }
+
+  @override
+  String greetingEvening(String name) {
+    return 'Good evening, $name';
+  }
+
+  @override
+  String get dashboardWelcomeBack => 'Welcome back';
+
+  @override
+  String get dashboardBusinessFallback => 'Your business';
+
+  @override
+  String dashboardCreditsLeft(int count) {
+    return '$count verifications left';
+  }
+
+  @override
+  String get dashboardUnlimited => 'Unlimited verifications';
+
+  @override
+  String get dashboardTopUp => 'Top up';
+
+  @override
+  String get dashboardThisMonth => 'This month';
+
+  @override
+  String get dashboardVerifications => 'Verifications';
+
+  @override
+  String get dashboardRange7 => 'Last 7 days';
+
+  @override
+  String get dashboardRange30 => 'Last 30 days';
+
+  @override
+  String get dashboardRange90 => 'Last 90 days';
+
+  @override
+  String get dashboardRange365 => 'Last 12 months';
+
+  @override
+  String get dashboardQuickVerifyTitle => 'Verify a payment';
+
+  @override
+  String get dashboardQuickVerifyBody => 'Scan a bank receipt';
+
+  @override
+  String get dashboardQuickHistoryTitle => 'Transactions';
+
+  @override
+  String get dashboardQuickHistoryBody => 'Every verification in one place';
+
+  @override
+  String get dashboardRecentTitle => 'Recent activity';
+
+  @override
+  String get dashboardSeeAll => 'See all';
+
+  @override
+  String get dashboardEmptyTitle => 'No verifications yet';
+
+  @override
+  String get dashboardEmptyBody => 'Verified payments will appear here.';
+
+  @override
+  String get dashboardStaleBanner =>
+      'Some of this data couldn\'t load. Tap to retry.';
+
+  @override
+  String get dashboardErrorBody => 'We couldn\'t load your dashboard.';
+
+  @override
+  String get dashboardNotifications => 'Notifications';
+
+  @override
+  String get dashboardInboxSoon => 'Your inbox arrives in Step 26.';
+
+  @override
+  String get dashboardBillingSoon => 'Billing arrives in Step 25.';
+
+  @override
+  String get shellComingSoon => 'Coming soon';
+
+  @override
+  String get shellHistoryBody => 'Full transaction history arrives in Step 24.';
+
+  @override
+  String get shellInsightsBody => 'Insights arrive in Step 26.';
+
+  @override
+  String get shellProfileBody => 'Profile and settings arrive in Step 27.';
+
+  @override
+  String get relativeTimeJustNow => 'Just now';
+
+  @override
+  String relativeTimeMinutes(int count) {
+    return '${count}m ago';
+  }
+
+  @override
+  String relativeTimeHours(int count) {
+    return '${count}h ago';
+  }
+
+  @override
+  String get relativeTimeYesterday => 'Yesterday';
+
+  @override
+  String relativeTimeDays(int count) {
+    return '${count}d ago';
+  }
 }

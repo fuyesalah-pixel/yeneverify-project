@@ -16,7 +16,6 @@ import '../../../../core/widgets/feedback/app_bottom_sheet.dart';
 import '../../../../core/widgets/layout/app_card.dart';
 import '../../data/models/verification_result.dart';
 import '../../data/verify_repository.dart';
-import '../verdict_copy.dart';
 import 'verdict_details_card.dart';
 
 class DuplicateReferenceCard extends StatelessWidget {
@@ -56,9 +55,9 @@ class DuplicateReferenceCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.micro),
                 Text(
-                  shortVerificationId(reference.verificationId),
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: colors.textPrimary,
+                  l10n.verdictFirstVerifiedHint,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -101,7 +100,9 @@ class _DuplicateDetailsSheetState extends ConsumerState<DuplicateDetailsSheet> {
   }
 
   Future<ApiResult<VerificationResult>> _load() {
-    return ref.read(verificationsApiProvider).getById(widget.reference.verificationId);
+    return ref
+        .read(verificationsApiProvider)
+        .getById(widget.reference.verificationId);
   }
 
   @override

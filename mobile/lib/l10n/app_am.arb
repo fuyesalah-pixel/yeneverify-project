@@ -550,6 +550,9 @@
 
   "verdictReviewSupplementarySubtitle": "ይህን ደረሰኝ ለማረጋገጥ የበለጠ ግልጽ ፎቶ ያስፈልገናል።",
 
+  "verdictReviewFixTitle": "ደረሰኙን እንደገና ያንሱ",
+  "verdictReviewRetakeHint": "ሙሉ ደረሰኙ በፎቶው ውስጥ እንዲገባ፣ ጠፍጣፋ ሆኖ እንዲቆይ እና በበቂ ብርሃን እንዲታይ ያድርጉ።",
+
   "verdictBankLabel": "ባንክ",
   "verdictReferenceLabel": "ማጣቀሻ",
   "verdictSenderLabel": "ላኪ",
@@ -558,6 +561,7 @@
   "verdictVerifiedAtLabel": "የተረጋገጠበት",
   "verdictDurationLabel": "ቆይታ",
   "verdictFirstVerifiedLabel": "በመጀመሪያ የተረጋገጠበት",
+  "verdictFirstVerifiedHint": "ዋናውን ደረሰኝ ለማየት ይንኩ።",
 
   "verdictDurationSeconds": "{seconds} ሰከንድ",
   "@verdictDurationSeconds": {
@@ -592,5 +596,71 @@
   "verdictErrorBankTimeout": "የባንኩ አገልጋይ አሁን ቀርፋፋ ነው። እንደገና ይሞክሩ።",
   "verdictErrorBankUnavailable": "ባንኩ አሁን አይገኝም። በኋላ ይሞክሩ።",
   "verdictErrorOcrEmpty": "ይህን ደረሰኝ ማንበብ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።",
-  "verdictErrorDefault": "ችግር ተፈጥሯል። እንደገና ይሞክሩ።"
+  "verdictErrorDefault": "ችግር ተፈጥሯል። እንደገና ይሞክሩ።",
+
+  "navHome": "መነሻ",
+  "navVerify": "አረጋግጥ",
+  "navTransactions": "ግብይቶች",
+  "navInsights": "ግንዛቤዎች",
+  "navProfile": "መገለጫ",
+
+  "greetingMorning": "እንደምን አደሩ፣ {name}",
+  "@greetingMorning": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "greetingAfternoon": "እንደምን ዋሉ፣ {name}",
+  "@greetingAfternoon": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "greetingEvening": "እንደምን አመሹ፣ {name}",
+  "@greetingEvening": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "dashboardWelcomeBack": "እንኳን ደህና መጡ",
+  "dashboardBusinessFallback": "የእርስዎ ንግድ",
+  "dashboardCreditsLeft": "{count} ማረጋገጫዎች ቀርተዋል",
+  "@dashboardCreditsLeft": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashboardUnlimited": "ያልተገደበ ማረጋገጫ",
+  "dashboardTopUp": "ክሬዲት ይሙሉ",
+  "dashboardThisMonth": "በዚህ ወር",
+  "dashboardVerifications": "ማረጋገጫዎች",
+  "dashboardRange7": "ባለፉት 7 ቀናት",
+  "dashboardRange30": "ባለፉት 30 ቀናት",
+  "dashboardRange90": "ባለፉት 90 ቀናት",
+  "dashboardRange365": "ባለፉት 12 ወራት",
+  "dashboardQuickVerifyTitle": "ክፍያ ያረጋግጡ",
+  "dashboardQuickVerifyBody": "የባንክ ደረሰኝ ይቃኙ",
+  "dashboardQuickHistoryTitle": "ግብይቶች",
+  "dashboardQuickHistoryBody": "ሁሉም ማረጋገጫዎች በአንድ ቦታ",
+  "dashboardRecentTitle": "የቅርብ እንቅስቃሴ",
+  "dashboardSeeAll": "ሁሉንም ይመልከቱ",
+  "dashboardEmptyTitle": "እስካሁን ማረጋገጫ የለም",
+  "dashboardEmptyBody": "የተረጋገጡ ክፍያዎች እዚህ ይታያሉ።",
+  "dashboardStaleBanner": "የተወሰነ መረጃ ሊጫን አልቻለም። ለማደስ ይንኩ።",
+  "dashboardErrorBody": "ዳሽቦርድዎን ማምጣት አልቻልንም።",
+  "dashboardNotifications": "ማሳወቂያዎች",
+  "dashboardInboxSoon": "የማሳወቂያ ሳጥንዎ በደረጃ 26 ይመጣል።",
+  "dashboardBillingSoon": "የክፍያ አስተዳደር በደረጃ 25 ይመጣል።",
+
+  "shellComingSoon": "በቅርቡ ይመጣል",
+  "shellHistoryBody": "ሙሉ የግብይት ታሪክ በደረጃ 24 ይመጣል።",
+  "shellInsightsBody": "ግንዛቤዎች በደረጃ 26 ይመጣሉ።",
+  "shellProfileBody": "መገለጫ እና ቅንብሮች በደረጃ 27 ይመጣሉ።",
+
+  "relativeTimeJustNow": "አሁን",
+  "relativeTimeMinutes": "ከ{count} ደቂቃ በፊት",
+  "@relativeTimeMinutes": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "relativeTimeHours": "ከ{count} ሰዓት በፊት",
+  "@relativeTimeHours": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "relativeTimeYesterday": "ትናንት",
+  "relativeTimeDays": "ከ{count} ቀን በፊት",
+  "@relativeTimeDays": {
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

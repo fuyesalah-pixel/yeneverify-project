@@ -14,7 +14,7 @@ void main() {
     expect(find.text('5,500.00 ETB'), findsOneWidget);
     expect(find.text('Payment verified'), findsOneWidget);
     expect(find.text('Paid by Abebe Kebede'), findsOneWidget);
-    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_outline_rounded), findsOneWidget);
   });
 
   testWidgets('FAKE explains the receipt was not found', (tester) async {
@@ -31,10 +31,12 @@ void main() {
     );
   });
 
-  testWidgets('DUPLICATE names the date of the first verification', (tester) async {
+  testWidgets('DUPLICATE names the date of the first verification',
+      (tester) async {
     await tester.pumpWidget(
       verdictTestApp(
-        VerdictHero(result: sampleVerdict(status: VerificationStatus.duplicate)),
+        VerdictHero(
+            result: sampleVerdict(status: VerificationStatus.duplicate)),
       ),
     );
 
@@ -45,10 +47,12 @@ void main() {
     );
   });
 
-  testWidgets('NEEDS_REVIEW asks for a clearer photo when supplementary', (tester) async {
+  testWidgets('NEEDS_REVIEW asks for a clearer photo when supplementary',
+      (tester) async {
     await tester.pumpWidget(
       verdictTestApp(
-        VerdictHero(result: sampleVerdict(status: VerificationStatus.needsReview)),
+        VerdictHero(
+            result: sampleVerdict(status: VerificationStatus.needsReview)),
       ),
     );
 

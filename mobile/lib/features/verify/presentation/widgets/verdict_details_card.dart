@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
+import '../../../../core/widgets/fintech/bank_logo.dart';
 import '../../../../core/widgets/layout/app_card.dart';
 import '../../data/models/verification_result.dart';
 import '../verdict_copy.dart';
@@ -40,7 +41,10 @@ class VerdictDetailsCard extends StatelessWidget {
 
     final rows = <Widget>[
       if (bank != null && bank.isNotEmpty)
-        _DetailRow(label: l10n.verdictBankLabel, value: bank),
+        _BankRow(
+          bankCode: result.bankCode!,
+          name: bank,
+        ),
       if (reference != null && reference.isNotEmpty)
         _ReferenceRow(reference: reference),
       if (sender != null && sender.isNotEmpty)
@@ -63,7 +67,8 @@ class VerdictDetailsCard extends StatelessWidget {
           value: verdictDurationText(l10n, result.durationMs),
         ),
       if (onViewReceipt != null && receiptId != null)
-        _ReceiptRow(label: l10n.verdictViewReceiptButton, onTap: onViewReceipt!),
+        _ReceiptRow(
+            label: l10n.verdictViewReceiptButton, onTap: onViewReceipt!),
     ];
 
     if (rows.isEmpty) return const SizedBox.shrink();
@@ -97,7 +102,8 @@ class _DetailRow extends StatelessWidget {
           width: 96,
           child: Text(
             label,
-            style: AppTypography.bodySmall.copyWith(color: colors.textSecondary),
+            style:
+                AppTypography.bodySmall.copyWith(color: colors.textSecondary),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -105,6 +111,33 @@ class _DetailRow extends StatelessWidget {
           child: Text(
             value,
             textAlign: TextAlign.end,
+            style: AppTypography.bodyMedium.copyWith(color: colors.textPrimary),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BankRow extends StatelessWidget {
+  const _BankRow({required this.bankCode, required this.name});
+
+  final String bankCode;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    // Logo + name left-aligned instead of label/value: the full name of a
+    // bank does not fit the value column and used to wrap into two ragged
+    // right-aligned lines.
+    return Row(
+      children: [
+        BankLogo(bankCode: bankCode, size: 22),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            name,
             style: AppTypography.bodyMedium.copyWith(color: colors.textPrimary),
           ),
         ),
@@ -129,7 +162,8 @@ class _ReferenceRow extends StatelessWidget {
           width: 96,
           child: Text(
             l10n.verdictReferenceLabel,
-            style: AppTypography.bodySmall.copyWith(color: colors.textSecondary),
+            style:
+                AppTypography.bodySmall.copyWith(color: colors.textSecondary),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -180,7 +214,8 @@ class _ReceiptRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         child: Row(
           children: [
-            Icon(Icons.receipt_long_outlined, size: 20, color: colors.primaryAction),
+            Icon(Icons.receipt_long_outlined,
+                size: 20, color: colors.primaryAction),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(

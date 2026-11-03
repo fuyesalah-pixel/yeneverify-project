@@ -40,7 +40,9 @@ class VerdictScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: AppBar(title: Text(l10n.verdictTitle)),
+      // No title: the hero is the title, and the 56 px it frees belongs to
+      // the verdict. The back button is all this bar is for.
+      appBar: AppBar(),
       body: SafeArea(
         child: verdict.when(
           loading: () => Center(
@@ -105,7 +107,8 @@ class _VerdictBody extends ConsumerWidget {
       ),
       children: [
         VerdictHero(result: result),
-        if (result.status == VerificationStatus.duplicate && duplicate != null) ...[
+        if (result.status == VerificationStatus.duplicate &&
+            duplicate != null) ...[
           const SizedBox(height: AppSpacing.lg),
           DuplicateReferenceCard(
             result: result,
@@ -114,10 +117,7 @@ class _VerdictBody extends ConsumerWidget {
         ],
         if (result.status == VerificationStatus.needsReview) ...[
           const SizedBox(height: AppSpacing.lg),
-          NeedsSupplementaryCard(
-            prompt: result.needsSupplementary,
-            onRetry: () => context.go(Routes.verify),
-          ),
+          NeedsSupplementaryCard(prompt: result.needsSupplementary),
         ],
         const SizedBox(height: AppSpacing.lg),
         VerdictDetailsCard(
@@ -154,12 +154,14 @@ class _InfoLine extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(Icons.notifications_none_rounded, size: 16, color: colors.textSecondary),
+        Icon(Icons.notifications_none_rounded,
+            size: 16, color: colors.textSecondary),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(
             text,
-            style: AppTypography.bodySmall.copyWith(color: colors.textSecondary),
+            style:
+                AppTypography.bodySmall.copyWith(color: colors.textSecondary),
           ),
         ),
       ],

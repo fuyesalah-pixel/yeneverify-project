@@ -844,6 +844,9 @@
 
   "verdictReviewSupplementarySubtitle": "We need a clearer photo of this receipt to finish verifying it.",
 
+  "verdictReviewFixTitle": "Retake the receipt",
+  "verdictReviewRetakeHint": "Keep the whole receipt in frame, flat and evenly lit.",
+
   "verdictBankLabel": "Bank",
   "verdictReferenceLabel": "Reference",
   "verdictSenderLabel": "Sender",
@@ -852,6 +855,7 @@
   "verdictVerifiedAtLabel": "Verified at",
   "verdictDurationLabel": "Duration",
   "verdictFirstVerifiedLabel": "First verified",
+  "verdictFirstVerifiedHint": "Tap to see the original receipt.",
 
   "verdictDurationSeconds": "{seconds} seconds",
   "@verdictDurationSeconds": {
@@ -886,5 +890,71 @@
   "verdictErrorBankTimeout": "The bank's server is slow right now. Try again.",
   "verdictErrorBankUnavailable": "The bank is unavailable right now. Try again later.",
   "verdictErrorOcrEmpty": "We could not read this receipt. Try a clearer photo.",
-  "verdictErrorDefault": "Something went wrong. Try again."
+  "verdictErrorDefault": "Something went wrong. Try again.",
+
+  "navHome": "Home",
+  "navVerify": "Verify",
+  "navTransactions": "Transactions",
+  "navInsights": "Insights",
+  "navProfile": "Profile",
+
+  "greetingMorning": "Good morning, {name}",
+  "@greetingMorning": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "greetingAfternoon": "Good afternoon, {name}",
+  "@greetingAfternoon": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "greetingEvening": "Good evening, {name}",
+  "@greetingEvening": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "dashboardWelcomeBack": "Welcome back",
+  "dashboardBusinessFallback": "Your business",
+  "dashboardCreditsLeft": "{count} verifications left",
+  "@dashboardCreditsLeft": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "dashboardUnlimited": "Unlimited verifications",
+  "dashboardTopUp": "Top up",
+  "dashboardThisMonth": "This month",
+  "dashboardVerifications": "Verifications",
+  "dashboardRange7": "Last 7 days",
+  "dashboardRange30": "Last 30 days",
+  "dashboardRange90": "Last 90 days",
+  "dashboardRange365": "Last 12 months",
+  "dashboardQuickVerifyTitle": "Verify a payment",
+  "dashboardQuickVerifyBody": "Scan a bank receipt",
+  "dashboardQuickHistoryTitle": "Transactions",
+  "dashboardQuickHistoryBody": "Every verification in one place",
+  "dashboardRecentTitle": "Recent activity",
+  "dashboardSeeAll": "See all",
+  "dashboardEmptyTitle": "No verifications yet",
+  "dashboardEmptyBody": "Verified payments will appear here.",
+  "dashboardStaleBanner": "Some of this data couldn't load. Tap to retry.",
+  "dashboardErrorBody": "We couldn't load your dashboard.",
+  "dashboardNotifications": "Notifications",
+  "dashboardInboxSoon": "Your inbox arrives in Step 26.",
+  "dashboardBillingSoon": "Billing arrives in Step 25.",
+
+  "shellComingSoon": "Coming soon",
+  "shellHistoryBody": "Full transaction history arrives in Step 24.",
+  "shellInsightsBody": "Insights arrive in Step 26.",
+  "shellProfileBody": "Profile and settings arrive in Step 27.",
+
+  "relativeTimeJustNow": "Just now",
+  "relativeTimeMinutes": "{count}m ago",
+  "@relativeTimeMinutes": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "relativeTimeHours": "{count}h ago",
+  "@relativeTimeHours": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "relativeTimeYesterday": "Yesterday",
+  "relativeTimeDays": "{count}d ago",
+  "@relativeTimeDays": {
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

@@ -57,7 +57,9 @@ class _VerdictHeroState extends State<VerdictHero>
   Future<void> _haptic(VerificationStatus status) {
     return switch (status) {
       VerificationStatus.verified => HapticFeedback.mediumImpact(),
-      VerificationStatus.fake || VerificationStatus.error => HapticFeedback.heavyImpact(),
+      VerificationStatus.fake ||
+      VerificationStatus.error =>
+        HapticFeedback.heavyImpact(),
       _ => HapticFeedback.lightImpact(),
     };
   }
@@ -91,7 +93,23 @@ class _VerdictHeroState extends State<VerdictHero>
             FadeTransition(
               key: const ValueKey('verdictHeroIcon'),
               opacity: _opacity,
-              child: Icon(verdictIcon(status), size: 72, color: accent),
+              // One glyph family, one stroke weight: a thin outlined icon in a
+              // hairline disc. Mixing filled and outlined Material glyphs made
+              // the five states look like two different products.
+              child: Container(
+                width: 84,
+                height: 84,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colors.surface,
+                  border: Border.all(
+                    color: accent.withValues(alpha: 0.24),
+                    width: 1.5,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Icon(verdictIcon(status), size: 40, color: accent),
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             if (amount != null)
@@ -140,12 +158,14 @@ Color verdictAccent(AppColors colors, VerificationStatus status) {
 }
 
 IconData verdictIcon(VerificationStatus status) {
+  // All five states use the outline family so the stroke weight reads the
+  // same whether the verdict is a check, a cross, a copy or a clock.
   return switch (status) {
-    VerificationStatus.verified => Icons.check_circle_rounded,
-    VerificationStatus.fake => Icons.cancel_rounded,
-    VerificationStatus.duplicate => Icons.content_copy_rounded,
-    VerificationStatus.needsReview => Icons.schedule_rounded,
-    VerificationStatus.error => Icons.warning_amber_rounded,
-    VerificationStatus.pending => Icons.hourglass_top_rounded,
+    VerificationStatus.verified => Icons.check_circle_outline_rounded,
+    VerificationStatus.fake => Icons.cancel_outlined,
+    VerificationStatus.duplicate => Icons.content_copy_outlined,
+    VerificationStatus.needsReview => Icons.schedule_outlined,
+    VerificationStatus.error => Icons.error_outline_rounded,
+    VerificationStatus.pending => Icons.hourglass_empty_rounded,
   };
 }

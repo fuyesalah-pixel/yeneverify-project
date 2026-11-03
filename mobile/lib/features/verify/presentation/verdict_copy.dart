@@ -107,9 +107,3 @@ String verdictDurationText(AppLocalizations l10n, int? durationMs) {
   if (durationMs == null || durationMs <= 0) return '—';
   return l10n.verdictDurationSeconds((durationMs / 1000).toStringAsFixed(1));
 }
-
-/// Short, non-identifying handle for another verification id.
-String shortVerificationId(String id) {
-  if (id.length <= 6) return id;
-  return '…${id.substring(id.length - 6)}';
-}

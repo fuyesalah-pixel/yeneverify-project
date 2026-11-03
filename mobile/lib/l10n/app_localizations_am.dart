@@ -830,6 +830,13 @@ class AppLocalizationsAm extends AppLocalizations {
       'ይህን ደረሰኝ ለማረጋገጥ የበለጠ ግልጽ ፎቶ ያስፈልገናል።';
 
   @override
+  String get verdictReviewFixTitle => 'ደረሰኙን እንደገና ያንሱ';
+
+  @override
+  String get verdictReviewRetakeHint =>
+      'ሙሉ ደረሰኙ በፎቶው ውስጥ እንዲገባ፣ ጠፍጣፋ ሆኖ እንዲቆይ እና በበቂ ብርሃን እንዲታይ ያድርጉ።';
+
+  @override
   String get verdictBankLabel => 'ባንክ';
 
   @override
@@ -852,6 +859,9 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get verdictFirstVerifiedLabel => 'በመጀመሪያ የተረጋገጠበት';
+
+  @override
+  String get verdictFirstVerifiedHint => 'ዋናውን ደረሰኝ ለማየት ይንኩ።';
 
   @override
   String verdictDurationSeconds(String seconds) {
@@ -927,4 +937,141 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get verdictErrorDefault => 'ችግር ተፈጥሯል። እንደገና ይሞክሩ።';
+
+  @override
+  String get navHome => 'መነሻ';
+
+  @override
+  String get navVerify => 'አረጋግጥ';
+
+  @override
+  String get navTransactions => 'ግብይቶች';
+
+  @override
+  String get navInsights => 'ግንዛቤዎች';
+
+  @override
+  String get navProfile => 'መገለጫ';
+
+  @override
+  String greetingMorning(String name) {
+    return 'እንደምን አደሩ፣ $name';
+  }
+
+  @override
+  String greetingAfternoon(String name) {
+    return 'እንደምን ዋሉ፣ $name';
+  }
+
+  @override
+  String greetingEvening(String name) {
+    return 'እንደምን አመሹ፣ $name';
+  }
+
+  @override
+  String get dashboardWelcomeBack => 'እንኳን ደህና መጡ';
+
+  @override
+  String get dashboardBusinessFallback => 'የእርስዎ ንግድ';
+
+  @override
+  String dashboardCreditsLeft(int count) {
+    return '$count ማረጋገጫዎች ቀርተዋል';
+  }
+
+  @override
+  String get dashboardUnlimited => 'ያልተገደበ ማረጋገጫ';
+
+  @override
+  String get dashboardTopUp => 'ክሬዲት ይሙሉ';
+
+  @override
+  String get dashboardThisMonth => 'በዚህ ወር';
+
+  @override
+  String get dashboardVerifications => 'ማረጋገጫዎች';
+
+  @override
+  String get dashboardRange7 => 'ባለፉት 7 ቀናት';
+
+  @override
+  String get dashboardRange30 => 'ባለፉት 30 ቀናት';
+
+  @override
+  String get dashboardRange90 => 'ባለፉት 90 ቀናት';
+
+  @override
+  String get dashboardRange365 => 'ባለፉት 12 ወራት';
+
+  @override
+  String get dashboardQuickVerifyTitle => 'ክፍያ ያረጋግጡ';
+
+  @override
+  String get dashboardQuickVerifyBody => 'የባንክ ደረሰኝ ይቃኙ';
+
+  @override
+  String get dashboardQuickHistoryTitle => 'ግብይቶች';
+
+  @override
+  String get dashboardQuickHistoryBody => 'ሁሉም ማረጋገጫዎች በአንድ ቦታ';
+
+  @override
+  String get dashboardRecentTitle => 'የቅርብ እንቅስቃሴ';
+
+  @override
+  String get dashboardSeeAll => 'ሁሉንም ይመልከቱ';
+
+  @override
+  String get dashboardEmptyTitle => 'እስካሁን ማረጋገጫ የለም';
+
+  @override
+  String get dashboardEmptyBody => 'የተረጋገጡ ክፍያዎች እዚህ ይታያሉ።';
+
+  @override
+  String get dashboardStaleBanner => 'የተወሰነ መረጃ ሊጫን አልቻለም። ለማደስ ይንኩ።';
+
+  @override
+  String get dashboardErrorBody => 'ዳሽቦርድዎን ማምጣት አልቻልንም።';
+
+  @override
+  String get dashboardNotifications => 'ማሳወቂያዎች';
+
+  @override
+  String get dashboardInboxSoon => 'የማሳወቂያ ሳጥንዎ በደረጃ 26 ይመጣል።';
+
+  @override
+  String get dashboardBillingSoon => 'የክፍያ አስተዳደር በደረጃ 25 ይመጣል።';
+
+  @override
+  String get shellComingSoon => 'በቅርቡ ይመጣል';
+
+  @override
+  String get shellHistoryBody => 'ሙሉ የግብይት ታሪክ በደረጃ 24 ይመጣል።';
+
+  @override
+  String get shellInsightsBody => 'ግንዛቤዎች በደረጃ 26 ይመጣሉ።';
+
+  @override
+  String get shellProfileBody => 'መገለጫ እና ቅንብሮች በደረጃ 27 ይመጣሉ።';
+
+  @override
+  String get relativeTimeJustNow => 'አሁን';
+
+  @override
+  String relativeTimeMinutes(int count) {
+    return 'ከ$count ደቂቃ በፊት';
+  }
+
+  @override
+  String relativeTimeHours(int count) {
+    return 'ከ$count ሰዓት በፊት';
+  }
+
+  @override
+  String get relativeTimeYesterday => 'ትናንት';
+
+  @override
+  String relativeTimeDays(int count) {
+    return 'ከ$count ቀን በፊት';
+  }
 }

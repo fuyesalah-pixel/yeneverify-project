@@ -3,8 +3,11 @@
 // VERIFIED      Done
 // FAKE          Report a problem · Try again · Done
 // DUPLICATE     View original · Report a problem · Done
-// NEEDS_REVIEW  Done
+// NEEDS_REVIEW  Try again
 // ERROR         Try again · Report a problem · Done
+//
+// NEEDS_REVIEW leads with Try again because a better photo is the only thing
+// that moves the verification forward; Done would silently drop the case.
 import 'package:flutter/material.dart';
 import 'package:yene_verify/l10n/app_localizations.dart';
 
@@ -46,7 +49,9 @@ class VerdictActions extends StatelessWidget {
               icon: Icons.receipt_long_outlined,
               onPressed: onViewOriginal,
             ),
-          VerificationStatus.error => AppButton(
+          VerificationStatus.error ||
+          VerificationStatus.needsReview =>
+            AppButton(
               label: l10n.verdictTryAgainButton,
               onPressed: onTryAgain,
             ),
@@ -74,7 +79,8 @@ class VerdictActions extends StatelessWidget {
           variant: AppButtonVariant.secondary,
           onPressed: onTryAgain,
         ),
-      if (status == VerificationStatus.duplicate || status == VerificationStatus.error)
+      if (status == VerificationStatus.duplicate ||
+          status == VerificationStatus.error)
         AppButton(
           label: l10n.verdictReportButton,
           variant: AppButtonVariant.secondary,

@@ -85,10 +85,17 @@ void main() {
     expect(reported, 1);
   });
 
-  testWidgets('NEEDS_REVIEW offers Done only', (tester) async {
-    await pump(tester, VerificationStatus.needsReview);
+  testWidgets('NEEDS_REVIEW leads with Try again', (tester) async {
+    var retried = 0;
+    await pump(
+      tester,
+      VerificationStatus.needsReview,
+      onTryAgain: () => retried++,
+    );
 
-    expect(find.text('Done'), findsOneWidget);
+    await tester.tap(find.text('Try again'));
+    expect(retried, 1);
     expect(find.text('Report a problem'), findsNothing);
+    expect(find.text('Done'), findsNothing);
   });
 }
