@@ -1074,4 +1074,61 @@ class AppLocalizationsAm extends AppLocalizations {
   String relativeTimeDays(int count) {
     return 'ከ$count ቀን በፊት';
   }
+
+  @override
+  String get transactionsSearchHint => 'ማጣቀሻ ወይም መጠን ይፈልጉ';
+
+  @override
+  String get transactionsFilterTitle => 'ማጣሪያዎች';
+
+  @override
+  String get transactionsFilterBank => 'ባንክ';
+
+  @override
+  String get transactionsFilterRange => 'የቀን ክልል';
+
+  @override
+  String get transactionsApply => 'ተግብር';
+
+  @override
+  String get transactionsClearAll => 'ሁሉንም አጽዳ';
+
+  @override
+  String get transactionsStatusAll => 'ሁሉም';
+
+  @override
+  String get transactionsStatusVerified => 'የተረጋገጠ';
+
+  @override
+  String get transactionsStatusFake => 'ሐሰተኛ';
+
+  @override
+  String get transactionsStatusDuplicate => 'ተደጋጋሚ';
+
+  @override
+  String get transactionsStatusReview => 'በግምገማ';
+
+  @override
+  String get transactionsStatusError => 'ስህተት';
+
+  @override
+  String get transactionsEmptyTitle => 'ግብይት አልተገኘም';
+
+  @override
+  String get transactionsEmptyBody => 'ሌላ ማጣሪያ ወይም ፍለጋ ይሞክሩ።';
+
+  @override
+  String get transactionsEmptyAction => 'ማጣሪያዎችን አጽዳ';
+
+  @override
+  String get transactionsLoadMoreError => 'ተጨማሪ ማምጣት አልተቻለም። ለመድገም ይንኩ።';
+
+  @override
+  String get transactionsNoMore => 'ተጨማሪ ውጤት የለም';
+
+  @override
+  String get transactionsRangeYear => 'በዚህ ዓመት';
+
+  @override
+  String get transactionsRangeAll => 'ሁሉም ጊዜ';
 }

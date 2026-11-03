@@ -13,6 +13,7 @@ import '../../features/design_system/presentation/screens/design_system_showcase
 import '../../features/onboarding/presentation/screens/merchant_setup_success_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import '../../features/shell/presentation/screens/shell_placeholder_screen.dart';
+import '../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../../features/shell/shell_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/verify/presentation/screens/camera_capture_screen.dart';
@@ -35,6 +36,11 @@ abstract final class Routes {
   static const String cameraCapture = '/verify/camera';
   static const String verdict = '/verify/result';
   static const String history = '/history';
+  static const String transactionDetail = '/transactions';
+
+  /// Read-only verdict view opened from the history list.
+  static String transactionFor(String verificationId) =>
+      '$transactionDetail/$verificationId';
   static const String insights = '/insights';
   static const String profile = '/profile';
 
@@ -128,8 +134,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: Routes.history,
-              builder: (_, __) =>
-                  const ShellPlaceholderScreen(section: ShellSection.history),
+              builder: (_, __) => const TransactionsScreen(),
             ),
           ],
         ),
@@ -152,6 +157,18 @@ final appRouter = GoRouter(
           ],
         ),
       ],
+    ),
+    // Opened from the history list; full screen on the root navigator so the
+    // bottom nav does not sit under a read-only detail view.
+    GoRoute(
+      path: '${Routes.transactionDetail}/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      pageBuilder: (_, state) => NoTransitionPage(
+        child: VerdictScreen(
+          verificationId: state.pathParameters['id'] ?? '',
+          mode: VerdictMode.detail,
+        ),
+      ),
     ),
     GoRoute(
       path: Routes.onboarding,

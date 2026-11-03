@@ -1109,4 +1109,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String relativeTimeDays(int count) {
     return '${count}d ago';
   }
+
+  @override
+  String get transactionsSearchHint => 'Search reference or amount';
+
+  @override
+  String get transactionsFilterTitle => 'Filters';
+
+  @override
+  String get transactionsFilterBank => 'Bank';
+
+  @override
+  String get transactionsFilterRange => 'Date range';
+
+  @override
+  String get transactionsApply => 'Apply';
+
+  @override
+  String get transactionsClearAll => 'Clear all';
+
+  @override
+  String get transactionsStatusAll => 'All';
+
+  @override
+  String get transactionsStatusVerified => 'Verified';
+
+  @override
+  String get transactionsStatusFake => 'Fake';
+
+  @override
+  String get transactionsStatusDuplicate => 'Duplicate';
+
+  @override
+  String get transactionsStatusReview => 'Review';
+
+  @override
+  String get transactionsStatusError => 'Error';
+
+  @override
+  String get transactionsEmptyTitle => 'No transactions found';
+
+  @override
+  String get transactionsEmptyBody => 'Try a different filter or search.';
+
+  @override
+  String get transactionsEmptyAction => 'Clear filters';
+
+  @override
+  String get transactionsLoadMoreError => 'Couldn\'t load more. Tap to retry.';
+
+  @override
+  String get transactionsNoMore => 'No more results';
+
+  @override
+  String get transactionsRangeYear => 'This year';
+
+  @override
+  String get transactionsRangeAll => 'All time';
 }

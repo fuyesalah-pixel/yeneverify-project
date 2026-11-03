@@ -126,6 +126,7 @@ class FakeVerificationsApi extends VerificationsApi {
     String? bankCode,
     DateTime? from,
     DateTime? to,
+    String? search,
     String sortBy = 'createdAt',
     String sortOrder = 'desc',
   }) async {

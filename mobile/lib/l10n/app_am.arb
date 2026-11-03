@@ -662,5 +662,26 @@
   "relativeTimeDays": "ከ{count} ቀን በፊት",
   "@relativeTimeDays": {
     "placeholders": { "count": { "type": "int" } }
-  }
+  },
+
+  "transactionsTitle": "ግብይቶች",
+  "transactionsSearchHint": "ማጣቀሻ ወይም መጠን ይፈልጉ",
+  "transactionsFilterTitle": "ማጣሪያዎች",
+  "transactionsFilterBank": "ባንክ",
+  "transactionsFilterRange": "የቀን ክልል",
+  "transactionsApply": "ተግብር",
+  "transactionsClearAll": "ሁሉንም አጽዳ",
+  "transactionsStatusAll": "ሁሉም",
+  "transactionsStatusVerified": "የተረጋገጠ",
+  "transactionsStatusFake": "ሐሰተኛ",
+  "transactionsStatusDuplicate": "ተደጋጋሚ",
+  "transactionsStatusReview": "በግምገማ",
+  "transactionsStatusError": "ስህተት",
+  "transactionsEmptyTitle": "ግብይት አልተገኘም",
+  "transactionsEmptyBody": "ሌላ ማጣሪያ ወይም ፍለጋ ይሞክሩ።",
+  "transactionsEmptyAction": "ማጣሪያዎችን አጽዳ",
+  "transactionsLoadMoreError": "ተጨማሪ ማምጣት አልተቻለም። ለመድገም ይንኩ።",
+  "transactionsNoMore": "ተጨማሪ ውጤት የለም",
+  "transactionsRangeYear": "በዚህ ዓመት",
+  "transactionsRangeAll": "ሁሉም ጊዜ"
 }

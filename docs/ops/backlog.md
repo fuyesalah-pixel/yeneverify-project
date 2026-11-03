@@ -393,3 +393,12 @@ sub-merchant-scoped variant (`/analytics/summary` scoped by
 `verifiedByUserId`) and surface "your verifications" on Home. Trigger:
 first merchant who invites staff and asks why the numbers look like the
 whole business.
+
+## 40. Custom date range picker for transaction filters (Step 23B)
+
+Step 23B ships five presets only (7 d, 30 d, 90 d, this year, all time).
+A `showDateRangePicker` flow is deferred because the backend takes arbitrary
+`from`/`to` (max 365 days) and the preset row already covers the realistic
+questions. Add a "Custom" option that opens the platform range picker, caps
+the span at 365 days client-side, and shows the chosen dates in the filter
+sheet. Trigger: first merchant who needs "last quarter" or a specific month.

@@ -42,6 +42,7 @@ class VerificationsApi {
     String? bankCode,
     DateTime? from,
     DateTime? to,
+    String? search,
     String sortBy = 'createdAt',
     String sortOrder = 'desc',
   }) async {
@@ -57,6 +58,7 @@ class VerificationsApi {
           if (bankCode != null && bankCode.isNotEmpty) 'bankCode': bankCode,
           if (from != null) 'from': from.toUtc().toIso8601String(),
           if (to != null) 'to': to.toUtc().toIso8601String(),
+          if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
         },
       );
       final body = res.data ?? const <String, dynamic>{};

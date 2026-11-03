@@ -2071,6 +2071,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count}d ago'**
   String relativeTimeDays(int count);
+
+  /// No description provided for @transactionsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search reference or amount'**
+  String get transactionsSearchHint;
+
+  /// No description provided for @transactionsFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get transactionsFilterTitle;
+
+  /// No description provided for @transactionsFilterBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get transactionsFilterBank;
+
+  /// No description provided for @transactionsFilterRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Date range'**
+  String get transactionsFilterRange;
+
+  /// No description provided for @transactionsApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get transactionsApply;
+
+  /// No description provided for @transactionsClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get transactionsClearAll;
+
+  /// No description provided for @transactionsStatusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get transactionsStatusAll;
+
+  /// No description provided for @transactionsStatusVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get transactionsStatusVerified;
+
+  /// No description provided for @transactionsStatusFake.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake'**
+  String get transactionsStatusFake;
+
+  /// No description provided for @transactionsStatusDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get transactionsStatusDuplicate;
+
+  /// No description provided for @transactionsStatusReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get transactionsStatusReview;
+
+  /// No description provided for @transactionsStatusError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get transactionsStatusError;
+
+  /// No description provided for @transactionsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions found'**
+  String get transactionsEmptyTitle;
+
+  /// No description provided for @transactionsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different filter or search.'**
+  String get transactionsEmptyBody;
+
+  /// No description provided for @transactionsEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get transactionsEmptyAction;
+
+  /// No description provided for @transactionsLoadMoreError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load more. Tap to retry.'**
+  String get transactionsLoadMoreError;
+
+  /// No description provided for @transactionsNoMore.
+  ///
+  /// In en, this message translates to:
+  /// **'No more results'**
+  String get transactionsNoMore;
+
+  /// No description provided for @transactionsRangeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get transactionsRangeYear;
+
+  /// No description provided for @transactionsRangeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get transactionsRangeAll;
 }
 
 class _AppLocalizationsDelegate

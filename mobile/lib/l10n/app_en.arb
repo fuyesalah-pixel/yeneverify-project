@@ -956,5 +956,26 @@
   "relativeTimeDays": "{count}d ago",
   "@relativeTimeDays": {
     "placeholders": { "count": { "type": "int" } }
-  }
+  },
+
+  "transactionsTitle": "Transactions",
+  "transactionsSearchHint": "Search reference or amount",
+  "transactionsFilterTitle": "Filters",
+  "transactionsFilterBank": "Bank",
+  "transactionsFilterRange": "Date range",
+  "transactionsApply": "Apply",
+  "transactionsClearAll": "Clear all",
+  "transactionsStatusAll": "All",
+  "transactionsStatusVerified": "Verified",
+  "transactionsStatusFake": "Fake",
+  "transactionsStatusDuplicate": "Duplicate",
+  "transactionsStatusReview": "Review",
+  "transactionsStatusError": "Error",
+  "transactionsEmptyTitle": "No transactions found",
+  "transactionsEmptyBody": "Try a different filter or search.",
+  "transactionsEmptyAction": "Clear filters",
+  "transactionsLoadMoreError": "Couldn't load more. Tap to retry.",
+  "transactionsNoMore": "No more results",
+  "transactionsRangeYear": "This year",
+  "transactionsRangeAll": "All time"
 }

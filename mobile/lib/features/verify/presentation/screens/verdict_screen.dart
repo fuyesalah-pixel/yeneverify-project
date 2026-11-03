@@ -14,6 +14,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../../core/widgets/layout/app_error_state.dart';
 import '../../data/models/verification_result.dart';
@@ -26,10 +27,22 @@ import '../widgets/verdict_actions.dart';
 import '../widgets/verdict_details_card.dart';
 import '../widgets/verdict_hero.dart';
 
+/// Where the verdict is being shown from.
+///
+/// `result` is the end of the verify flow (Done / Try again / Report).
+/// `detail` is a read-only view opened from history, so the flow actions are
+/// gone and only "Report a problem" survives for a bad verdict.
+enum VerdictMode { result, detail }
+
 class VerdictScreen extends ConsumerWidget {
-  const VerdictScreen({super.key, required this.verificationId});
+  const VerdictScreen({
+    super.key,
+    required this.verificationId,
+    this.mode = VerdictMode.result,
+  });
 
   final String verificationId;
+  final VerdictMode mode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,7 +74,7 @@ class VerdictScreen extends ConsumerWidget {
               ),
             ),
           ),
-          data: (result) => _VerdictBody(result: result),
+          data: (result) => _VerdictBody(result: result, mode: mode),
         ),
       ),
     );
@@ -69,9 +82,10 @@ class VerdictScreen extends ConsumerWidget {
 }
 
 class _VerdictBody extends ConsumerWidget {
-  const _VerdictBody({required this.result});
+  const _VerdictBody({required this.result, required this.mode});
 
   final VerificationResult result;
+  final VerdictMode mode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -131,13 +145,23 @@ class _VerdictBody extends ConsumerWidget {
           _InfoLine(text: l10n.verdictReviewNotificationInfo),
         ],
         const SizedBox(height: AppSpacing.xxl),
-        VerdictActions(
-          status: result.status,
-          onDone: () => context.go(Routes.verify),
-          onTryAgain: () => context.go(Routes.verify),
-          onReport: report,
-          onViewOriginal: duplicate == null ? null : viewOriginal,
-        ),
+        if (mode == VerdictMode.detail) ...[
+          if (result.status == VerificationStatus.fake ||
+              result.status == VerificationStatus.error)
+            AppButton(
+              label: l10n.verdictReportButton,
+              icon: Icons.flag_outlined,
+              variant: AppButtonVariant.secondary,
+              onPressed: report,
+            ),
+        ] else
+          VerdictActions(
+            status: result.status,
+            onDone: () => context.go(Routes.verify),
+            onTryAgain: () => context.go(Routes.verify),
+            onReport: report,
+            onViewOriginal: duplicate == null ? null : viewOriginal,
+          ),
       ],
     );
   }
