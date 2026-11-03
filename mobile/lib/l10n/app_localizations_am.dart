@@ -672,4 +672,125 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get debugDesignSystem => 'ዴበግ: የንድፍ ስርዓት';
+
+  @override
+  String get verifyHeading => 'ክፍያ ያረጋግጡ';
+
+  @override
+  String get verifyHeadingSubtitle =>
+      'የደንበኛውን የባንክ ማረጋገጫ ፎቶ ያንሱ ወይም ይስቀሉ — በሰከንዶች ውስጥ ያረጋግጡ።';
+
+  @override
+  String get takePhotoCardSubtitle => 'ማረጋገጫውን በካሜራዎ ያንሱ';
+
+  @override
+  String get uploadImageCardSubtitle => 'ከማዕከለ-ስዕሎትዎ ስክሪንሾት ይምረጡ';
+
+  @override
+  String verificationsRemaining(int count) {
+    return '$count ማረጋገጫዎች ቀርተውዎታል።';
+  }
+
+  @override
+  String get unlimitedVerifications => 'ያልተገደበ ማረጋገጫ';
+
+  @override
+  String get preparingImage => 'ምስሉ እየተዘጋጀ ነው…';
+
+  @override
+  String uploadingPercent(int percent) {
+    return 'እየተሰቀለ ነው… $percent%';
+  }
+
+  @override
+  String get verifyTakesSeconds => 'ጥቂት ሰከንዶች ይወስዳል…';
+
+  @override
+  String get verifyStillWorking => 'አሁንም እያረጋገጠ ነው…';
+
+  @override
+  String get verifyTooLong => 'ማረጋገጫው ብዙ ጊዜ እየወሰደ ነው። ከአንድ ደቂቃ በኋላ ይመልከቱ።';
+
+  @override
+  String get errorImageTooLarge => 'ምስሉ በጣም ትልቅ ነው። ያነሰ ስክሪንሾት ይሞክሩ።';
+
+  @override
+  String get errorInvalidImageType => 'ልክ ያልሆነ የምስል ቅርጸት። JPEG ወይም PNG ይጠቀሙ።';
+
+  @override
+  String get errorUploadMismatch => 'የሰቀለው ምስል ማረጋገጫ አልተሳካም። በድጋሚ ይሞክሩ።';
+
+  @override
+  String get errorUploadIncomplete => 'ስቀላው አልተጠናቀቀም። ግንኙነትዎን ይመልከቱ።';
+
+  @override
+  String get errorCreditsExhausted => 'ክሬዲትዎ አልቋል። ለመቀጠል ይሙሉ።';
+
+  @override
+  String get errorBankNotDetected =>
+      'በዚህ ደረሰኝ ውስጥ ባንኩን ማወቅ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።';
+
+  @override
+  String get cameraNotAvailable => 'ካሜራ አይገኝም። በምትኩ “ምስል ይስቀሉ” ይጠቀሙ።';
+
+  @override
+  String get cameraAccessNeeded => 'የካሜራ ፍቃድ ያስፈልጋል';
+
+  @override
+  String get cameraAccessBody => 'ደረሰኞችን ለማንሳት በስርዓት ቅንብሮችዎ ውስጥ የካሜራ ፍቃድ ይስጡ።';
+
+  @override
+  String get photoAccessNeeded => 'የፎቶ ፍቃድ ያስፈልጋል';
+
+  @override
+  String get photoAccessBody => 'የደረሰኝ ምስል ለመምረጥ በስርዓት ቅንብሮችዎ ውስጥ የፎቶ ፍቃድ ይስጡ።';
+
+  @override
+  String get openSettings => 'ቅንብሮችን ይክፈቱ';
+
+  @override
+  String get usePhoto => 'ፎቶውን ተጠቀም';
+
+  @override
+  String get retakePhoto => 'እንደገና አንሳ';
+
+  @override
+  String get switchCamera => 'ካሜራ ቀይር';
+
+  @override
+  String get toggleFlash => 'ፍላሽ ቀይር';
+
+  @override
+  String get galleryUnavailable => 'ማዕከለ-ስዕሎትዎን መክፈት አልቻልንም። በድጋሚ ይሞክሩ።';
+
+  @override
+  String get verdictTitle => 'የማረጋገጫ ውጤት';
+
+  @override
+  String get backToVerify => 'ወደ ማረጋገጫ ተመለስ';
+
+  @override
+  String get verdictPlaceholderNote =>
+      'የደረሰኝ ቅድመ-እይታ፣ ማጋራት እና ድጋሚ ሙከራ በክፍል 2 ይመጣሉ።';
+
+  @override
+  String get statusPending => 'በሂደት ላይ';
+
+  @override
+  String get statusVerified => 'ተረጋግጧል';
+
+  @override
+  String get statusFake => 'ሐሰት';
+
+  @override
+  String get statusDuplicate => 'ተደጋጋሚ';
+
+  @override
+  String get statusNeedsReview => 'ግምገማ ይፈልጋል';
+
+  @override
+  String get statusError => 'ስህተት';
+
+  @override
+  String get viewPlans => 'እቅዶችን ይመልከቱ';
 }

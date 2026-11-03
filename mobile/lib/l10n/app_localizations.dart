@@ -1327,6 +1327,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Debug: Design System'**
   String get debugDesignSystem;
+
+  /// Verify screen heading
+  ///
+  /// In en, this message translates to:
+  /// **'Verify a payment'**
+  String get verifyHeading;
+
+  /// No description provided for @verifyHeadingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload or photograph the customer\'s bank confirmation to verify it in seconds.'**
+  String get verifyHeadingSubtitle;
+
+  /// No description provided for @takePhotoCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your camera to capture the receipt'**
+  String get takePhotoCardSubtitle;
+
+  /// No description provided for @uploadImageCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a screenshot from your gallery'**
+  String get uploadImageCardSubtitle;
+
+  /// Credits info card on the verify screen
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} verifications remaining.'**
+  String verificationsRemaining(int count);
+
+  /// No description provided for @unlimitedVerifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited verifications'**
+  String get unlimitedVerifications;
+
+  /// No description provided for @preparingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing image…'**
+  String get preparingImage;
+
+  /// No description provided for @uploadingPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading… {percent}%'**
+  String uploadingPercent(int percent);
+
+  /// No description provided for @verifyTakesSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'This takes a few seconds…'**
+  String get verifyTakesSeconds;
+
+  /// No description provided for @verifyStillWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Still verifying…'**
+  String get verifyStillWorking;
+
+  /// No description provided for @verifyTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification is taking too long. Check back in a minute.'**
+  String get verifyTooLong;
+
+  /// No description provided for @errorImageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image too large. Try a smaller screenshot.'**
+  String get errorImageTooLarge;
+
+  /// No description provided for @errorInvalidImageType.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid image format. Use JPEG or PNG.'**
+  String get errorInvalidImageType;
+
+  /// No description provided for @errorUploadMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload verification failed. Try again.'**
+  String get errorUploadMismatch;
+
+  /// No description provided for @errorUploadIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload didn\'t complete. Check your connection.'**
+  String get errorUploadIncomplete;
+
+  /// No description provided for @errorCreditsExhausted.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re out of credits. Top up to continue.'**
+  String get errorCreditsExhausted;
+
+  /// No description provided for @errorBankNotDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t identify the bank in this receipt. Try a clearer photo.'**
+  String get errorBankNotDetected;
+
+  /// No description provided for @cameraNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera not available. Use Upload image instead.'**
+  String get cameraNotAvailable;
+
+  /// No description provided for @cameraAccessNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access needed'**
+  String get cameraAccessNeeded;
+
+  /// No description provided for @cameraAccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera access in your system settings to photograph receipts.'**
+  String get cameraAccessBody;
+
+  /// No description provided for @photoAccessNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo access needed'**
+  String get photoAccessNeeded;
+
+  /// No description provided for @photoAccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow photo access in your system settings to pick a receipt image.'**
+  String get photoAccessBody;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openSettings;
+
+  /// No description provided for @usePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Use photo'**
+  String get usePhoto;
+
+  /// No description provided for @retakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get retakePhoto;
+
+  /// No description provided for @switchCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch camera'**
+  String get switchCamera;
+
+  /// No description provided for @toggleFlash.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle flash'**
+  String get toggleFlash;
+
+  /// No description provided for @galleryUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open your gallery. Try again.'**
+  String get galleryUnavailable;
+
+  /// No description provided for @verdictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification result'**
+  String get verdictTitle;
+
+  /// No description provided for @backToVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to verify'**
+  String get backToVerify;
+
+  /// No description provided for @verdictPlaceholderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt preview, share, and retry arrive in Part 2.'**
+  String get verdictPlaceholderNote;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get statusPending;
+
+  /// No description provided for @statusVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get statusVerified;
+
+  /// No description provided for @statusFake.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake'**
+  String get statusFake;
+
+  /// No description provided for @statusDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get statusDuplicate;
+
+  /// No description provided for @statusNeedsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs review'**
+  String get statusNeedsReview;
+
+  /// No description provided for @statusError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get statusError;
+
+  /// No description provided for @viewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'View plans'**
+  String get viewPlans;
 }
 
 class _AppLocalizationsDelegate

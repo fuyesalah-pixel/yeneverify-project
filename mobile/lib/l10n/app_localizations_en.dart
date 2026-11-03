@@ -690,4 +690,131 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debugDesignSystem => 'Debug: Design System';
+
+  @override
+  String get verifyHeading => 'Verify a payment';
+
+  @override
+  String get verifyHeadingSubtitle =>
+      'Upload or photograph the customer\'s bank confirmation to verify it in seconds.';
+
+  @override
+  String get takePhotoCardSubtitle => 'Use your camera to capture the receipt';
+
+  @override
+  String get uploadImageCardSubtitle => 'Choose a screenshot from your gallery';
+
+  @override
+  String verificationsRemaining(int count) {
+    return 'You have $count verifications remaining.';
+  }
+
+  @override
+  String get unlimitedVerifications => 'Unlimited verifications';
+
+  @override
+  String get preparingImage => 'Preparing image…';
+
+  @override
+  String uploadingPercent(int percent) {
+    return 'Uploading… $percent%';
+  }
+
+  @override
+  String get verifyTakesSeconds => 'This takes a few seconds…';
+
+  @override
+  String get verifyStillWorking => 'Still verifying…';
+
+  @override
+  String get verifyTooLong =>
+      'Verification is taking too long. Check back in a minute.';
+
+  @override
+  String get errorImageTooLarge => 'Image too large. Try a smaller screenshot.';
+
+  @override
+  String get errorInvalidImageType => 'Invalid image format. Use JPEG or PNG.';
+
+  @override
+  String get errorUploadMismatch => 'Upload verification failed. Try again.';
+
+  @override
+  String get errorUploadIncomplete =>
+      'Upload didn\'t complete. Check your connection.';
+
+  @override
+  String get errorCreditsExhausted =>
+      'You\'re out of credits. Top up to continue.';
+
+  @override
+  String get errorBankNotDetected =>
+      'We couldn\'t identify the bank in this receipt. Try a clearer photo.';
+
+  @override
+  String get cameraNotAvailable =>
+      'Camera not available. Use Upload image instead.';
+
+  @override
+  String get cameraAccessNeeded => 'Camera access needed';
+
+  @override
+  String get cameraAccessBody =>
+      'Allow camera access in your system settings to photograph receipts.';
+
+  @override
+  String get photoAccessNeeded => 'Photo access needed';
+
+  @override
+  String get photoAccessBody =>
+      'Allow photo access in your system settings to pick a receipt image.';
+
+  @override
+  String get openSettings => 'Open settings';
+
+  @override
+  String get usePhoto => 'Use photo';
+
+  @override
+  String get retakePhoto => 'Retake';
+
+  @override
+  String get switchCamera => 'Switch camera';
+
+  @override
+  String get toggleFlash => 'Toggle flash';
+
+  @override
+  String get galleryUnavailable => 'Couldn\'t open your gallery. Try again.';
+
+  @override
+  String get verdictTitle => 'Verification result';
+
+  @override
+  String get backToVerify => 'Back to verify';
+
+  @override
+  String get verdictPlaceholderNote =>
+      'Receipt preview, share, and retry arrive in Part 2.';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get statusVerified => 'Verified';
+
+  @override
+  String get statusFake => 'Fake';
+
+  @override
+  String get statusDuplicate => 'Duplicate';
+
+  @override
+  String get statusNeedsReview => 'Needs review';
+
+  @override
+  String get statusError => 'Error';
+
+  @override
+  String get viewPlans => 'View plans';
 }

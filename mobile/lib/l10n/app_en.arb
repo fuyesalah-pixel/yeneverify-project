@@ -701,5 +701,124 @@
   "@authComingSoon": { "description": "Step 20 placeholder snackbar" },
 
   "debugDesignSystem": "Debug: Design System",
-  "@debugDesignSystem": { "description": "Step 20 debug link to the design-system showcase" }
+  "@debugDesignSystem": { "description": "Step 20 debug link to the design-system showcase" },
+
+  "verifyHeading": "Verify a payment",
+  "@verifyHeading": { "description": "Verify screen heading" },
+
+  "verifyHeadingSubtitle": "Upload or photograph the customer's bank confirmation to verify it in seconds.",
+  "@verifyHeadingSubtitle": {},
+
+  "takePhotoCardSubtitle": "Use your camera to capture the receipt",
+  "@takePhotoCardSubtitle": {},
+
+  "uploadImageCardSubtitle": "Choose a screenshot from your gallery",
+  "@uploadImageCardSubtitle": {},
+
+  "verificationsRemaining": "You have {count} verifications remaining.",
+  "@verificationsRemaining": {
+    "description": "Credits info card on the verify screen",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "unlimitedVerifications": "Unlimited verifications",
+  "@unlimitedVerifications": {},
+
+  "preparingImage": "Preparing image…",
+  "@preparingImage": {},
+
+  "uploadingPercent": "Uploading… {percent}%",
+  "@uploadingPercent": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+
+  "verifyTakesSeconds": "This takes a few seconds…",
+  "@verifyTakesSeconds": {},
+
+  "verifyStillWorking": "Still verifying…",
+  "@verifyStillWorking": {},
+
+  "verifyTooLong": "Verification is taking too long. Check back in a minute.",
+  "@verifyTooLong": {},
+
+  "errorImageTooLarge": "Image too large. Try a smaller screenshot.",
+  "@errorImageTooLarge": {},
+
+  "errorInvalidImageType": "Invalid image format. Use JPEG or PNG.",
+  "@errorInvalidImageType": {},
+
+  "errorUploadMismatch": "Upload verification failed. Try again.",
+  "@errorUploadMismatch": {},
+
+  "errorUploadIncomplete": "Upload didn't complete. Check your connection.",
+  "@errorUploadIncomplete": {},
+
+  "errorCreditsExhausted": "You're out of credits. Top up to continue.",
+  "@errorCreditsExhausted": {},
+
+  "errorBankNotDetected": "We couldn't identify the bank in this receipt. Try a clearer photo.",
+  "@errorBankNotDetected": {},
+
+  "cameraNotAvailable": "Camera not available. Use Upload image instead.",
+  "@cameraNotAvailable": {},
+
+  "cameraAccessNeeded": "Camera access needed",
+  "@cameraAccessNeeded": {},
+
+  "cameraAccessBody": "Allow camera access in your system settings to photograph receipts.",
+  "@cameraAccessBody": {},
+
+  "photoAccessNeeded": "Photo access needed",
+  "@photoAccessNeeded": {},
+
+  "photoAccessBody": "Allow photo access in your system settings to pick a receipt image.",
+  "@photoAccessBody": {},
+
+  "openSettings": "Open settings",
+  "@openSettings": {},
+
+  "usePhoto": "Use photo",
+  "@usePhoto": {},
+
+  "retakePhoto": "Retake",
+  "@retakePhoto": {},
+
+  "switchCamera": "Switch camera",
+  "@switchCamera": {},
+
+  "toggleFlash": "Toggle flash",
+  "@toggleFlash": {},
+
+  "galleryUnavailable": "Couldn't open your gallery. Try again.",
+  "@galleryUnavailable": {},
+
+  "verdictTitle": "Verification result",
+  "@verdictTitle": {},
+
+  "backToVerify": "Back to verify",
+  "@backToVerify": {},
+
+  "verdictPlaceholderNote": "Receipt preview, share, and retry arrive in Part 2.",
+  "@verdictPlaceholderNote": {},
+
+  "statusPending": "Pending",
+  "@statusPending": {},
+
+  "statusVerified": "Verified",
+  "@statusVerified": {},
+
+  "statusFake": "Fake",
+  "@statusFake": {},
+
+  "statusDuplicate": "Duplicate",
+  "@statusDuplicate": {},
+
+  "statusNeedsReview": "Needs review",
+  "@statusNeedsReview": {},
+
+  "statusError": "Error",
+  "@statusError": {},
+
+  "viewPlans": "View plans",
+  "@viewPlans": {}
 }

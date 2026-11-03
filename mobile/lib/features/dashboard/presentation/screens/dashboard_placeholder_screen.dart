@@ -10,6 +10,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/feedback/app_snackbar.dart';
 import '../../../auth/domain/auth_notifier.dart' show authProvider;
 import '../../../auth/presentation/providers/dev_overrides.dart';
@@ -79,6 +80,15 @@ class DashboardPlaceholderScreen extends ConsumerWidget {
                   ),
                 ),
               ],
+              // Step 22B: the verify screen is the app's primary surface but
+              // the bottom nav arrives with the real dashboard (Step 24), so
+              // this placeholder links to it until then.
+              const SizedBox(height: AppSpacing.xxl),
+              AppButton(
+                label: l10n.verifyHeading,
+                icon: Icons.document_scanner_outlined,
+                onPressed: () => context.push(Routes.verify),
+              ),
               if (kDebugMode) ...[
                 const SizedBox(height: AppSpacing.xl),
                 TextButton(

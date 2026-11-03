@@ -12,7 +12,10 @@ import '../../features/design_system/presentation/screens/design_system_showcase
 import '../../features/dashboard/presentation/screens/dashboard_placeholder_screen.dart';
 import '../../features/onboarding/presentation/screens/merchant_setup_success_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_flow_screen.dart';
-import '../../features/verification/presentation/screens/verify_placeholder_screen.dart';
+import '../../features/verify/data/models/verification_result.dart';
+import '../../features/verify/presentation/screens/camera_capture_screen.dart';
+import '../../features/verify/presentation/screens/placeholder_verdict_screen.dart';
+import '../../features/verify/presentation/screens/verify_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import 'auth_redirect.dart';
 
@@ -28,6 +31,8 @@ abstract final class Routes {
   static const String onboarding = '/onboarding';
   static const String onboardingSuccess = '/onboarding/success';
   static const String verify = '/verify';
+  static const String cameraCapture = '/verify/camera';
+  static const String verdict = '/verify/verdict';
   static const String designSystem = '/design-system';
 }
 
@@ -84,7 +89,21 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: Routes.verify,
-      builder: (_, __) => const VerifyPlaceholderScreen(),
+      builder: (_, __) => const VerifyScreen(),
+      routes: [
+        // Pushed on top of /verify (full-screen camera, no tab chrome).
+        GoRoute(
+          path: 'camera',
+          builder: (_, __) => const CameraCaptureScreen(),
+        ),
+        // Terminal verdict. Part 2 replaces the placeholder internals.
+        GoRoute(
+          path: 'verdict',
+          builder: (_, state) => PlaceholderVerdictScreen(
+            result: state.extra as VerificationResult,
+          ),
+        ),
+      ],
     ),
     GoRoute(
       path: Routes.designSystem,

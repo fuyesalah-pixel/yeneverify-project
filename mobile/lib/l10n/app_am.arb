@@ -444,5 +444,87 @@
 
   "authComingSoon": "የምስገት ፍሰት — በStep 21 ይመጣል",
 
-  "debugDesignSystem": "ዴበግ: የንድፍ ስርዓት"
+  "debugDesignSystem": "ዴበግ: የንድፍ ስርዓት",
+
+  "verifyHeading": "ክፍያ ያረጋግጡ",
+
+  "verifyHeadingSubtitle": "የደንበኛውን የባንክ ማረጋገጫ ፎቶ ያንሱ ወይም ይስቀሉ — በሰከንዶች ውስጥ ያረጋግጡ።",
+
+  "takePhotoCardSubtitle": "ማረጋገጫውን በካሜራዎ ያንሱ",
+
+  "uploadImageCardSubtitle": "ከማዕከለ-ስዕሎትዎ ስክሪንሾት ይምረጡ",
+
+  "verificationsRemaining": "{count} ማረጋገጫዎች ቀርተውዎታል።",
+  "@verificationsRemaining": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "unlimitedVerifications": "ያልተገደበ ማረጋገጫ",
+
+  "preparingImage": "ምስሉ እየተዘጋጀ ነው…",
+
+  "uploadingPercent": "እየተሰቀለ ነው… {percent}%",
+  "@uploadingPercent": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+
+  "verifyTakesSeconds": "ጥቂት ሰከንዶች ይወስዳል…",
+
+  "verifyStillWorking": "አሁንም እያረጋገጠ ነው…",
+
+  "verifyTooLong": "ማረጋገጫው ብዙ ጊዜ እየወሰደ ነው። ከአንድ ደቂቃ በኋላ ይመልከቱ።",
+
+  "errorImageTooLarge": "ምስሉ በጣም ትልቅ ነው። ያነሰ ስክሪንሾት ይሞክሩ።",
+
+  "errorInvalidImageType": "ልክ ያልሆነ የምስል ቅርጸት። JPEG ወይም PNG ይጠቀሙ።",
+
+  "errorUploadMismatch": "የሰቀለው ምስል ማረጋገጫ አልተሳካም። በድጋሚ ይሞክሩ።",
+
+  "errorUploadIncomplete": "ስቀላው አልተጠናቀቀም። ግንኙነትዎን ይመልከቱ።",
+
+  "errorCreditsExhausted": "ክሬዲትዎ አልቋል። ለመቀጠል ይሙሉ።",
+
+  "errorBankNotDetected": "በዚህ ደረሰኝ ውስጥ ባንኩን ማወቅ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።",
+
+  "cameraNotAvailable": "ካሜራ አይገኝም። በምትኩ “ምስል ይስቀሉ” ይጠቀሙ።",
+
+  "cameraAccessNeeded": "የካሜራ ፍቃድ ያስፈልጋል",
+
+  "cameraAccessBody": "ደረሰኞችን ለማንሳት በስርዓት ቅንብሮችዎ ውስጥ የካሜራ ፍቃድ ይስጡ።",
+
+  "photoAccessNeeded": "የፎቶ ፍቃድ ያስፈልጋል",
+
+  "photoAccessBody": "የደረሰኝ ምስል ለመምረጥ በስርዓት ቅንብሮችዎ ውስጥ የፎቶ ፍቃድ ይስጡ።",
+
+  "openSettings": "ቅንብሮችን ይክፈቱ",
+
+  "usePhoto": "ፎቶውን ተጠቀም",
+
+  "retakePhoto": "እንደገና አንሳ",
+
+  "switchCamera": "ካሜራ ቀይር",
+
+  "toggleFlash": "ፍላሽ ቀይር",
+
+  "galleryUnavailable": "ማዕከለ-ስዕሎትዎን መክፈት አልቻልንም። በድጋሚ ይሞክሩ።",
+
+  "verdictTitle": "የማረጋገጫ ውጤት",
+
+  "backToVerify": "ወደ ማረጋገጫ ተመለስ",
+
+  "verdictPlaceholderNote": "የደረሰኝ ቅድመ-እይታ፣ ማጋራት እና ድጋሚ ሙከራ በክፍል 2 ይመጣሉ።",
+
+  "statusPending": "በሂደት ላይ",
+
+  "statusVerified": "ተረጋግጧል",
+
+  "statusFake": "ሐሰት",
+
+  "statusDuplicate": "ተደጋጋሚ",
+
+  "statusNeedsReview": "ግምገማ ይፈልጋል",
+
+  "statusError": "ስህተት",
+
+  "viewPlans": "እቅዶችን ይመልከቱ"
 }
