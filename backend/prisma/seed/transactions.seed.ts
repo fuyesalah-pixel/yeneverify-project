@@ -81,7 +81,9 @@ export async function seedTransactions(prisma: PrismaClient): Promise<void> {
   let count = 0;
   for (const t of txns) {
     const r = ref(t.bank, t.refIdx);
-    const paidAt = r ? new Date(r.date) : daysAgo(t.daysBack);
+    // Fixture dates are documentation only; runtime uses now-relative dates so
+    // the dashboard always shows fresh data.
+    const paidAt = daysAgo(t.daysBack);
 
     await prisma.transaction.upsert({
       where:  { verificationId: t.verificationId },
@@ -100,7 +102,7 @@ export async function seedTransactions(prisma: PrismaClient): Promise<void> {
         status:           'VERIFIED',
         productLabel:     t.productLabel,
       },
-      update: { productLabel: t.productLabel },
+      update: { productLabel: t.productLabel, paidAt },
     });
     count++;
   }

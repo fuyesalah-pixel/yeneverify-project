@@ -105,6 +105,8 @@ export async function seedVerifications(prisma: PrismaClient): Promise<void> {
   let count = 0;
   for (const v of verifs) {
     const ref = bankRef(v.bank, v.refIdx ?? 0);
+    // Fixture dates are documentation only; runtime uses now-relative dates so
+    // the dashboard always shows fresh data.
     const paidAt = daysAgo(v.daysBack);
     const completedAt = new Date(paidAt.getTime() + 8000);
 
@@ -122,13 +124,13 @@ export async function seedVerifications(prisma: PrismaClient): Promise<void> {
         amountMinor:        ref ? etbToMinor(ref.amount / 100) : null,
         senderName:         ref?.sender ?? null,
         receiverName:       ref?.receiver ?? null,
-        paidAt:             ref ? new Date(ref.date) : paidAt,
+        paidAt,
         status:             v.status,
         ocrRawText:         ref ? fakeOcrText({
           bank: v.bank, reference: ref.reference,
           amountEtb: ref.amount / 100,
           sender: ref.sender, receiver: ref.receiver,
-          date: ref.date,
+          date: paidAt.toISOString(),
         }) : null,
         ocrConfidence:      v.status === 'ERROR' ? null : 0.96,
         adapterMetadata:    { bank: v.bank, seedFixture: true },
@@ -140,7 +142,13 @@ export async function seedVerifications(prisma: PrismaClient): Promise<void> {
         completedAt:        completedAt,
         createdAt:          paidAt,
       },
-      update: { status: v.status },
+      update: {
+        status: v.status,
+        paidAt,
+        startedAt: paidAt,
+        completedAt,
+        createdAt: paidAt,
+      },
     });
     count++;
   }

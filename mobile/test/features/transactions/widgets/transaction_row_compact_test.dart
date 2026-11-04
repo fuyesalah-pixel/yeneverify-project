@@ -15,6 +15,21 @@ void main() {
     createdAt: DateTime.now().subtract(const Duration(hours: 2)),
   );
 
+  VerificationSummary row({
+    String? senderName,
+    String? bankReference,
+    String? bankCode,
+  }) =>
+      VerificationSummary(
+        id: 'v1',
+        status: VerificationStatus.verified,
+        bankCode: bankCode,
+        bankReference: bankReference,
+        senderName: senderName,
+        amountMinor: '550000',
+        createdAt: DateTime.now(),
+      );
+
   testWidgets('shows bank, reference, amount, verdict and time', (tester) async {
     await tester.pumpWidget(
       dashboardTestApp(TransactionRowCompact(item: item, onTap: () {})),
@@ -25,6 +40,52 @@ void main() {
     expect(find.text('5,500.00 ETB'), findsOneWidget);
     expect(find.text('FAKE'), findsOneWidget);
     expect(find.text('2h ago'), findsOneWidget);
+  });
+
+  testWidgets('prefers senderName over the bank reference', (tester) async {
+    await tester.pumpWidget(
+      dashboardTestApp(
+        TransactionRowCompact(
+          item: row(
+            senderName: 'Abebe Kebede',
+            bankReference: 'FT23170ABC',
+            bankCode: 'CBE',
+          ),
+          onTap: () {},
+        ),
+      ),
+    );
+
+    expect(find.text('Abebe Kebede'), findsOneWidget);
+    expect(find.text('FT23170ABC'), findsNothing);
+    expect(find.text('5,500.00 ETB'), findsOneWidget);
+  });
+
+  testWidgets('falls back to bankReference when senderName is null', (tester) async {
+    await tester.pumpWidget(
+      dashboardTestApp(
+        TransactionRowCompact(
+          item: row(bankReference: 'FT23170ABC', bankCode: 'CBE'),
+          onTap: () {},
+        ),
+      ),
+    );
+
+    expect(find.text('FT23170ABC'), findsOneWidget);
+    expect(find.text('Abebe Kebede'), findsNothing);
+  });
+
+  testWidgets('falls back to bankCode when senderName and bankReference are null',
+      (tester) async {
+    await tester.pumpWidget(
+      dashboardTestApp(
+        TransactionRowCompact(item: row(bankCode: 'CBE'), onTap: () {}),
+      ),
+    );
+
+    // Row 1 always shows the bank; row 2 falls back to the same code.
+    expect(find.text('CBE'), findsNWidgets(2));
+    expect(find.text('5,500.00 ETB'), findsOneWidget);
   });
 
   testWidgets('tapping the row opens it', (tester) async {

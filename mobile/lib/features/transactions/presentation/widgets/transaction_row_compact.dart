@@ -27,6 +27,11 @@ class TransactionRowCompact extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final colors = context.colors;
     final amount = item.amountMinorValue;
+    // Who paid is the row's primary label; the bank reference and the bank
+    // code are fallbacks for receipts where the sender was not extracted.
+    final hasSender = item.senderName != null;
+    final primaryLabel =
+        item.senderName ?? item.bankReference ?? item.bankCode ?? '—';
 
     return InkWell(
       onTap: onTap,
@@ -61,12 +66,13 @@ class TransactionRowCompact extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    item.bankReference ?? '—',
+                    primaryLabel,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.bodySmall.copyWith(
-                      color: colors.textSecondary,
-                      fontFamily: AppTypography.mono.fontFamily,
+                      color: hasSender ? colors.textPrimary : colors.textSecondary,
+                      // References are monospaced; a person's name is not.
+                      fontFamily: hasSender ? null : AppTypography.mono.fontFamily,
                     ),
                   ),
                 ),

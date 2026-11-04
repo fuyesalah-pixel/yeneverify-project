@@ -58,6 +58,8 @@ export type VerificationSummaryRow = {
   status: string;
   bankCode: string | null;
   bankReference: string | null;
+  senderName: string | null;
+  receiverName: string | null;
   amountMinor: bigint | null;
   createdAt: Date;
   completedAt: Date | null;
@@ -311,6 +313,8 @@ export class VerificationsRepository {
           status: true,
           bankCode: true,
           bankReference: true,
+          senderName: true,
+          receiverName: true,
           amountMinor: true,
           createdAt: true,
           completedAt: true,

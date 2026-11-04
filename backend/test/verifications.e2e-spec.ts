@@ -342,6 +342,10 @@ describe('Verifications (e2e, local driver + real queue)', () => {
     expect(subList.body.meta.total).toBe(1);
     expect(subList.body.data[0].id).toBe(submit.body.verificationId);
     expect((subList.body.data[0] as Record<string, unknown>).verifiedByUserId).toBeUndefined();
+    // The list is a payment history: sender/receiver labels are always present
+    // (null when the bank paid out without a readable sender).
+    expect(subList.body.data[0]).toHaveProperty('senderName');
+    expect(subList.body.data[0]).toHaveProperty('receiverName');
 
     const merchantList = await request(app.getHttpServer())
       .get('/api/v1/verifications')
@@ -358,7 +362,12 @@ describe('Verifications (e2e, local driver + real queue)', () => {
     const receiptId = await uploadReceipt(merchantAuth(), 'fake-claim.jpg');
     await prisma.verification.upsert({
       where: { id: fakeVerificationId },
-      update: { status: 'FAKE', errorCode: null },
+      update: {
+        status: 'FAKE',
+        errorCode: null,
+        senderName: 'Abebe Kebede',
+        receiverName: 'Selam Coffee',
+      },
       create: {
         id: fakeVerificationId,
         merchantId,
@@ -369,6 +378,8 @@ describe('Verifications (e2e, local driver + real queue)', () => {
         bankCode: 'CBE',
         bankReference: 'FT26E2EFAKE000000',
         referenceNormalized: 'FT26E2EFAKE000000',
+        senderName: 'Abebe Kebede',
+        receiverName: 'Selam Coffee',
       },
     });
 
@@ -465,6 +476,19 @@ describe('Verifications (e2e, local driver + real queue)', () => {
       .send({ reason: 'double flag' });
     expect([200, 409].includes(fakeRes.status)).toBe(true); // fake row may already be NEEDS_REVIEW
   }, 40_000);
+
+  it('list rows carry senderName and receiverName for payment-history labels', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/v1/verifications')
+      .query({ search: 'FT26E2EFAKE000000' })
+      .set(merchantAuth())
+      .expect(200);
+
+    expect(res.body.data.length).toBeGreaterThanOrEqual(1);
+    const row = res.body.data[0] as Record<string, unknown>;
+    expect(row.senderName).toBe('Abebe Kebede');
+    expect(row.receiverName).toBe('Selam Coffee');
+  });
 
   it('unknown id 404s with a clean envelope and DTO validation rejects bad bodies', async () => {
     await request(app.getHttpServer())

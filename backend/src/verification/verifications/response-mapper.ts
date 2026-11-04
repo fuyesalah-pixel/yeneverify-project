@@ -60,6 +60,8 @@ function mapSummary(row: VerificationSummaryRow): VerificationSummaryDto {
     status: row.status as VerificationSummaryDto['status'],
     bankCode: (row.bankCode as VerificationSummaryDto['bankCode']) ?? null,
     bankReference: row.bankReference,
+    senderName: row.senderName,
+    receiverName: row.receiverName,
     amountMinor: row.amountMinor !== null ? row.amountMinor.toString() : null,
     createdAt: row.createdAt.toISOString(),
     completedAt: isoOrNull(row.completedAt),

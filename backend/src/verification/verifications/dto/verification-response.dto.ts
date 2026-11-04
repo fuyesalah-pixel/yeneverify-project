@@ -71,6 +71,9 @@ export interface VerificationSummaryDto {
   status: VerificationDetailDto['status'];
   bankCode: BankCodeLiteral | null;
   bankReference: string | null;
+  /** Who paid — the merchant-facing label for a list row. */
+  senderName: string | null;
+  receiverName: string | null;
   amountMinor: string | null;
   createdAt: string;
   completedAt: string | null;

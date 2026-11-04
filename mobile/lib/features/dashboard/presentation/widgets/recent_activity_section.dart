@@ -83,7 +83,11 @@ class _RecentRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.bankCode ?? '—',
+                    // Who paid reads as payment history; the bank code is
+                    // only the fallback when the receipt had no sender.
+                    item.senderName ?? item.bankCode ?? '—',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTypography.bodyMedium.copyWith(
                       color: colors.textPrimary,
                     ),

@@ -11,6 +11,8 @@ class VerificationSummary {
     required this.status,
     this.bankCode,
     this.bankReference,
+    this.senderName,
+    this.receiverName,
     this.amountMinor,
     this.createdAt,
     this.completedAt,
@@ -20,6 +22,8 @@ class VerificationSummary {
   final VerificationStatus status;
   final String? bankCode;
   final String? bankReference;
+  final String? senderName;
+  final String? receiverName;
   final String? amountMinor;
   final DateTime? createdAt;
   final DateTime? completedAt;
@@ -34,6 +38,8 @@ class VerificationSummary {
       status: VerificationStatus.fromWire(json['status'] as String?),
       bankCode: json['bankCode'] as String?,
       bankReference: json['bankReference'] as String?,
+      senderName: json['senderName'] as String?,
+      receiverName: json['receiverName'] as String?,
       amountMinor: json['amountMinor']?.toString(),
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
       completedAt: DateTime.tryParse(json['completedAt'] as String? ?? ''),
