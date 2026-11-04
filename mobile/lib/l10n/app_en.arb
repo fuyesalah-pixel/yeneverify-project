@@ -977,5 +977,344 @@
   "transactionsLoadMoreError": "Couldn't load more. Tap to retry.",
   "transactionsNoMore": "No more results",
   "transactionsRangeYear": "This year",
-  "transactionsRangeAll": "All time"
+  "transactionsRangeAll": "All time",
+
+  "teamActiveSection": "Active team members",
+
+  "@teamActiveSection": {},
+
+  "teamPendingSection": "Pending invites",
+
+  "@teamPendingSection": {},
+
+  "teamInviteHeading": "Invite someone to verify payments",
+
+  "@teamInviteHeading": {},
+
+  "teamInviteSubtitle": "They'll receive an SMS with a link to accept.",
+
+  "@teamInviteSubtitle": {},
+
+  "teamPhoneLabel": "Phone number",
+
+  "@teamPhoneLabel": {},
+
+  "teamPhoneHint": "+2519XXXXXXXX",
+
+  "@teamPhoneHint": {},
+
+  "teamNameLabel": "Name (optional) — what's their name?",
+
+  "@teamNameLabel": {},
+
+  "teamBranchLabel": "Branch label (optional)",
+
+  "@teamBranchLabel": {},
+
+  "teamBranchHint": "e.g., Bole Branch, Main Counter",
+
+  "@teamBranchHint": {},
+
+  "teamSendInvite": "Send invite",
+
+  "@teamSendInvite": {},
+
+  "teamPhoneInvalid": "Enter a valid Ethiopian phone number",
+
+  "@teamPhoneInvalid": {},
+
+  "teamInviteTitle": "Invite team member",
+
+  "@teamInviteTitle": {},
+
+  "teamInviteSuccessTitle": "Invite sent",
+
+  "@teamInviteSuccessTitle": {},
+
+  "teamShareInviteLink": "Share invite link",
+
+  "@teamShareInviteLink": {},
+
+  "teamInviteAcceptHint": "They'll appear in your team list once they accept.",
+
+  "@teamInviteAcceptHint": {},
+
+  "teamDone": "Done",
+
+  "@teamDone": {},
+
+  "teamUpgrade": "Upgrade",
+
+  "@teamUpgrade": {},
+
+  "teamUpgradeBody": "You've used every team seat on your current plan. Upgrade to add more people.",
+
+  "@teamUpgradeBody": {},
+
+  "teamCapFree": "FREE plan allows 1 team member. Upgrade to add more.",
+
+  "@teamCapFree": {},
+
+  "teamCapPremium": "PREMIUM plan allows 1 team member. Upgrade to add more.",
+
+  "@teamCapPremium": {},
+
+  "teamCapBusiness": "BUSINESS plan allows 10 team members. Upgrade to add more.",
+
+  "@teamCapBusiness": {},
+
+  "teamCapGeneric": "Your plan's team limit is reached. Upgrade to add more.",
+
+  "@teamCapGeneric": {},
+
+  "teamStatusActive": "Active",
+
+  "@teamStatusActive": {},
+
+  "teamStatusInvited": "Invited",
+
+  "@teamStatusInvited": {},
+
+  "teamStatusSuspended": "Suspended",
+
+  "@teamStatusSuspended": {},
+
+  "teamStatusRemoved": "Removed",
+
+  "@teamStatusRemoved": {},
+
+  "teamResend": "Resend",
+
+  "@teamResend": {},
+
+  "teamRevoke": "Revoke",
+
+  "@teamRevoke": {},
+
+  "teamRevokeConfirmTitle": "Revoke this invite?",
+
+  "@teamRevokeConfirmTitle": {},
+
+  "teamRevokeConfirmBody": "They won't be able to join with the current invite link.",
+
+  "@teamRevokeConfirmBody": {},
+
+  "teamResendSuccess": "Invite resent",
+
+  "@teamResendSuccess": {},
+
+  "teamResendFailed": "Couldn't resend the invite. Try again.",
+
+  "@teamResendFailed": {},
+
+  "teamRemove": "Remove from team",
+
+  "@teamRemove": {},
+
+  "teamRemoveConfirmBody": "They won't be able to verify payments anymore. Their past verifications will remain in your history.",
+
+  "@teamRemoveConfirmBody": {},
+
+  "teamRemoveSuccess": "Team member removed",
+
+  "@teamRemoveSuccess": {},
+
+  "teamRemoveFailed": "Couldn't remove this team member. Try again.",
+
+  "@teamRemoveFailed": {},
+
+  "teamAlreadyMember": "This phone is already on your team",
+
+  "@teamAlreadyMember": {},
+
+  "teamDetailTitle": "Team member",
+
+  "@teamDetailTitle": {},
+
+  "teamNotJoined": "Invite pending — they have not joined yet",
+
+  "@teamNotJoined": {},
+
+  "teamJoinedLabel": "Joined",
+
+  "@teamJoinedLabel": {},
+
+  "teamLastActiveLabel": "Last active",
+
+  "@teamLastActiveLabel": {},
+
+  "teamChangeBranch": "Change branch label",
+
+  "@teamChangeBranch": {},
+
+  "teamBranchSaved": "Branch label updated",
+
+  "@teamBranchSaved": {},
+
+  "teamSave": "Save",
+
+  "@teamSave": {},
+
+  "teamCancel": "Cancel",
+
+  "@teamCancel": {},
+
+  "teamNoBranch": "No branch label",
+
+  "@teamNoBranch": {},
+
+  "teamUnknown": "Team member",
+
+  "@teamUnknown": {},
+
+  "profileAccountSection": "Account",
+
+  "@profileAccountSection": {},
+
+  "profileEditBusiness": "Edit business info",
+
+  "@profileEditBusiness": {},
+
+  "profileChangePin": "Change PIN",
+
+  "@profileChangePin": {},
+
+  "profileTeamSection": "Team",
+
+  "@profileTeamSection": {},
+
+  "profileManageTeam": "Manage team",
+
+  "@profileManageTeam": {},
+
+  "profileSubscriptionSection": "Subscription",
+
+  "@profileSubscriptionSection": {},
+
+  "profilePreferencesSection": "Preferences",
+
+  "@profilePreferencesSection": {},
+
+  "profileTheme": "Theme",
+
+  "@profileTheme": {},
+
+  "profileThemeSystem": "System",
+
+  "@profileThemeSystem": {},
+
+  "profileThemeLight": "Light",
+
+  "@profileThemeLight": {},
+
+  "profileThemeDark": "Dark",
+
+  "@profileThemeDark": {},
+
+  "profileNotifications": "Notifications",
+
+  "@profileNotifications": {},
+
+  "profileSupportSection": "Support",
+
+  "@profileSupportSection": {},
+
+  "profileHelpCenter": "Help center",
+
+  "@profileHelpCenter": {},
+
+  "profileContactSupport": "Contact support",
+
+  "@profileContactSupport": {},
+
+  "profileSignOut": "Sign out",
+
+  "@profileSignOut": {},
+
+  "profileSignOutConfirmTitle": "Sign out of Yene Verify?",
+
+  "@profileSignOutConfirmTitle": {},
+
+  "profileSignOutConfirmBody": "You'll need to sign in again with your phone and PIN.",
+
+  "@profileSignOutConfirmBody": {},
+
+  "profileComingSoon": "Coming soon",
+
+  "@profileComingSoon": {},
+
+  "teamInvitedAgo": "Invited {time}",
+
+  "@teamInvitedAgo": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+
+  "teamInviteSent": "Invite sent to {phone}",
+
+  "@teamInviteSent": {
+    "placeholders": {
+      "phone": { "type": "String" }
+    }
+  },
+
+  "teamSeatsRemaining": "{remaining} of {limit} team seats remaining",
+
+  "@teamSeatsRemaining": {
+    "placeholders": {
+      "remaining": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+
+  "teamActivity": "{count} verifications last 30 days",
+
+  "@teamActivity": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "teamRemoveConfirmTitle": "Remove {name}?",
+
+  "@teamRemoveConfirmTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "profileTeamCount": "{members} members · {pending} pending",
+
+  "@profileTeamCount": {
+    "placeholders": {
+      "members": { "type": "int" },
+      "pending": { "type": "int" }
+    }
+  },
+
+  "profilePlanRenews": "{plan} · renews in {days} days",
+
+  "@profilePlanRenews": {
+    "placeholders": {
+      "plan": { "type": "String" },
+      "days": { "type": "int" }
+    }
+  },
+
+  "profilePlanNoRenewal": "{plan}",
+
+  "@profilePlanNoRenewal": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+
+  "profileBusiness": "Business: {name}",
+
+  "@profileBusiness": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  }
 }

@@ -12,7 +12,11 @@ import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/design_system/presentation/screens/design_system_showcase_screen.dart';
 import '../../features/onboarding/presentation/screens/merchant_setup_success_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_flow_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/shell/presentation/screens/shell_placeholder_screen.dart';
+import '../../features/sub_merchants/presentation/screens/invite_sub_merchant_screen.dart';
+import '../../features/sub_merchants/presentation/screens/sub_merchant_detail_screen.dart';
+import '../../features/sub_merchants/presentation/screens/sub_merchants_screen.dart';
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../../features/shell/shell_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
@@ -43,6 +47,11 @@ abstract final class Routes {
       '$transactionDetail/$verificationId';
   static const String insights = '/insights';
   static const String profile = '/profile';
+
+  /// Step 24 — team management, nested under the Profile tab.
+  static const String subMerchants = '/profile/sub-merchants';
+  static const String subMerchantInvite = '/profile/sub-merchants/invite';
+  static String subMerchantFor(String id) => '$subMerchants/$id';
 
   /// Route to one verdict. The screen refetches by id, so nothing but the
   /// id travels through navigation.
@@ -151,8 +160,26 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: Routes.profile,
-              builder: (_, __) =>
-                  const ShellPlaceholderScreen(section: ShellSection.profile),
+              builder: (_, __) => const ProfileScreen(),
+              routes: [
+                GoRoute(
+                  path: 'sub-merchants',
+                  builder: (_, __) => const SubMerchantsScreen(),
+                  routes: [
+                    // Literal before ':id' so /invite never parses as an id.
+                    GoRoute(
+                      path: 'invite',
+                      builder: (_, __) => const InviteSubMerchantScreen(),
+                    ),
+                    GoRoute(
+                      path: ':id',
+                      builder: (_, state) => SubMerchantDetailScreen(
+                        subMerchantId: state.pathParameters['id'] ?? '',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),

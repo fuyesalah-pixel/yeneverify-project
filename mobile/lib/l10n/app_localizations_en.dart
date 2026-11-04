@@ -1166,4 +1166,258 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsRangeAll => 'All time';
+
+  @override
+  String get teamActiveSection => 'Active team members';
+
+  @override
+  String get teamPendingSection => 'Pending invites';
+
+  @override
+  String get teamInviteHeading => 'Invite someone to verify payments';
+
+  @override
+  String get teamInviteSubtitle =>
+      'They\'ll receive an SMS with a link to accept.';
+
+  @override
+  String get teamPhoneLabel => 'Phone number';
+
+  @override
+  String get teamPhoneHint => '+2519XXXXXXXX';
+
+  @override
+  String get teamNameLabel => 'Name (optional) — what\'s their name?';
+
+  @override
+  String get teamBranchLabel => 'Branch label (optional)';
+
+  @override
+  String get teamBranchHint => 'e.g., Bole Branch, Main Counter';
+
+  @override
+  String get teamSendInvite => 'Send invite';
+
+  @override
+  String get teamPhoneInvalid => 'Enter a valid Ethiopian phone number';
+
+  @override
+  String get teamInviteTitle => 'Invite team member';
+
+  @override
+  String get teamInviteSuccessTitle => 'Invite sent';
+
+  @override
+  String get teamShareInviteLink => 'Share invite link';
+
+  @override
+  String get teamInviteAcceptHint =>
+      'They\'ll appear in your team list once they accept.';
+
+  @override
+  String get teamDone => 'Done';
+
+  @override
+  String get teamUpgrade => 'Upgrade';
+
+  @override
+  String get teamUpgradeBody =>
+      'You\'ve used every team seat on your current plan. Upgrade to add more people.';
+
+  @override
+  String get teamCapFree =>
+      'FREE plan allows 1 team member. Upgrade to add more.';
+
+  @override
+  String get teamCapPremium =>
+      'PREMIUM plan allows 1 team member. Upgrade to add more.';
+
+  @override
+  String get teamCapBusiness =>
+      'BUSINESS plan allows 10 team members. Upgrade to add more.';
+
+  @override
+  String get teamCapGeneric =>
+      'Your plan\'s team limit is reached. Upgrade to add more.';
+
+  @override
+  String get teamStatusActive => 'Active';
+
+  @override
+  String get teamStatusInvited => 'Invited';
+
+  @override
+  String get teamStatusSuspended => 'Suspended';
+
+  @override
+  String get teamStatusRemoved => 'Removed';
+
+  @override
+  String get teamResend => 'Resend';
+
+  @override
+  String get teamRevoke => 'Revoke';
+
+  @override
+  String get teamRevokeConfirmTitle => 'Revoke this invite?';
+
+  @override
+  String get teamRevokeConfirmBody =>
+      'They won\'t be able to join with the current invite link.';
+
+  @override
+  String get teamResendSuccess => 'Invite resent';
+
+  @override
+  String get teamResendFailed => 'Couldn\'t resend the invite. Try again.';
+
+  @override
+  String get teamRemove => 'Remove from team';
+
+  @override
+  String get teamRemoveConfirmBody =>
+      'They won\'t be able to verify payments anymore. Their past verifications will remain in your history.';
+
+  @override
+  String get teamRemoveSuccess => 'Team member removed';
+
+  @override
+  String get teamRemoveFailed =>
+      'Couldn\'t remove this team member. Try again.';
+
+  @override
+  String get teamAlreadyMember => 'This phone is already on your team';
+
+  @override
+  String get teamDetailTitle => 'Team member';
+
+  @override
+  String get teamNotJoined => 'Invite pending — they have not joined yet';
+
+  @override
+  String get teamJoinedLabel => 'Joined';
+
+  @override
+  String get teamLastActiveLabel => 'Last active';
+
+  @override
+  String get teamChangeBranch => 'Change branch label';
+
+  @override
+  String get teamBranchSaved => 'Branch label updated';
+
+  @override
+  String get teamSave => 'Save';
+
+  @override
+  String get teamCancel => 'Cancel';
+
+  @override
+  String get teamNoBranch => 'No branch label';
+
+  @override
+  String get teamUnknown => 'Team member';
+
+  @override
+  String get profileAccountSection => 'Account';
+
+  @override
+  String get profileEditBusiness => 'Edit business info';
+
+  @override
+  String get profileChangePin => 'Change PIN';
+
+  @override
+  String get profileTeamSection => 'Team';
+
+  @override
+  String get profileManageTeam => 'Manage team';
+
+  @override
+  String get profileSubscriptionSection => 'Subscription';
+
+  @override
+  String get profilePreferencesSection => 'Preferences';
+
+  @override
+  String get profileTheme => 'Theme';
+
+  @override
+  String get profileThemeSystem => 'System';
+
+  @override
+  String get profileThemeLight => 'Light';
+
+  @override
+  String get profileThemeDark => 'Dark';
+
+  @override
+  String get profileNotifications => 'Notifications';
+
+  @override
+  String get profileSupportSection => 'Support';
+
+  @override
+  String get profileHelpCenter => 'Help center';
+
+  @override
+  String get profileContactSupport => 'Contact support';
+
+  @override
+  String get profileSignOut => 'Sign out';
+
+  @override
+  String get profileSignOutConfirmTitle => 'Sign out of Yene Verify?';
+
+  @override
+  String get profileSignOutConfirmBody =>
+      'You\'ll need to sign in again with your phone and PIN.';
+
+  @override
+  String get profileComingSoon => 'Coming soon';
+
+  @override
+  String teamInvitedAgo(String time) {
+    return 'Invited $time';
+  }
+
+  @override
+  String teamInviteSent(String phone) {
+    return 'Invite sent to $phone';
+  }
+
+  @override
+  String teamSeatsRemaining(int remaining, int limit) {
+    return '$remaining of $limit team seats remaining';
+  }
+
+  @override
+  String teamActivity(int count) {
+    return '$count verifications last 30 days';
+  }
+
+  @override
+  String teamRemoveConfirmTitle(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String profileTeamCount(int members, int pending) {
+    return '$members members · $pending pending';
+  }
+
+  @override
+  String profilePlanRenews(String plan, int days) {
+    return '$plan · renews in $days days';
+  }
+
+  @override
+  String profilePlanNoRenewal(String plan) {
+    return '$plan';
+  }
+
+  @override
+  String profileBusiness(String name) {
+    return 'Business: $name';
+  }
 }

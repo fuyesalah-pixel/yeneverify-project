@@ -1131,4 +1131,251 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get transactionsRangeAll => 'ሁሉም ጊዜ';
+
+  @override
+  String get teamActiveSection => 'ንቁ የቡድን አባላት';
+
+  @override
+  String get teamPendingSection => 'በመጠባበቅ ላይ ያሉ ግብዣዎች';
+
+  @override
+  String get teamInviteHeading => 'ክፍያዎችን እንዲያረጋግጥ አንድ ሰው ይጋብዙ';
+
+  @override
+  String get teamInviteSubtitle => 'ለመቀበል አገናኝ ያለው SMS ይደርሳቸዋል።';
+
+  @override
+  String get teamPhoneLabel => 'የስልክ ቁጥር';
+
+  @override
+  String get teamPhoneHint => '+2519XXXXXXXX';
+
+  @override
+  String get teamNameLabel => 'ስም (አማራጭ) — ስማቸው ማን ነው?';
+
+  @override
+  String get teamBranchLabel => 'የቅርንጫፍ መግለጫ (አማራጭ)';
+
+  @override
+  String get teamBranchHint => 'ለምሳሌ፣ ቦሌ ቅርንጫፍ፣ ዋና ቆጣሪ';
+
+  @override
+  String get teamSendInvite => 'ግብዣ ላክ';
+
+  @override
+  String get teamPhoneInvalid => 'ትክክለኛ የኢትዮጵያ ስልክ ቁጥር ያስገቡ';
+
+  @override
+  String get teamInviteTitle => 'የቡድን አባል ይጋብዙ';
+
+  @override
+  String get teamInviteSuccessTitle => 'ግብዣ ተልኳል';
+
+  @override
+  String get teamShareInviteLink => 'የግብዣ አገናኝ አጋራ';
+
+  @override
+  String get teamInviteAcceptHint => 'ከተቀበሉ በኋላ በቡድን ዝርዝርዎ ውስጥ ይታያሉ።';
+
+  @override
+  String get teamDone => 'ተከናውኗል';
+
+  @override
+  String get teamUpgrade => 'አሻሽል';
+
+  @override
+  String get teamUpgradeBody =>
+      'በአሁኑ እቅድዎ ሁሉንም የቡድን ቦታዎች ተጠቅመዋል። ተጨማሪ ሰዎችን ለማከል ያሻሽሉ።';
+
+  @override
+  String get teamCapFree => 'የFREE እቅድ 1 የቡድን አባል ብቻ ይፈቅዳል። ተጨማሪ ለማከል ያሻሽሉ።';
+
+  @override
+  String get teamCapPremium =>
+      'የPREMIUM እቅድ 1 የቡድን አባል ብቻ ይፈቅዳል። ተጨማሪ ለማከል ያሻሽሉ።';
+
+  @override
+  String get teamCapBusiness =>
+      'የBUSINESS እቅድ 10 የቡድን አባላት ይፈቅዳል። ተጨማሪ ለማከል ያሻሽሉ።';
+
+  @override
+  String get teamCapGeneric => 'የእቅድዎ የቡድን ገደብ ደርሷል። ተጨማሪ ለማከል ያሻሽሉ።';
+
+  @override
+  String get teamStatusActive => 'ንቁ';
+
+  @override
+  String get teamStatusInvited => 'ተጋብዟል';
+
+  @override
+  String get teamStatusSuspended => 'ታግዷል';
+
+  @override
+  String get teamStatusRemoved => 'ተወግዷል';
+
+  @override
+  String get teamResend => 'እንደገና ላክ';
+
+  @override
+  String get teamRevoke => 'ሰርዝ';
+
+  @override
+  String get teamRevokeConfirmTitle => 'ይህን ግብዣ ይሰረዝ?';
+
+  @override
+  String get teamRevokeConfirmBody => 'በአሁኑ የግብዣ አገናኝ መቀላቀል አይችሉም።';
+
+  @override
+  String get teamResendSuccess => 'ግብዣ እንደገና ተልኳል';
+
+  @override
+  String get teamResendFailed => 'ግብዣውን እንደገና መላክ አልተቻለም። እንደገና ይሞክሩ።';
+
+  @override
+  String get teamRemove => 'ከቡድን አስወግድ';
+
+  @override
+  String get teamRemoveConfirmBody =>
+      'ከእንደዚህ በኋላ ክፍያዎችን ማረጋገጥ አይችሉም። ያለፉ ማረጋገጫዎቻቸው በታሪክዎ ውስጥ ይቆያሉ።';
+
+  @override
+  String get teamRemoveSuccess => 'የቡድን አባል ተወግዷል';
+
+  @override
+  String get teamRemoveFailed => 'ይህን የቡድን አባል ማስወገድ አልተቻለም። እንደገና ይሞክሩ።';
+
+  @override
+  String get teamAlreadyMember => 'ይህ ስልክ አስቀድሞ በቡድንዎ ውስጥ ነው';
+
+  @override
+  String get teamDetailTitle => 'የቡድን አባል';
+
+  @override
+  String get teamNotJoined => 'ግብዣ በመጠባበቅ ላይ — አልተቀላቀሉም';
+
+  @override
+  String get teamJoinedLabel => 'የተቀላቀሉበት';
+
+  @override
+  String get teamLastActiveLabel => 'መጨረሻ ንቁ';
+
+  @override
+  String get teamChangeBranch => 'የቅርንጫፍ መግለጫ ቀይር';
+
+  @override
+  String get teamBranchSaved => 'የቅርንጫፍ መግለጫ ተሻሽሏል';
+
+  @override
+  String get teamSave => 'አስቀምጥ';
+
+  @override
+  String get teamCancel => 'ተወው';
+
+  @override
+  String get teamNoBranch => 'የቅርንጫፍ መግለጫ የለም';
+
+  @override
+  String get teamUnknown => 'የቡድን አባል';
+
+  @override
+  String get profileAccountSection => 'መለያ';
+
+  @override
+  String get profileEditBusiness => 'የንግድ መረጃ አስተካክል';
+
+  @override
+  String get profileChangePin => 'PIN ቀይር';
+
+  @override
+  String get profileTeamSection => 'ቡድን';
+
+  @override
+  String get profileManageTeam => 'ቡድን አስተዳድር';
+
+  @override
+  String get profileSubscriptionSection => 'ደንበኝነት';
+
+  @override
+  String get profilePreferencesSection => 'ምርጫዎች';
+
+  @override
+  String get profileTheme => 'ገጽታ';
+
+  @override
+  String get profileThemeSystem => 'የስርዓቱ';
+
+  @override
+  String get profileThemeLight => 'ብሩህ';
+
+  @override
+  String get profileThemeDark => 'ጨለማ';
+
+  @override
+  String get profileNotifications => 'ማሳወቂያዎች';
+
+  @override
+  String get profileSupportSection => 'ድጋፍ';
+
+  @override
+  String get profileHelpCenter => 'የእርዳታ ማዕከል';
+
+  @override
+  String get profileContactSupport => 'ድጋፍን ያግኙ';
+
+  @override
+  String get profileSignOut => 'ውጣ';
+
+  @override
+  String get profileSignOutConfirmTitle => 'ከYene Verify ይውጡ?';
+
+  @override
+  String get profileSignOutConfirmBody => 'በስልክዎ እና PIN እንደገና መግባት ይኖርብዎታል።';
+
+  @override
+  String get profileComingSoon => 'በቅርቡ';
+
+  @override
+  String teamInvitedAgo(String time) {
+    return 'የተጋበዙት $time';
+  }
+
+  @override
+  String teamInviteSent(String phone) {
+    return 'ግብዣ ወደ $phone ተልኳል';
+  }
+
+  @override
+  String teamSeatsRemaining(int remaining, int limit) {
+    return 'ከ$limit የቡድን ቦታዎች $remaining ቀርተዋል';
+  }
+
+  @override
+  String teamActivity(int count) {
+    return 'ባለፉት 30 ቀናት $count ማረጋገጫዎች';
+  }
+
+  @override
+  String teamRemoveConfirmTitle(String name) {
+    return '$nameን ያስወግዱ?';
+  }
+
+  @override
+  String profileTeamCount(int members, int pending) {
+    return '$members አባላት · $pending በመጠባበቅ';
+  }
+
+  @override
+  String profilePlanRenews(String plan, int days) {
+    return '$plan · በ$days ቀናት ይታደሳል';
+  }
+
+  @override
+  String profilePlanNoRenewal(String plan) {
+    return '$plan';
+  }
+
+  @override
+  String profileBusiness(String name) {
+    return 'ንግድ: $name';
+  }
 }

@@ -2185,6 +2185,456 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All time'**
   String get transactionsRangeAll;
+
+  /// No description provided for @teamActiveSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Active team members'**
+  String get teamActiveSection;
+
+  /// No description provided for @teamPendingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending invites'**
+  String get teamPendingSection;
+
+  /// No description provided for @teamInviteHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite someone to verify payments'**
+  String get teamInviteHeading;
+
+  /// No description provided for @teamInviteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'ll receive an SMS with a link to accept.'**
+  String get teamInviteSubtitle;
+
+  /// No description provided for @teamPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get teamPhoneLabel;
+
+  /// No description provided for @teamPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'+2519XXXXXXXX'**
+  String get teamPhoneHint;
+
+  /// No description provided for @teamNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional) — what\'s their name?'**
+  String get teamNameLabel;
+
+  /// No description provided for @teamBranchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch label (optional)'**
+  String get teamBranchLabel;
+
+  /// No description provided for @teamBranchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Bole Branch, Main Counter'**
+  String get teamBranchHint;
+
+  /// No description provided for @teamSendInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invite'**
+  String get teamSendInvite;
+
+  /// No description provided for @teamPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Ethiopian phone number'**
+  String get teamPhoneInvalid;
+
+  /// No description provided for @teamInviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite team member'**
+  String get teamInviteTitle;
+
+  /// No description provided for @teamInviteSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite sent'**
+  String get teamInviteSuccessTitle;
+
+  /// No description provided for @teamShareInviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share invite link'**
+  String get teamShareInviteLink;
+
+  /// No description provided for @teamInviteAcceptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'ll appear in your team list once they accept.'**
+  String get teamInviteAcceptHint;
+
+  /// No description provided for @teamDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get teamDone;
+
+  /// No description provided for @teamUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get teamUpgrade;
+
+  /// No description provided for @teamUpgradeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used every team seat on your current plan. Upgrade to add more people.'**
+  String get teamUpgradeBody;
+
+  /// No description provided for @teamCapFree.
+  ///
+  /// In en, this message translates to:
+  /// **'FREE plan allows 1 team member. Upgrade to add more.'**
+  String get teamCapFree;
+
+  /// No description provided for @teamCapPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'PREMIUM plan allows 1 team member. Upgrade to add more.'**
+  String get teamCapPremium;
+
+  /// No description provided for @teamCapBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'BUSINESS plan allows 10 team members. Upgrade to add more.'**
+  String get teamCapBusiness;
+
+  /// No description provided for @teamCapGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan\'s team limit is reached. Upgrade to add more.'**
+  String get teamCapGeneric;
+
+  /// No description provided for @teamStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get teamStatusActive;
+
+  /// No description provided for @teamStatusInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get teamStatusInvited;
+
+  /// No description provided for @teamStatusSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get teamStatusSuspended;
+
+  /// No description provided for @teamStatusRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get teamStatusRemoved;
+
+  /// No description provided for @teamResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get teamResend;
+
+  /// No description provided for @teamRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get teamRevoke;
+
+  /// No description provided for @teamRevokeConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke this invite?'**
+  String get teamRevokeConfirmTitle;
+
+  /// No description provided for @teamRevokeConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They won\'t be able to join with the current invite link.'**
+  String get teamRevokeConfirmBody;
+
+  /// No description provided for @teamResendSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite resent'**
+  String get teamResendSuccess;
+
+  /// No description provided for @teamResendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t resend the invite. Try again.'**
+  String get teamResendFailed;
+
+  /// No description provided for @teamRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from team'**
+  String get teamRemove;
+
+  /// No description provided for @teamRemoveConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They won\'t be able to verify payments anymore. Their past verifications will remain in your history.'**
+  String get teamRemoveConfirmBody;
+
+  /// No description provided for @teamRemoveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Team member removed'**
+  String get teamRemoveSuccess;
+
+  /// No description provided for @teamRemoveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t remove this team member. Try again.'**
+  String get teamRemoveFailed;
+
+  /// No description provided for @teamAlreadyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone is already on your team'**
+  String get teamAlreadyMember;
+
+  /// No description provided for @teamDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Team member'**
+  String get teamDetailTitle;
+
+  /// No description provided for @teamNotJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite pending — they have not joined yet'**
+  String get teamNotJoined;
+
+  /// No description provided for @teamJoinedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get teamJoinedLabel;
+
+  /// No description provided for @teamLastActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last active'**
+  String get teamLastActiveLabel;
+
+  /// No description provided for @teamChangeBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Change branch label'**
+  String get teamChangeBranch;
+
+  /// No description provided for @teamBranchSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch label updated'**
+  String get teamBranchSaved;
+
+  /// No description provided for @teamSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get teamSave;
+
+  /// No description provided for @teamCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get teamCancel;
+
+  /// No description provided for @teamNoBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'No branch label'**
+  String get teamNoBranch;
+
+  /// No description provided for @teamUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Team member'**
+  String get teamUnknown;
+
+  /// No description provided for @profileAccountSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get profileAccountSection;
+
+  /// No description provided for @profileEditBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit business info'**
+  String get profileEditBusiness;
+
+  /// No description provided for @profileChangePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get profileChangePin;
+
+  /// No description provided for @profileTeamSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get profileTeamSection;
+
+  /// No description provided for @profileManageTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage team'**
+  String get profileManageTeam;
+
+  /// No description provided for @profileSubscriptionSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get profileSubscriptionSection;
+
+  /// No description provided for @profilePreferencesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get profilePreferencesSection;
+
+  /// No description provided for @profileTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get profileTheme;
+
+  /// No description provided for @profileThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get profileThemeSystem;
+
+  /// No description provided for @profileThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get profileThemeLight;
+
+  /// No description provided for @profileThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get profileThemeDark;
+
+  /// No description provided for @profileNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get profileNotifications;
+
+  /// No description provided for @profileSupportSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get profileSupportSection;
+
+  /// No description provided for @profileHelpCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Help center'**
+  String get profileHelpCenter;
+
+  /// No description provided for @profileContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get profileContactSupport;
+
+  /// No description provided for @profileSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get profileSignOut;
+
+  /// No description provided for @profileSignOutConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out of Yene Verify?'**
+  String get profileSignOutConfirmTitle;
+
+  /// No description provided for @profileSignOutConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll need to sign in again with your phone and PIN.'**
+  String get profileSignOutConfirmBody;
+
+  /// No description provided for @profileComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get profileComingSoon;
+
+  /// No description provided for @teamInvitedAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited {time}'**
+  String teamInvitedAgo(String time);
+
+  /// No description provided for @teamInviteSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite sent to {phone}'**
+  String teamInviteSent(String phone);
+
+  /// No description provided for @teamSeatsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} of {limit} team seats remaining'**
+  String teamSeatsRemaining(int remaining, int limit);
+
+  /// No description provided for @teamActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} verifications last 30 days'**
+  String teamActivity(int count);
+
+  /// No description provided for @teamRemoveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String teamRemoveConfirmTitle(String name);
+
+  /// No description provided for @profileTeamCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{members} members · {pending} pending'**
+  String profileTeamCount(int members, int pending);
+
+  /// No description provided for @profilePlanRenews.
+  ///
+  /// In en, this message translates to:
+  /// **'{plan} · renews in {days} days'**
+  String profilePlanRenews(String plan, int days);
+
+  /// No description provided for @profilePlanNoRenewal.
+  ///
+  /// In en, this message translates to:
+  /// **'{plan}'**
+  String profilePlanNoRenewal(String plan);
+
+  /// No description provided for @profileBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Business: {name}'**
+  String profileBusiness(String name);
 }
 
 class _AppLocalizationsDelegate

@@ -683,5 +683,155 @@
   "transactionsLoadMoreError": "ተጨማሪ ማምጣት አልተቻለም። ለመድገም ይንኩ።",
   "transactionsNoMore": "ተጨማሪ ውጤት የለም",
   "transactionsRangeYear": "በዚህ ዓመት",
-  "transactionsRangeAll": "ሁሉም ጊዜ"
+  "transactionsRangeAll": "ሁሉም ጊዜ",
+
+  "teamActiveSection": "ንቁ የቡድን አባላት",
+
+  "teamPendingSection": "በመጠባበቅ ላይ ያሉ ግብዣዎች",
+
+  "teamInviteHeading": "ክፍያዎችን እንዲያረጋግጥ አንድ ሰው ይጋብዙ",
+
+  "teamInviteSubtitle": "ለመቀበል አገናኝ ያለው SMS ይደርሳቸዋል።",
+
+  "teamPhoneLabel": "የስልክ ቁጥር",
+
+  "teamPhoneHint": "+2519XXXXXXXX",
+
+  "teamNameLabel": "ስም (አማራጭ) — ስማቸው ማን ነው?",
+
+  "teamBranchLabel": "የቅርንጫፍ መግለጫ (አማራጭ)",
+
+  "teamBranchHint": "ለምሳሌ፣ ቦሌ ቅርንጫፍ፣ ዋና ቆጣሪ",
+
+  "teamSendInvite": "ግብዣ ላክ",
+
+  "teamPhoneInvalid": "ትክክለኛ የኢትዮጵያ ስልክ ቁጥር ያስገቡ",
+
+  "teamInviteTitle": "የቡድን አባል ይጋብዙ",
+
+  "teamInviteSuccessTitle": "ግብዣ ተልኳል",
+
+  "teamShareInviteLink": "የግብዣ አገናኝ አጋራ",
+
+  "teamInviteAcceptHint": "ከተቀበሉ በኋላ በቡድን ዝርዝርዎ ውስጥ ይታያሉ።",
+
+  "teamDone": "ተከናውኗል",
+
+  "teamUpgrade": "አሻሽል",
+
+  "teamUpgradeBody": "በአሁኑ እቅድዎ ሁሉንም የቡድን ቦታዎች ተጠቅመዋል። ተጨማሪ ሰዎችን ለማከል ያሻሽሉ።",
+
+  "teamCapFree": "የFREE እቅድ 1 የቡድን አባል ብቻ ይፈቅዳል። ተጨማሪ ለማከል ያሻሽሉ።",
+
+  "teamCapPremium": "የPREMIUM እቅድ 1 የቡድን አባል ብቻ ይፈቅዳል። ተጨማሪ ለማከል ያሻሽሉ።",
+
+  "teamCapBusiness": "የBUSINESS እቅድ 10 የቡድን አባላት ይፈቅዳል። ተጨማሪ ለማከል ያሻሽሉ።",
+
+  "teamCapGeneric": "የእቅድዎ የቡድን ገደብ ደርሷል። ተጨማሪ ለማከል ያሻሽሉ።",
+
+  "teamStatusActive": "ንቁ",
+
+  "teamStatusInvited": "ተጋብዟል",
+
+  "teamStatusSuspended": "ታግዷል",
+
+  "teamStatusRemoved": "ተወግዷል",
+
+  "teamResend": "እንደገና ላክ",
+
+  "teamRevoke": "ሰርዝ",
+
+  "teamRevokeConfirmTitle": "ይህን ግብዣ ይሰረዝ?",
+
+  "teamRevokeConfirmBody": "በአሁኑ የግብዣ አገናኝ መቀላቀል አይችሉም።",
+
+  "teamResendSuccess": "ግብዣ እንደገና ተልኳል",
+
+  "teamResendFailed": "ግብዣውን እንደገና መላክ አልተቻለም። እንደገና ይሞክሩ።",
+
+  "teamRemove": "ከቡድን አስወግድ",
+
+  "teamRemoveConfirmBody": "ከእንደዚህ በኋላ ክፍያዎችን ማረጋገጥ አይችሉም። ያለፉ ማረጋገጫዎቻቸው በታሪክዎ ውስጥ ይቆያሉ።",
+
+  "teamRemoveSuccess": "የቡድን አባል ተወግዷል",
+
+  "teamRemoveFailed": "ይህን የቡድን አባል ማስወገድ አልተቻለም። እንደገና ይሞክሩ።",
+
+  "teamAlreadyMember": "ይህ ስልክ አስቀድሞ በቡድንዎ ውስጥ ነው",
+
+  "teamDetailTitle": "የቡድን አባል",
+
+  "teamNotJoined": "ግብዣ በመጠባበቅ ላይ — አልተቀላቀሉም",
+
+  "teamJoinedLabel": "የተቀላቀሉበት",
+
+  "teamLastActiveLabel": "መጨረሻ ንቁ",
+
+  "teamChangeBranch": "የቅርንጫፍ መግለጫ ቀይር",
+
+  "teamBranchSaved": "የቅርንጫፍ መግለጫ ተሻሽሏል",
+
+  "teamSave": "አስቀምጥ",
+
+  "teamCancel": "ተወው",
+
+  "teamNoBranch": "የቅርንጫፍ መግለጫ የለም",
+
+  "teamUnknown": "የቡድን አባል",
+
+  "profileAccountSection": "መለያ",
+
+  "profileEditBusiness": "የንግድ መረጃ አስተካክል",
+
+  "profileChangePin": "PIN ቀይር",
+
+  "profileTeamSection": "ቡድን",
+
+  "profileManageTeam": "ቡድን አስተዳድር",
+
+  "profileSubscriptionSection": "ደንበኝነት",
+
+  "profilePreferencesSection": "ምርጫዎች",
+
+  "profileTheme": "ገጽታ",
+
+  "profileThemeSystem": "የስርዓቱ",
+
+  "profileThemeLight": "ብሩህ",
+
+  "profileThemeDark": "ጨለማ",
+
+  "profileNotifications": "ማሳወቂያዎች",
+
+  "profileSupportSection": "ድጋፍ",
+
+  "profileHelpCenter": "የእርዳታ ማዕከል",
+
+  "profileContactSupport": "ድጋፍን ያግኙ",
+
+  "profileSignOut": "ውጣ",
+
+  "profileSignOutConfirmTitle": "ከYene Verify ይውጡ?",
+
+  "profileSignOutConfirmBody": "በስልክዎ እና PIN እንደገና መግባት ይኖርብዎታል።",
+
+  "profileComingSoon": "በቅርቡ",
+
+  "teamInvitedAgo": "የተጋበዙት {time}",
+
+  "teamInviteSent": "ግብዣ ወደ {phone} ተልኳል",
+
+  "teamSeatsRemaining": "ከ{limit} የቡድን ቦታዎች {remaining} ቀርተዋል",
+
+  "teamActivity": "ባለፉት 30 ቀናት {count} ማረጋገጫዎች",
+
+  "teamRemoveConfirmTitle": "{name}ን ያስወግዱ?",
+
+  "profileTeamCount": "{members} አባላት · {pending} በመጠባበቅ",
+
+  "profilePlanRenews": "{plan} · በ{days} ቀናት ይታደሳል",
+
+  "profilePlanNoRenewal": "{plan}",
+
+  "profileBusiness": "ንግድ: {name}"
 }

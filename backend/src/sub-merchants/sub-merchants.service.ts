@@ -144,6 +144,20 @@ export class SubMerchantsService {
       return null;
     }
 
+    // Activity summary for the detail screen: the last 30 days of
+    // verifications this member ran, plus their most recent one ever.
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const [verificationCount, lastVerification] = await Promise.all([
+      this.prisma.verification.count({
+        where: { merchantId, verifiedByUserId: sub.userId, createdAt: { gte: since } },
+      }),
+      this.prisma.verification.findFirst({
+        where: { merchantId, verifiedByUserId: sub.userId },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      }),
+    ]);
+
     return {
       id: sub.id,
       kind: 'SUB_MERCHANT' as const,
@@ -153,8 +167,8 @@ export class SubMerchantsService {
       branchLabel: sub.branchLabel,
       invitedAt: sub.invitedAt?.toISOString() ?? null,
       joinedAt: sub.joinedAt?.toISOString() ?? null,
-      verificationCount: 0,
-      lastVerificationAt: null,
+      verificationCount,
+      lastVerificationAt: lastVerification?.createdAt.toISOString() ?? null,
       createdAt: sub.createdAt.toISOString(),
       updatedAt: sub.updatedAt.toISOString(),
     };
