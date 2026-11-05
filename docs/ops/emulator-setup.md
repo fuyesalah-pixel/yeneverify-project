@@ -1,5 +1,35 @@
 # Emulator Setup
 
+## Running on a physical Android phone (not emulator)
+
+The default `API_BASE_URL` is `http://10.0.2.2:3000/api/v1` which is the
+Android emulator's loopback to the host. A physical phone CANNOT reach
+`10.0.2.2`.
+
+To run on a phone:
+
+1. Connect phone via USB, enable USB debugging.
+2. Backend must listen on `0.0.0.0` (not just `127.0.0.1`). Check
+   `backend/.env`: `HOST=0.0.0.0`.
+3. Get your PC's LAN IP:
+   `ipconfig | Select-String "IPv4"` — note the address (e.g. `192.168.1.5`).
+4. Phone and PC must be on the same WiFi network.
+5. Windows Firewall must allow port 3000 inbound.
+   Run once (Admin PowerShell):
+   ```
+   New-NetFirewallRule -DisplayName "Yene Backend" \
+     -Direction Inbound -LocalPort 3000 -Protocol TCP -Action Allow
+   ```
+6. Run:
+   ```
+   flutter run -d <phone-device-id> \
+     --dart-define=API_BASE_URL=http://<your-pc-ip>:3000/api/v1
+   ```
+
+Helper: `scripts/run-on-phone.ps1` (PowerShell) or
+`mobile/dev-util/run-on-phone.sh` (bash) auto-detects the PC LAN IP and
+runs the mobile app with the right `API_BASE_URL`.
+
 ## Do NOT use the default AVD for manual QA
 
 The default `yene-pixel` AVD (API 33, 1080x2400, 2 GB RAM, software GL)

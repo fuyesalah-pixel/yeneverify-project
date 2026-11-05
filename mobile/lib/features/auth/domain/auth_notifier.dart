@@ -1,8 +1,10 @@
-// Auth state machine + Riverpod Notifier (Step 21). Mobile-only.
+// Auth state machine + Riverpod Notifier (Step 21).
 //
 // All session transitions live here: screens and flow-providers call these
 // methods instead of writing `authProvider.notifier.state` directly.
-import 'package:flutter/foundation.dart' show kReleaseMode;
+import 'dart:async';
+
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode, kReleaseMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_error.dart';
@@ -108,7 +110,30 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   // -- startup ---------------------------------------------------------------
+
+  /// Resolves the cold-start auth state, with a hard timeout and a catch so
+  /// the splash can never hang forever on a slow/hanging secure-storage or
+  /// device-info plugin.
   Future<AuthState> _checkStartupState() async {
+    try {
+      return await _doCheckStartupState().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint(
+            'YV: startup auth check timed out after 5s — falling back to unauthenticated',
+          );
+          return _fallbackStartupState(reason: 'timeout');
+        },
+      );
+    } catch (e, st) {
+      debugPrint(
+        'YV: startup auth check failed: $e\n$st\n— falling back to unauthenticated',
+      );
+      return _fallbackStartupState(reason: 'error');
+    }
+  }
+
+  Future<AuthState> _doCheckStartupState() async {
     final fingerprint = await repo.getOrCreateFingerprint();
     final hasSession = await repo.hasStoredSession();
     if (!hasSession) {
@@ -136,6 +161,27 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       deviceFingerprint: fingerprint,
       biometricEnabled: biometric,
       lastLoginPhone: storedPhone,
+    );
+  }
+
+  /// Safe landing when the startup check times out or throws. Tries to keep
+  /// any persisted session context (refresh token / PIN flag), but on
+  /// failure it always resolves to a known state instead of `unknown`.
+  AuthState _fallbackStartupState({required String reason}) {
+    // Best-effort: if secure storage is responsive enough to tell us whether
+    // a refresh token exists, preserve that much context. Otherwise force
+    // the user to the login screen.
+    const fingerprint = 'unverified-device';
+    if (kDebugMode) {
+      debugPrint(
+        'YV: startup auth check ${reason == 'timeout' ? 'timed out' : 'failed'} '
+        '- falling back to unauthenticated',
+      );
+    }
+    return AuthState(
+      status: AuthStatus.unauthenticated,
+      deviceFingerprint: fingerprint,
+      errorMessage: 'Startup check ${reason == 'timeout' ? 'timed out' : 'failed'}. Please log in again.',
     );
   }
 

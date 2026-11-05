@@ -15,5 +15,11 @@ void main() {
 
     // The splash screen shows the app name before the 1.5s timer fires.
     expect(find.text('Yene Verify'), findsOneWidget);
+
+    // Advance past the splash's 8s safety net and the startup check's 5s
+    // timeout clock (both fake-timer based) so no timer stays pending at
+    // test end; the splash resolves to /login and unmounts.
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pump(const Duration(seconds: 1));
   });
 }
