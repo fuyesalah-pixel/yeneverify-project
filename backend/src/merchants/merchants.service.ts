@@ -10,7 +10,11 @@ import { AuditService } from '../audit/audit.service';
 import { NotFoundError } from '../common/errors/domain-errors';
 import type { UpdateMerchantDto } from './dto/merchant.dto';
 import type { VerificationAccountsUpdate } from './dto/verification-accounts.dto';
-import { mergeVerificationAccounts, normalizeVerificationAccounts } from './verification-accounts';
+import {
+  maskVerificationAccounts,
+  mergeVerificationAccounts,
+  normalizeVerificationAccounts,
+} from './verification-accounts';
 
 const MeInclude = {
   currentSubscription: {
@@ -107,7 +111,11 @@ export class MerchantsService {
       targetId: merchant.id,
       ip,
       userAgent,
-      metadata: { merchantId: merchant.id, banks: Object.keys(merged) },
+      metadata: {
+        merchantId: merchant.id,
+        banks: Object.keys(merged),
+        maskedAccounts: maskVerificationAccounts(merged),
+      },
     });
 
     return merged;

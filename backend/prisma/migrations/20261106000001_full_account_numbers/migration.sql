@@ -1,0 +1,15 @@
+-- ============================================================
+-- Yene Verify — full account numbers for verification
+--
+-- Merchants now enter their full account number once; the backend
+-- derives the suffix each bank adapter needs. New shape:
+--   {
+--     "cbe":       { "full": "1000123456789", "last8": "3456789" },
+--     "abyssinia": { "full": "0123456789",    "last5": "56789" },
+--     "awash":     { "full": "0123456789",    "accountNumber": "0123456789" }
+--   }
+--
+-- verification_accounts is JSONB, so no DDL change is required.
+-- Legacy last-N-only rows stay in place and are readable; they are
+-- replaced with the full shape the next time the merchant saves.
+-- ============================================================

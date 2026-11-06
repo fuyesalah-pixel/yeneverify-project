@@ -1445,32 +1445,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verificationAccountsCbe => 'Commercial Bank of Ethiopia (CBE)';
 
   @override
-  String get verificationAccountsCbeField => 'Last 8 digits';
+  String get verificationAccountsCbeLabel => 'Your CBE account number';
 
   @override
   String get verificationAccountsAbyssinia => 'Bank of Abyssinia';
 
   @override
-  String get verificationAccountsAbyssiniaField => 'Last 5 digits';
+  String get verificationAccountsAbyssiniaLabel =>
+      'Your Bank of Abyssinia account number';
 
   @override
   String get verificationAccountsAwash => 'Awash Bank';
 
   @override
-  String get verificationAccountsAwashField => 'Account number (10–16 digits)';
+  String get verificationAccountsAwashLabel => 'Your Awash Bank account number';
 
   @override
-  String get verificationAccountsOptional =>
-      'Leave a field empty if you don\'t use that bank.';
+  String get verificationAccountsAccountHint => 'e.g., 1000123456789';
 
   @override
-  String get verificationAccountsInvalid8 => 'Enter exactly 8 digits';
+  String get verificationAccountsCbeHelper =>
+      'We only use the last 8 digits for verification.';
 
   @override
-  String get verificationAccountsInvalid5 => 'Enter exactly 5 digits';
+  String get verificationAccountsAbyssiniaHelper =>
+      'We only use the last 5 digits for verification.';
 
   @override
-  String get verificationAccountsInvalidAwash => 'Enter 10 to 16 digits';
+  String get verificationAccountsAwashHelper =>
+      'We use this number to look up your account.';
+
+  @override
+  String get verificationAccountsInvalidLength => 'Enter 10 to 16 digits';
 
   @override
   String get verificationAccountsSaved => 'Verification accounts saved';

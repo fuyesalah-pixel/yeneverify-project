@@ -2678,11 +2678,11 @@ abstract class AppLocalizations {
   /// **'Commercial Bank of Ethiopia (CBE)'**
   String get verificationAccountsCbe;
 
-  /// No description provided for @verificationAccountsCbeField.
+  /// No description provided for @verificationAccountsCbeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Last 8 digits'**
-  String get verificationAccountsCbeField;
+  /// **'Your CBE account number'**
+  String get verificationAccountsCbeLabel;
 
   /// No description provided for @verificationAccountsAbyssinia.
   ///
@@ -2690,11 +2690,11 @@ abstract class AppLocalizations {
   /// **'Bank of Abyssinia'**
   String get verificationAccountsAbyssinia;
 
-  /// No description provided for @verificationAccountsAbyssiniaField.
+  /// No description provided for @verificationAccountsAbyssiniaLabel.
   ///
   /// In en, this message translates to:
-  /// **'Last 5 digits'**
-  String get verificationAccountsAbyssiniaField;
+  /// **'Your Bank of Abyssinia account number'**
+  String get verificationAccountsAbyssiniaLabel;
 
   /// No description provided for @verificationAccountsAwash.
   ///
@@ -2702,35 +2702,41 @@ abstract class AppLocalizations {
   /// **'Awash Bank'**
   String get verificationAccountsAwash;
 
-  /// No description provided for @verificationAccountsAwashField.
+  /// No description provided for @verificationAccountsAwashLabel.
   ///
   /// In en, this message translates to:
-  /// **'Account number (10–16 digits)'**
-  String get verificationAccountsAwashField;
+  /// **'Your Awash Bank account number'**
+  String get verificationAccountsAwashLabel;
 
-  /// No description provided for @verificationAccountsOptional.
+  /// No description provided for @verificationAccountsAccountHint.
   ///
   /// In en, this message translates to:
-  /// **'Leave a field empty if you don\'t use that bank.'**
-  String get verificationAccountsOptional;
+  /// **'e.g., 1000123456789'**
+  String get verificationAccountsAccountHint;
 
-  /// No description provided for @verificationAccountsInvalid8.
+  /// No description provided for @verificationAccountsCbeHelper.
   ///
   /// In en, this message translates to:
-  /// **'Enter exactly 8 digits'**
-  String get verificationAccountsInvalid8;
+  /// **'We only use the last 8 digits for verification.'**
+  String get verificationAccountsCbeHelper;
 
-  /// No description provided for @verificationAccountsInvalid5.
+  /// No description provided for @verificationAccountsAbyssiniaHelper.
   ///
   /// In en, this message translates to:
-  /// **'Enter exactly 5 digits'**
-  String get verificationAccountsInvalid5;
+  /// **'We only use the last 5 digits for verification.'**
+  String get verificationAccountsAbyssiniaHelper;
 
-  /// No description provided for @verificationAccountsInvalidAwash.
+  /// No description provided for @verificationAccountsAwashHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'We use this number to look up your account.'**
+  String get verificationAccountsAwashHelper;
+
+  /// No description provided for @verificationAccountsInvalidLength.
   ///
   /// In en, this message translates to:
   /// **'Enter 10 to 16 digits'**
-  String get verificationAccountsInvalidAwash;
+  String get verificationAccountsInvalidLength;
 
   /// No description provided for @verificationAccountsSaved.
   ///

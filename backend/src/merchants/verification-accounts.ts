@@ -2,9 +2,11 @@
 // Yene Verify — Verification Accounts
 //
 // Shared logic for the merchant-configured bank identifiers:
-//   • merge partial updates into the stored JSON object
+//   • merge partial updates into the stored JSON object (deriving the
+//     suffix each adapter needs from the full account number)
 //   • map a merchant's settings onto VerifyInput.supplementary
 //   • the bank/field catalogue served to the mobile settings screen
+//   • masked values for the audit log
 // ============================================================
 
 import type { BankCode } from '@prisma/client';
@@ -21,6 +23,7 @@ export interface SupportedBankField {
   minLength: number;
   maxLength: number;
   inputType: 'number';
+  note?: string;
 }
 
 export interface SupportedVerificationBank {
@@ -29,18 +32,23 @@ export interface SupportedVerificationBank {
   fields: SupportedBankField[];
 }
 
+const FULL_ACCOUNT_FIELD = {
+  key: 'full',
+  pattern: '^\\d{10,16}$',
+  minLength: 10,
+  maxLength: 16,
+  inputType: 'number' as const,
+};
+
 export const SUPPORTED_VERIFICATION_BANKS: SupportedVerificationBank[] = [
   {
     bankCode: 'CBE',
     displayName: 'Commercial Bank of Ethiopia',
     fields: [
       {
-        key: 'last8',
-        label: 'Last 8 digits of your account',
-        pattern: '^\\d{8}$',
-        minLength: 8,
-        maxLength: 8,
-        inputType: 'number',
+        ...FULL_ACCOUNT_FIELD,
+        label: 'Your CBE account number',
+        note: 'We only use the last 8 digits for verification.',
       },
     ],
   },
@@ -49,12 +57,9 @@ export const SUPPORTED_VERIFICATION_BANKS: SupportedVerificationBank[] = [
     displayName: 'Bank of Abyssinia',
     fields: [
       {
-        key: 'last5',
-        label: 'Last 5 digits of your account',
-        pattern: '^\\d{5}$',
-        minLength: 5,
-        maxLength: 5,
-        inputType: 'number',
+        ...FULL_ACCOUNT_FIELD,
+        label: 'Your Bank of Abyssinia account number',
+        note: 'We only use the last 5 digits for verification.',
       },
     ],
   },
@@ -63,12 +68,9 @@ export const SUPPORTED_VERIFICATION_BANKS: SupportedVerificationBank[] = [
     displayName: 'Awash Bank',
     fields: [
       {
-        key: 'accountNumber',
-        label: 'Account number',
-        pattern: '^\\d{10,16}$',
-        minLength: 10,
-        maxLength: 16,
-        inputType: 'number',
+        ...FULL_ACCOUNT_FIELD,
+        label: 'Your Awash Bank account number',
+        note: 'We use this number to look up your account.',
       },
     ],
   },
@@ -80,10 +82,21 @@ export function normalizeVerificationAccounts(value: unknown): VerificationAccou
   return parsed.success ? parsed.data : {};
 }
 
+function deriveCbe(full: string) {
+  return { full, last8: full.slice(-8) };
+}
+
+function deriveAbyssinia(full: string) {
+  return { full, last5: full.slice(-5) };
+}
+
+function deriveAwash(full: string) {
+  return { full, accountNumber: full };
+}
+
 /**
  * Apply a partial settings update. `undefined` leaves a value untouched,
- * explicit `null` clears it, and a bank object with no remaining fields
- * disappears entirely.
+ * explicit `null` clears it.
  */
 export function mergeVerificationAccounts(
   current: unknown,
@@ -93,39 +106,18 @@ export function mergeVerificationAccounts(
   if (!patch) return merged;
 
   if (patch.cbe !== undefined) {
-    if (patch.cbe === null) {
-      delete merged.cbe;
-    } else {
-      const last8 = patch.cbe.last8 === null ? undefined : (patch.cbe.last8 ?? merged.cbe?.last8);
-      if (last8) merged.cbe = { last8 };
-      else delete merged.cbe;
-    }
+    if (patch.cbe === null) delete merged.cbe;
+    else merged.cbe = deriveCbe(patch.cbe.full);
   }
 
   if (patch.abyssinia !== undefined) {
-    if (patch.abyssinia === null) {
-      delete merged.abyssinia;
-    } else {
-      const last5 =
-        patch.abyssinia.last5 === null
-          ? undefined
-          : (patch.abyssinia.last5 ?? merged.abyssinia?.last5);
-      if (last5) merged.abyssinia = { last5 };
-      else delete merged.abyssinia;
-    }
+    if (patch.abyssinia === null) delete merged.abyssinia;
+    else merged.abyssinia = deriveAbyssinia(patch.abyssinia.full);
   }
 
   if (patch.awash !== undefined) {
-    if (patch.awash === null) {
-      delete merged.awash;
-    } else {
-      const accountNumber =
-        patch.awash.accountNumber === null
-          ? undefined
-          : (patch.awash.accountNumber ?? merged.awash?.accountNumber);
-      if (accountNumber) merged.awash = { accountNumber };
-      else delete merged.awash;
-    }
+    if (patch.awash === null) delete merged.awash;
+    else merged.awash = deriveAwash(patch.awash.full);
   }
 
   return merged;
@@ -152,4 +144,27 @@ export function buildSupplementaryData(
     default:
       return {};
   }
+}
+
+/** Keep only the last four digits — used solely for audit metadata. */
+export function maskAccountNumber(value: string): string {
+  const visible = value.slice(-4);
+  return `${'*'.repeat(Math.max(0, value.length - visible.length))}${visible}`;
+}
+
+/** Masked per-bank identifiers for the audit trail (never the full number). */
+export function maskVerificationAccounts(accounts: VerificationAccounts): Record<string, string> {
+  const masked: Record<string, string> = {};
+  if (accounts.cbe) {
+    masked.cbe = maskAccountNumber('full' in accounts.cbe ? accounts.cbe.full : accounts.cbe.last8);
+  }
+  if (accounts.abyssinia) {
+    masked.abyssinia = maskAccountNumber(
+      'full' in accounts.abyssinia ? accounts.abyssinia.full : accounts.abyssinia.last5,
+    );
+  }
+  if (accounts.awash) {
+    masked.awash = maskAccountNumber(accounts.awash.accountNumber);
+  }
+  return masked;
 }

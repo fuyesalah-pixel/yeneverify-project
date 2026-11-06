@@ -113,48 +113,50 @@ class MerchantSetupScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _BankAccountField(
-                  label: l10n.verificationAccountsCbe,
-                  hint: l10n.verificationAccountsCbeField,
+                  title: l10n.verificationAccountsCbe,
+                  fieldLabel: l10n.verificationAccountsCbeLabel,
+                  helper: l10n.verificationAccountsCbeHelper,
                   enabled: state.cbeEnabled,
                   errorText: state.isCbeValid
                       ? null
-                      : l10n.verificationAccountsInvalid8,
-                  maxLength: 8,
+                      : l10n.verificationAccountsInvalidLength,
+                  maxLength: 16,
                   onEnabled:
                       ref.read(merchantSetupProvider.notifier).setCbeEnabled,
                   onChanged:
-                      ref.read(merchantSetupProvider.notifier).setCbeLast8,
+                      ref.read(merchantSetupProvider.notifier).setCbeFull,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _BankAccountField(
-                  label: l10n.verificationAccountsAbyssinia,
-                  hint: l10n.verificationAccountsAbyssiniaField,
+                  title: l10n.verificationAccountsAbyssinia,
+                  fieldLabel: l10n.verificationAccountsAbyssiniaLabel,
+                  helper: l10n.verificationAccountsAbyssiniaHelper,
                   enabled: state.abyssiniaEnabled,
                   errorText: state.isAbyssiniaValid
                       ? null
-                      : l10n.verificationAccountsInvalid5,
-                  maxLength: 5,
+                      : l10n.verificationAccountsInvalidLength,
+                  maxLength: 16,
                   onEnabled: ref
                       .read(merchantSetupProvider.notifier)
                       .setAbyssiniaEnabled,
                   onChanged: ref
                       .read(merchantSetupProvider.notifier)
-                      .setAbyssiniaLast5,
+                      .setAbyssiniaFull,
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _BankAccountField(
-                  label: l10n.verificationAccountsAwash,
-                  hint: l10n.verificationAccountsAwashField,
+                  title: l10n.verificationAccountsAwash,
+                  fieldLabel: l10n.verificationAccountsAwashLabel,
+                  helper: l10n.verificationAccountsAwashHelper,
                   enabled: state.awashEnabled,
                   errorText: state.isAwashValid
                       ? null
-                      : l10n.verificationAccountsInvalidAwash,
+                      : l10n.verificationAccountsInvalidLength,
                   maxLength: 16,
                   onEnabled:
                       ref.read(merchantSetupProvider.notifier).setAwashEnabled,
-                  onChanged: ref
-                      .read(merchantSetupProvider.notifier)
-                      .setAwashAccountNumber,
+                  onChanged:
+                      ref.read(merchantSetupProvider.notifier).setAwashFull,
                 ),
                 if (!state.areAccountsValid) ...[
                   const SizedBox(height: AppSpacing.sm),
@@ -274,8 +276,9 @@ class _DetailsExpander extends StatelessWidget {
 
 class _BankAccountField extends StatelessWidget {
   const _BankAccountField({
-    required this.label,
-    required this.hint,
+    required this.title,
+    required this.fieldLabel,
+    required this.helper,
     required this.enabled,
     required this.errorText,
     required this.maxLength,
@@ -283,8 +286,9 @@ class _BankAccountField extends StatelessWidget {
     required this.onChanged,
   });
 
-  final String label;
-  final String hint;
+  final String title;
+  final String fieldLabel;
+  final String helper;
   final bool enabled;
   final String? errorText;
   final int maxLength;
@@ -302,7 +306,7 @@ class _BankAccountField extends StatelessWidget {
           value: enabled,
           onChanged: (value) => onEnabled(value ?? false),
           title: Text(
-            label,
+            title,
             style: AppTypography.bodyMedium.copyWith(color: colors.textPrimary),
           ),
           contentPadding: EdgeInsets.zero,
@@ -311,7 +315,8 @@ class _BankAccountField extends StatelessWidget {
         if (enabled) ...[
           const SizedBox(height: AppSpacing.xs),
           AppTextField(
-            label: hint,
+            label: fieldLabel,
+            helper: helper,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             maxLength: maxLength,

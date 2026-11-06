@@ -99,8 +99,8 @@ describe('Merchant verification accounts (e2e, real login + step-up)', () => {
         businessName: 'E2E Verification Accounts',
         city: 'Addis Ababa',
         verificationAccounts: {
-          cbe: { last8: '12345678' },
-          abyssinia: { last5: '54321' },
+          cbe: { full: '1000123456789' },
+          abyssinia: { full: '0123456789' },
         },
       })
       .expect(201);
@@ -108,8 +108,8 @@ describe('Merchant verification accounts (e2e, real login + step-up)', () => {
 
     const stored = await prisma.merchant.findUnique({ where: { id: merchantId } });
     expect(stored!.verificationAccounts).toEqual({
-      cbe: { last8: '12345678' },
-      abyssinia: { last5: '54321' },
+      cbe: { full: '1000123456789', last8: '23456789' },
+      abyssinia: { full: '0123456789', last5: '56789' },
     });
 
     // ── 4. GET returns the configured accounts ─────────────────────
@@ -118,8 +118,8 @@ describe('Merchant verification accounts (e2e, real login + step-up)', () => {
       .set(auth)
       .expect(200);
     expect(getRes.body.verificationAccounts).toEqual({
-      cbe: { last8: '12345678' },
-      abyssinia: { last5: '54321' },
+      cbe: { full: '1000123456789', last8: '23456789' },
+      abyssinia: { full: '0123456789', last5: '56789' },
     });
 
     // ── 5. supported banks catalogue ───────────────────────────────
@@ -133,12 +133,19 @@ describe('Merchant verification accounts (e2e, real login + step-up)', () => {
       'ABYSSINIA',
       'AWASH',
     ]);
+    expect(banksRes.body.banks[0].fields[0]).toMatchObject({
+      key: 'full',
+      label: 'Your CBE account number',
+      minLength: 10,
+      maxLength: 16,
+      note: 'We only use the last 8 digits for verification.',
+    });
 
     // ── 6. PUT without step-up → 401 ───────────────────────────────
     const noStepUp = await request(app.getHttpServer())
       .put('/api/v1/merchants/me/verification-accounts')
       .set(auth)
-      .send({ cbe: { last8: '87654321' } })
+      .send({ cbe: { full: '1000999988887' } })
       .expect(401);
     expect(noStepUp.body.error.code).toBe('AUTH_STEP_UP_REQUIRED');
 
@@ -148,25 +155,25 @@ describe('Merchant verification accounts (e2e, real login + step-up)', () => {
       .set(auth)
       .set('X-Step-Up-Token', stepUpToken)
       .send({
-        cbe: { last8: '87654321' },
-        abyssinia: { last5: null },
-        awash: { accountNumber: '0123456789' },
+        cbe: { full: '1000999988887' },
+        abyssinia: null,
+        awash: { full: '0123456789' },
       })
       .expect(200);
     expect(putRes.body.verificationAccounts).toEqual({
-      cbe: { last8: '87654321' },
-      awash: { accountNumber: '0123456789' },
+      cbe: { full: '1000999988887', last8: '99988887' },
+      awash: { full: '0123456789', accountNumber: '0123456789' },
     });
 
-    // ── 8. invalid digits → 422 validation error ───────────────────
+    // ── 8. invalid account → 422 validation error ──────────────────
     const invalid = await request(app.getHttpServer())
       .put('/api/v1/merchants/me/verification-accounts')
       .set(auth)
       .set('X-Step-Up-Token', stepUpToken)
-      .send({ cbe: { last8: '123' } })
+      .send({ cbe: { full: '123' } })
       .expect(422);
     expect(invalid.body.error.code).toBe('VALIDATION_FAILED');
-    expect(invalid.body.error.details.fields['cbe.last8']).toEqual(['Must be exactly 8 digits']);
+    expect(invalid.body.error.details.fields['cbe.full']).toEqual(['Must be 10 to 16 digits']);
 
     // ── 9. audit entry (fire-and-forget) ───────────────────────────
     let auditRow = null;
@@ -180,9 +187,13 @@ describe('Merchant verification accounts (e2e, real login + step-up)', () => {
       if (!auditRow) await new Promise((resolve) => setTimeout(resolve, 50));
     }
     expect(auditRow).not.toBeNull();
-    // Account digits never enter the audit log — only which banks changed.
+    // Full account numbers never enter the audit log — only masked values.
     const metadata = JSON.stringify(auditRow!.metadata);
-    expect(metadata).not.toContain('87654321');
+    expect(metadata).not.toContain('1000999988887');
     expect(metadata).not.toContain('0123456789');
+    expect(JSON.parse(metadata).maskedAccounts).toEqual({
+      cbe: '*********8887',
+      awash: '******6789',
+    });
   });
 });

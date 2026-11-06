@@ -1,5 +1,6 @@
 // Verification accounts — the bank identifiers adapters cannot read from
-// a receipt (CBE last 8, Abyssinia last 5, Awash account number).
+// a receipt. The merchant enters each full account number; the backend
+// derives the suffix (CBE last 8, Abyssinia last 5, Awash account number).
 //
 // Saving is step-up protected: the user re-enters their PIN, the PIN is
 // exchanged for a step-up token, and the PUT carries X-Step-Up-Token.
@@ -55,7 +56,7 @@ class VerificationAccountsScreen extends ConsumerWidget {
         ),
         data: (accounts) => _AccountsForm(
           key: ValueKey(
-            '${accounts.cbeLast8}|${accounts.abyssiniaLast5}|${accounts.awashAccountNumber}',
+            '${accounts.cbeFull}|${accounts.abyssiniaFull}|${accounts.awashFull}',
           ),
           initial: accounts,
         ),
@@ -82,11 +83,10 @@ class _AccountsFormState extends ConsumerState<_AccountsForm> {
   @override
   void initState() {
     super.initState();
-    _cbe = TextEditingController(text: widget.initial.cbeLast8 ?? '');
+    _cbe = TextEditingController(text: widget.initial.cbeFull ?? '');
     _abyssinia =
-        TextEditingController(text: widget.initial.abyssiniaLast5 ?? '');
-    _awash =
-        TextEditingController(text: widget.initial.awashAccountNumber ?? '');
+        TextEditingController(text: widget.initial.abyssiniaFull ?? '');
+    _awash = TextEditingController(text: widget.initial.awashFull ?? '');
   }
 
   @override
@@ -97,19 +97,19 @@ class _AccountsFormState extends ConsumerState<_AccountsForm> {
     super.dispose();
   }
 
-  bool get _cbeValid => _cbe.text.isEmpty || _cbe.text.length == 8;
-  bool get _abyssiniaValid =>
-      _abyssinia.text.isEmpty || _abyssinia.text.length == 5;
-  bool get _awashValid =>
-      _awash.text.isEmpty ||
-      (_awash.text.length >= 10 && _awash.text.length <= 16);
+  static bool _isFullAccount(String value) =>
+      value.isEmpty || (value.length >= 10 && value.length <= 16);
+
+  bool get _cbeValid => _isFullAccount(_cbe.text);
+  bool get _abyssiniaValid => _isFullAccount(_abyssinia.text);
+  bool get _awashValid => _isFullAccount(_awash.text);
 
   bool get _formValid => _cbeValid && _abyssiniaValid && _awashValid;
 
   VerificationAccounts get _values => VerificationAccounts(
-        cbeLast8: _cbe.text.isEmpty ? null : _cbe.text,
-        abyssiniaLast5: _abyssinia.text.isEmpty ? null : _abyssinia.text,
-        awashAccountNumber: _awash.text.isEmpty ? null : _awash.text,
+        cbeFull: _cbe.text.isEmpty ? null : _cbe.text,
+        abyssiniaFull: _abyssinia.text.isEmpty ? null : _abyssinia.text,
+        awashFull: _awash.text.isEmpty ? null : _awash.text,
       );
 
   Future<void> _save() async {
@@ -182,37 +182,41 @@ class _AccountsFormState extends ConsumerState<_AccountsForm> {
         ),
         const SizedBox(height: AppSpacing.xl),
         AppTextField(
-          label: l10n.verificationAccountsCbe,
-          hint: l10n.verificationAccountsCbeField,
-          helper: l10n.verificationAccountsOptional,
+          label: l10n.verificationAccountsCbeLabel,
+          hint: l10n.verificationAccountsAccountHint,
+          helper: l10n.verificationAccountsCbeHelper,
           controller: _cbe,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          maxLength: 8,
-          errorText: _cbeValid ? null : l10n.verificationAccountsInvalid8,
+          maxLength: 16,
+          errorText:
+              _cbeValid ? null : l10n.verificationAccountsInvalidLength,
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: l10n.verificationAccountsAbyssinia,
-          hint: l10n.verificationAccountsAbyssiniaField,
+          label: l10n.verificationAccountsAbyssiniaLabel,
+          hint: l10n.verificationAccountsAccountHint,
+          helper: l10n.verificationAccountsAbyssiniaHelper,
           controller: _abyssinia,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          maxLength: 5,
+          maxLength: 16,
           errorText:
-              _abyssiniaValid ? null : l10n.verificationAccountsInvalid5,
+              _abyssiniaValid ? null : l10n.verificationAccountsInvalidLength,
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: AppSpacing.lg),
         AppTextField(
-          label: l10n.verificationAccountsAwash,
-          hint: l10n.verificationAccountsAwashField,
+          label: l10n.verificationAccountsAwashLabel,
+          hint: l10n.verificationAccountsAccountHint,
+          helper: l10n.verificationAccountsAwashHelper,
           controller: _awash,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           maxLength: 16,
-          errorText: _awashValid ? null : l10n.verificationAccountsInvalidAwash,
+          errorText:
+              _awashValid ? null : l10n.verificationAccountsInvalidLength,
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: AppSpacing.xxl),

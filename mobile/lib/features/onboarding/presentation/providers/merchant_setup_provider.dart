@@ -22,11 +22,11 @@ class MerchantSetupState {
     this.showDetails = false,
     this.showAccounts = false,
     this.cbeEnabled = false,
-    this.cbeLast8 = '',
+    this.cbeFull = '',
     this.abyssiniaEnabled = false,
-    this.abyssiniaLast5 = '',
+    this.abyssiniaFull = '',
     this.awashEnabled = false,
-    this.awashAccountNumber = '',
+    this.awashFull = '',
     this.error,
     this.businessNameError,
     this.merchant,
@@ -41,11 +41,11 @@ class MerchantSetupState {
   final bool showDetails;
   final bool showAccounts;
   final bool cbeEnabled;
-  final String cbeLast8;
+  final String cbeFull;
   final bool abyssiniaEnabled;
-  final String abyssiniaLast5;
+  final String abyssiniaFull;
   final bool awashEnabled;
-  final String awashAccountNumber;
+  final String awashFull;
   final ApiError? error;
   final BusinessNameError? businessNameError;
   final CreateMerchantResponse? merchant;
@@ -53,21 +53,20 @@ class MerchantSetupState {
   bool get isBusinessNameValid => validateBusinessName(businessName) == null;
 
   bool get isCbeValid =>
-      !cbeEnabled || RegExp(r'^\d{8}$').hasMatch(cbeLast8.trim());
+      !cbeEnabled || RegExp(r'^\d{10,16}$').hasMatch(cbeFull.trim());
   bool get isAbyssiniaValid =>
-      !abyssiniaEnabled || RegExp(r'^\d{5}$').hasMatch(abyssiniaLast5.trim());
+      !abyssiniaEnabled || RegExp(r'^\d{10,16}$').hasMatch(abyssiniaFull.trim());
   bool get isAwashValid =>
-      !awashEnabled ||
-      RegExp(r'^\d{10,16}$').hasMatch(awashAccountNumber.trim());
+      !awashEnabled || RegExp(r'^\d{10,16}$').hasMatch(awashFull.trim());
 
   bool get areAccountsValid => isCbeValid && isAbyssiniaValid && isAwashValid;
 
   /// Only checked banks travel to the backend; unchecked banks stay absent.
   Map<String, dynamic>? get verificationAccountsPatch {
     final patch = <String, dynamic>{};
-    if (cbeEnabled) patch['cbe'] = {'last8': cbeLast8.trim()};
-    if (abyssiniaEnabled) patch['abyssinia'] = {'last5': abyssiniaLast5.trim()};
-    if (awashEnabled) patch['awash'] = {'accountNumber': awashAccountNumber.trim()};
+    if (cbeEnabled) patch['cbe'] = {'full': cbeFull.trim()};
+    if (abyssiniaEnabled) patch['abyssinia'] = {'full': abyssiniaFull.trim()};
+    if (awashEnabled) patch['awash'] = {'full': awashFull.trim()};
     return patch.isEmpty ? null : patch;
   }
 
@@ -81,11 +80,11 @@ class MerchantSetupState {
     bool? showDetails,
     bool? showAccounts,
     bool? cbeEnabled,
-    String? cbeLast8,
+    String? cbeFull,
     bool? abyssiniaEnabled,
-    String? abyssiniaLast5,
+    String? abyssiniaFull,
     bool? awashEnabled,
-    String? awashAccountNumber,
+    String? awashFull,
     ApiError? error,
     BusinessNameError? businessNameError,
     CreateMerchantResponse? merchant,
@@ -104,11 +103,11 @@ class MerchantSetupState {
       showDetails: showDetails ?? this.showDetails,
       showAccounts: showAccounts ?? this.showAccounts,
       cbeEnabled: cbeEnabled ?? this.cbeEnabled,
-      cbeLast8: cbeLast8 ?? this.cbeLast8,
+      cbeFull: cbeFull ?? this.cbeFull,
       abyssiniaEnabled: abyssiniaEnabled ?? this.abyssiniaEnabled,
-      abyssiniaLast5: abyssiniaLast5 ?? this.abyssiniaLast5,
+      abyssiniaFull: abyssiniaFull ?? this.abyssiniaFull,
       awashEnabled: awashEnabled ?? this.awashEnabled,
-      awashAccountNumber: awashAccountNumber ?? this.awashAccountNumber,
+      awashFull: awashFull ?? this.awashFull,
       error: clearError ? null : (error ?? this.error),
       businessNameError: clearBusinessNameError
           ? null
@@ -181,10 +180,10 @@ class MerchantSetupNotifier
     _update(current.copyWith(cbeEnabled: value));
   }
 
-  void setCbeLast8(String value) {
+  void setCbeFull(String value) {
     final current = _current;
     if (current == null) return;
-    _update(current.copyWith(cbeLast8: value));
+    _update(current.copyWith(cbeFull: value));
   }
 
   void setAbyssiniaEnabled(bool value) {
@@ -193,10 +192,10 @@ class MerchantSetupNotifier
     _update(current.copyWith(abyssiniaEnabled: value));
   }
 
-  void setAbyssiniaLast5(String value) {
+  void setAbyssiniaFull(String value) {
     final current = _current;
     if (current == null) return;
-    _update(current.copyWith(abyssiniaLast5: value));
+    _update(current.copyWith(abyssiniaFull: value));
   }
 
   void setAwashEnabled(bool value) {
@@ -205,10 +204,10 @@ class MerchantSetupNotifier
     _update(current.copyWith(awashEnabled: value));
   }
 
-  void setAwashAccountNumber(String value) {
+  void setAwashFull(String value) {
     final current = _current;
     if (current == null) return;
-    _update(current.copyWith(awashAccountNumber: value));
+    _update(current.copyWith(awashFull: value));
   }
 
   /// Submits the form. The repository refreshes /onboarding/status on

@@ -406,7 +406,7 @@ void main() {
 
       await tester.tap(find.text('Commercial Bank of Ethiopia (CBE)'));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextFormField).at(1), '12345678');
+      await tester.enterText(find.byType(TextFormField).at(1), '1000123456789');
       await tester.pumpAndSettle();
 
       expect(_button(tester, 'Create business').onPressed, isNotNull);
@@ -417,7 +417,7 @@ void main() {
 
       expect(repo.createCalls, 1);
       expect(repo.lastRequest?.verificationAccounts, {
-        'cbe': {'last8': '12345678'},
+        'cbe': {'full': '1000123456789'},
       });
     });
 

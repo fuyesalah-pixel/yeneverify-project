@@ -89,32 +89,32 @@ void main() {
     test('parses the wrapped GET/PUT response shape', () {
       final accounts = VerificationAccounts.fromJson({
         'verificationAccounts': {
-          'cbe': {'last8': '12345678'},
-          'abyssinia': {'last5': '54321'},
-          'awash': {'accountNumber': '0130012345678'},
+          'cbe': {'full': '1000123456789', 'last8': '23456789'},
+          'abyssinia': {'full': '0123456789', 'last5': '56789'},
+          'awash': {'full': '0130012345678', 'accountNumber': '0130012345678'},
         },
       });
 
-      expect(accounts.cbeLast8, '12345678');
-      expect(accounts.abyssiniaLast5, '54321');
-      expect(accounts.awashAccountNumber, '0130012345678');
+      expect(accounts.cbeFull, '1000123456789');
+      expect(accounts.abyssiniaFull, '0123456789');
+      expect(accounts.awashFull, '0130012345678');
     });
 
     test('also parses an already-unwrapped payload', () {
       final accounts = VerificationAccounts.fromJson({
-        'cbe': {'last8': '87654321'},
+        'cbe': {'full': '1000123456789'},
       });
 
-      expect(accounts.cbeLast8, '87654321');
-      expect(accounts.abyssiniaLast5, isNull);
+      expect(accounts.cbeFull, '1000123456789');
+      expect(accounts.abyssiniaFull, isNull);
       expect(accounts.isEmpty, isFalse);
     });
 
-    test('toPatch sends null for cleared banks so the merge removes them', () {
-      const accounts = VerificationAccounts(cbeLast8: '12345678');
+    test('toPatch sends the full number and null for cleared banks', () {
+      const accounts = VerificationAccounts(cbeFull: '1000123456789');
 
       expect(accounts.toPatch(), {
-        'cbe': {'last8': '12345678'},
+        'cbe': {'full': '1000123456789'},
         'abyssinia': null,
         'awash': null,
       });
@@ -123,28 +123,35 @@ void main() {
   });
 
   group('VerificationAccountsScreen', () {
-    testWidgets('renders the three banks with the stored values',
+    testWidgets('renders the three banks with the stored full numbers',
         (tester) async {
       final api = _FakeAccountsApi();
       await _pumpScreen(
         tester,
         initial: const VerificationAccounts(
-          cbeLast8: '12345678',
-          abyssiniaLast5: '54321',
+          cbeFull: '1000123456789',
+          abyssiniaFull: '0123456789',
         ),
         auth: _FakeAuthRepository(),
         api: api,
       );
 
-      expect(find.text('Commercial Bank of Ethiopia (CBE)'), findsOneWidget);
-      expect(find.text('Bank of Abyssinia'), findsOneWidget);
-      expect(find.text('Awash Bank'), findsOneWidget);
+      expect(find.text('Your CBE account number'), findsOneWidget);
+      expect(
+        find.text('Your Bank of Abyssinia account number'),
+        findsOneWidget,
+      );
+      expect(find.text('Your Awash Bank account number'), findsOneWidget);
+      expect(
+        find.text('We only use the last 8 digits for verification.'),
+        findsOneWidget,
+      );
 
       final fields = tester
           .widgetList<TextFormField>(find.byType(TextFormField))
           .toList();
-      expect(fields[0].controller?.text, '12345678');
-      expect(fields[1].controller?.text, '54321');
+      expect(fields[0].controller?.text, '1000123456789');
+      expect(fields[1].controller?.text, '0123456789');
       expect(fields[2].controller?.text, '');
       expect(_saveButton(tester).onPressed, isNotNull);
     });
@@ -161,7 +168,7 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(0), '123');
       await tester.pumpAndSettle();
 
-      expect(find.text('Enter exactly 8 digits'), findsOneWidget);
+      expect(find.text('Enter 10 to 16 digits'), findsOneWidget);
       expect(_saveButton(tester).onPressed, isNull);
     });
 
@@ -176,7 +183,7 @@ void main() {
         api: api,
       );
 
-      await tester.enterText(find.byType(TextFormField).at(0), '12345678');
+      await tester.enterText(find.byType(TextFormField).at(0), '1000123456789');
       await tester.pumpAndSettle();
 
       await tester.tap(find.widgetWithText(AppButton, 'Save'));
@@ -195,9 +202,9 @@ void main() {
       expect(auth.lastPin, '5729');
       expect(api.updateCalls, 1);
       expect(api.lastToken, 'step-up-token');
-      expect(api.lastAccounts?.cbeLast8, '12345678');
-      expect(api.lastAccounts?.abyssiniaLast5, isNull);
-      expect(api.lastAccounts?.awashAccountNumber, isNull);
+      expect(api.lastAccounts?.cbeFull, '1000123456789');
+      expect(api.lastAccounts?.abyssiniaFull, isNull);
+      expect(api.lastAccounts?.awashFull, isNull);
       expect(find.text('Verification accounts saved'), findsOneWidget);
     });
   });

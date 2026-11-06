@@ -1403,31 +1403,37 @@ class AppLocalizationsAm extends AppLocalizations {
   String get verificationAccountsCbe => 'የኢትዮጵያ ንግድ ባንክ (CBE)';
 
   @override
-  String get verificationAccountsCbeField => 'የመጨረሻዎቹ 8 አሃዞች';
+  String get verificationAccountsCbeLabel => 'የእርስዎ የCBE አካውንት ቁጥር';
 
   @override
   String get verificationAccountsAbyssinia => 'ባንክ አቢሲኒያ';
 
   @override
-  String get verificationAccountsAbyssiniaField => 'የመጨረሻዎቹ 5 አሃዞች';
+  String get verificationAccountsAbyssiniaLabel => 'የእርስዎ የአቢሲኒያ ባንክ አካውንት ቁጥር';
 
   @override
   String get verificationAccountsAwash => 'አዋሽ ባንክ';
 
   @override
-  String get verificationAccountsAwashField => 'የመለያ ቁጥር (10–16 አሃዞች)';
+  String get verificationAccountsAwashLabel => 'የእርስዎ የአዋሽ ባንክ አካውንት ቁጥር';
 
   @override
-  String get verificationAccountsOptional => 'የማይጠቀሙበትን ባንክ ባዶ ይተውት።';
+  String get verificationAccountsAccountHint => 'ለምሳሌ፦ 1000123456789';
 
   @override
-  String get verificationAccountsInvalid8 => 'በትክክል 8 አሃዞች ያስገቡ';
+  String get verificationAccountsCbeHelper =>
+      'ለማረጋገጫ የመጨረሻዎቹን 8 አሃዞች ብቻ እንጠቀማለን።';
 
   @override
-  String get verificationAccountsInvalid5 => 'በትክክል 5 አሃዞች ያስገቡ';
+  String get verificationAccountsAbyssiniaHelper =>
+      'ለማረጋገጫ የመጨረሻዎቹን 5 አሃዞች ብቻ እንጠቀማለን።';
 
   @override
-  String get verificationAccountsInvalidAwash => 'ከ10 እስከ 16 አሃዞች ያስገቡ';
+  String get verificationAccountsAwashHelper =>
+      'ይህን ቁጥር አካውንትዎን ለመፈለግ እንጠቀማለን።';
+
+  @override
+  String get verificationAccountsInvalidLength => 'ከ10 እስከ 16 አሃዞች ያስገቡ';
 
   @override
   String get verificationAccountsSaved => 'የማረጋገጫ መለያዎች ተቀምጠዋል';
