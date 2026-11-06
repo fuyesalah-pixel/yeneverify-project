@@ -51,6 +51,9 @@ export type CreatePendingInput = {
   verifiedByUserId: string;
   receiptId: string;
   source: 'TRANSACTION' | 'BILLING';
+  /** Client-scanned QR hint; persisted so the queue worker sees it. */
+  qrContent?: string | null;
+  qrType?: string | null;
 };
 
 export type VerificationSummaryRow = {
@@ -103,6 +106,9 @@ export type VerificationRow = {
   status: string;
   ocrRawText: string | null;
   ocrConfidence: Prisma.Decimal | null;
+  /** Present when selected via ROW_SELECT; legacy spec fixtures omit it. */
+  qrContent?: string | null;
+  qrType?: string | null;
   adapterMetadata: Prisma.JsonValue | null;
   errorCode: string | null;
   errorMessage: string | null;
@@ -135,6 +141,8 @@ const ROW_SELECT = {
   status: true,
   ocrRawText: true,
   ocrConfidence: true,
+  qrContent: true,
+  qrType: true,
   adapterMetadata: true,
   errorCode: true,
   errorMessage: true,
@@ -255,6 +263,8 @@ export class VerificationsRepository {
         receiptId: input.receiptId,
         source: input.source,
         status: 'PENDING',
+        qrContent: input.qrContent ?? null,
+        qrType: input.qrType ?? null,
       },
       select: ROW_SELECT,
     });

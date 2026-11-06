@@ -15,8 +15,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BankCode } from '@prisma/client';
 import { normalizeReference } from '../regex/reference-patterns';
-import type { VerifyInput } from '../adapters/adapter.interface';
+import type { VerifyInput, BankAdapter } from '../adapters/adapter.interface';
 import { AdapterRegistry } from '../adapters/adapter.registry';
+import { resolveQrHints } from '../qr/qr-hints';
 import { OcrService } from '../../ocr/ocr.service';
 import { StorageService } from '../../storage/storage.service';
 import { AuditService } from '../../audit/audit.service';
@@ -118,19 +119,45 @@ export class VerificationsService {
 
     const requestId = input.requestId ?? input.verificationId;
 
+    // ── Stage 0: QR hints (v1.8.4) ──
+    // A scanned payload is a HINT, never a verdict: the adapter still
+    // performs the lookup. When it names a registered bank AND a
+    // reference-shaped value, OCR is skipped entirely.
+    const qr = verification.qrContent
+      ? resolveQrHints(verification.qrContent, verification.qrType)
+      : null;
+
     // ── Stage 1: OCR (cached from a prior partial run when present) ──
     let ocrText = verification.ocrRawText;
+    let ocrRan = false;
     const state: DetectionStageResult = {
       ocrConfidence: verification.ocrConfidence?.toNumber() ?? null,
       bankCode: null,
       referenceNormalized: null,
     };
 
-    if (!ocrText) {
+    let adapter: BankAdapter | null = null;
+    let detectionConfidence: number | null = null;
+
+    if (qr?.reference && qr.bankCode) {
+      try {
+        adapter = this.registry.get(qr.bankCode);
+        detectionConfidence = 1;
+        this.logger.log(
+          `Verification ${verification.id} QR hint type=${qr.contentType} bank=${qr.bankCode} — OCR skipped (request ${requestId})`,
+        );
+      } catch {
+        // No adapter ships for that bank yet: fall back to OCR routing.
+        adapter = null;
+      }
+    }
+
+    if (!ocrText && !adapter) {
       try {
         const bytes = await this.storage.getObject(verification.receipt.storageKey);
         const ocr = await this.ocr.recognize(bytes, verification.receipt.mimeType);
         ocrText = ocr.text;
+        ocrRan = true;
         state.ocrConfidence = ocr.confidence;
         if (!ocrText) {
           throw new Error('empty result');
@@ -147,28 +174,31 @@ export class VerificationsService {
       }
     }
 
-    // ── Stage 2: bank detection ──
-    const detection = this.registry.detectBest(ocrText);
-    if (!detection) {
-      return this.finalize(input, startedAt, {
-        status: 'ERROR',
-        errorCode: 'VERIFICATION_BANK_NOT_DETECTED',
-        errorMessage: 'Could not identify the bank from the receipt.',
-        metadata: { stage: 'detect', ocrTextLength: ocrText.length },
-      });
+    // ── Stage 2: bank detection (QR first, then OCR text) ──
+    if (!adapter) {
+      const detection = this.registry.detectBest(ocrText ?? '');
+      if (!detection) {
+        return this.finalize(input, startedAt, {
+          status: 'ERROR',
+          errorCode: 'VERIFICATION_BANK_NOT_DETECTED',
+          errorMessage: 'Could not identify the bank from the receipt.',
+          metadata: { stage: 'detect', ocrTextLength: ocrText?.length ?? 0 },
+        });
+      }
+      adapter = detection.adapter;
+      detectionConfidence = detection.confidence;
     }
-    const { adapter, confidence } = detection;
     state.bankCode = adapter.bankCode as DetectionStageResult['bankCode'];
 
-    // ── Stage 3: reference extraction ──
-    const reference = adapter.extractReference(ocrText);
+    // ── Stage 3: reference extraction (QR wins when present) ──
+    const reference = qr?.reference ?? adapter.extractReference(ocrText ?? '');
     if (!reference) {
       return this.finalize(input, startedAt, {
         status: 'ERROR',
         bankCode: adapter.bankCode as never,
         errorCode: 'BANK_REFERENCE_NOT_FOUND',
         errorMessage: 'No transaction reference could be extracted from this receipt.',
-        metadata: { stage: 'extract', detectionConfidence: confidence },
+        metadata: { stage: 'extract', detectionConfidence },
       });
     }
     const referenceNormalized = normalizeReference(reference);
@@ -179,7 +209,7 @@ export class VerificationsService {
       where: { id: input.merchantId },
       select: { verificationAccounts: true },
     });
-    const ocrSupplementary = adapter.extractSupplementary?.(ocrText) ?? {};
+    const ocrSupplementary = adapter.extractSupplementary?.(ocrText ?? '') ?? {};
     const configuredSupplementary = buildSupplementaryData(
       adapter.bankCode,
       merchant?.verificationAccounts,
@@ -189,7 +219,7 @@ export class VerificationsService {
       referenceNormalized,
       // Merchant-configured accounts win over OCR-derived guesses.
       supplementary: { ...ocrSupplementary, ...configuredSupplementary },
-      rawOcrText: ocrText,
+      rawOcrText: ocrText ?? '',
       merchantId: input.merchantId,
       requestId,
     };
@@ -244,6 +274,17 @@ export class VerificationsService {
     outcome.referenceNormalized = referenceNormalized;
     // Persisted alongside bankCode so the status endpoint shows it.
     outcome.bankReference ??= referenceNormalized;
+    if (qr) {
+      outcome.metadata = {
+        ...outcome.metadata,
+        qr: {
+          type: qr.contentType,
+          bank: qr.bankCode,
+          referenceFromQr: qr.reference !== null,
+          ocrSkipped: !ocrRan,
+        },
+      };
+    }
 
     return this.finalize(input, startedAt, outcome, state);
   }
@@ -300,6 +341,8 @@ export class VerificationsService {
       verifiedByUserId: user.id,
       receiptId: dto.receiptId,
       source: dto.source,
+      qrContent: dto.qrContent ?? null,
+      qrType: dto.qrType ?? null,
     });
 
     this.audit.log({
@@ -313,6 +356,8 @@ export class VerificationsService {
         merchantId,
         receiptId: dto.receiptId,
         source: dto.source,
+        // Type only — the payload may carry PII or tokens.
+        qrType: dto.qrType ?? null,
         billing:
           dto.source === 'BILLING' ? { packageCode: dto.billingPackageCode ?? null } : undefined,
       },

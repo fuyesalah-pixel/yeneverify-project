@@ -604,6 +604,9 @@ model Verification {
   status              VerificationStatus @default(PENDING)
   ocrRawText          String?            @map("ocr_raw_text")
   ocrConfidence       Decimal?           @map("ocr_confidence") @db.Decimal(4, 3)
+  /// Client-scanned QR hint (v1.8.4). Never trusted as a verdict.
+  qrContent           String?            @map("qr_content")
+  qrType              String?            @map("qr_type")
   adapterMetadata     Json?              @map("adapter_metadata")
   errorCode           String?            @map("error_code")
   errorMessage        String?            @map("error_message")

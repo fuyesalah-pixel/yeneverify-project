@@ -7,6 +7,7 @@
 // exception. The upload progress callback is passed straight through to the
 // PUT so the UI can show a real percentage.
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,6 +16,7 @@ import '../../../core/network/api_result.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/image_prep.dart';
 import '../domain/poll_verification.dart';
+import '../domain/qr_detector.dart';
 import 'models/receipt_response.dart';
 import 'models/verification_result.dart';
 import 'receipts_api.dart';
@@ -25,13 +27,16 @@ class VerifyRepository {
     required ReceiptsApi receipts,
     required VerificationsApi verifications,
     ImagePrep? imagePrep,
+    QrDetector? qrDetector,
   })  : _receipts = receipts,
         _verifications = verifications,
-        _imagePrep = imagePrep ?? ImagePrep();
+        _imagePrep = imagePrep ?? ImagePrep(),
+        _qrDetector = qrDetector ?? const ZxingQrDetector();
 
   final ReceiptsApi _receipts;
   final VerificationsApi _verifications;
   final ImagePrep _imagePrep;
+  final QrDetector _qrDetector;
 
   /// Compresses and hashes the picked/captured image. Throws
   /// [ImagePrepException] (RECEIPT_TOO_LARGE / RECEIPT_INVALID_TYPE).
@@ -82,7 +87,22 @@ class VerifyRepository {
       return Failure(complete.errorOrNull!);
     }
 
-    return _verifications.submit(receiptId: complete.data.receiptId);
+    // Best-effort: a missing/unreadable QR must never fail a submit.
+    final qr = _detectQr(image.bytes);
+
+    return _verifications.submit(
+      receiptId: complete.data.receiptId,
+      qrContent: qr?.rawValue,
+      qrType: qr?.type.wire,
+    );
+  }
+
+  QrScanResult? _detectQr(Uint8List bytes) {
+    try {
+      return _qrDetector.detect(bytes);
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Polls until a terminal status, the 30 s ceiling, or a hard failure.
@@ -107,10 +127,13 @@ final verificationsApiProvider = Provider<VerificationsApi>(
 
 final imagePrepProvider = Provider<ImagePrep>((ref) => ImagePrep());
 
+final qrDetectorProvider = Provider<QrDetector>((ref) => const ZxingQrDetector());
+
 final verifyRepositoryProvider = Provider<VerifyRepository>(
   (ref) => VerifyRepository(
     receipts: ref.watch(receiptsApiProvider),
     verifications: ref.watch(verificationsApiProvider),
     imagePrep: ref.watch(imagePrepProvider),
+    qrDetector: ref.watch(qrDetectorProvider),
   ),
 );

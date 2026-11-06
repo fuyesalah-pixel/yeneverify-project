@@ -3,6 +3,7 @@
 // ============================================================
 
 import { z } from 'zod';
+import { QR_CONTENT_TYPES } from '../../qr/qr-hints';
 
 export const BANK_CODES = [
   'CBE',
@@ -32,8 +33,19 @@ export const CreateVerificationDtoSchema = z
     // Reserved: soft hints for a future manual-entry submission path.
     hintBankCode: z.enum(BANK_CODES).optional(),
     hintReference: z.string().min(1).max(40).optional(),
+    // Scanned QR payload (v1.8.4). A HINT only: the adapter still
+    // decides the verdict; the pipeline may use it to skip OCR.
+    qrContent: z.string().trim().min(1).max(2048).optional(),
+    qrType: z.enum(QR_CONTENT_TYPES).optional(),
   })
   .superRefine((dto, ctx) => {
+    if ((dto.qrContent === undefined) !== (dto.qrType === undefined)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [dto.qrContent === undefined ? 'qrContent' : 'qrType'],
+        message: 'qrContent and qrType must be provided together',
+      });
+    }
     if (dto.source === 'BILLING') {
       if (!dto.billingPackageCode) {
         ctx.addIssue({

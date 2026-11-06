@@ -18,14 +18,26 @@ class VerificationsApi {
   final Dio _dio;
 
   /// Enqueues a TRANSACTION verification for a completed receipt upload.
+  ///
+  /// [qrContent]/[qrType] carry the scanned QR payload as a hint; the
+  /// backend may use it to skip OCR, but the verdict still comes from
+  /// the bank adapter.
   Future<ApiResult<VerificationSubmitted>> submit({
     required String receiptId,
     String source = 'TRANSACTION',
+    String? qrContent,
+    String? qrType,
   }) async {
+    final hasQr = qrContent != null && qrType != null;
     return _request<VerificationSubmitted>(
       '/verifications',
       method: 'POST',
-      data: {'receiptId': receiptId, 'source': source},
+      data: {
+        'receiptId': receiptId,
+        'source': source,
+        if (hasQr) 'qrContent': qrContent,
+        if (hasQr) 'qrType': qrType,
+      },
       fromJson: VerificationSubmitted.fromJson,
     );
   }

@@ -312,6 +312,42 @@ describe('Verifications (e2e, local driver + real queue)', () => {
     }
   }, 40_000);
 
+  it('rejects qrContent without qrType (422, no row created)', async () => {
+    const receiptId = await uploadReceipt(merchantAuth(), 'qr-bad.jpg');
+
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/verifications')
+      .set(merchantAuth())
+      .send({ receiptId, qrContent: 'CBE FT26195DBK5W81465291' })
+      .expect(422);
+
+    expect(res.body.error.details ?? res.body.error).toBeTruthy();
+  });
+
+  it('QR hint without a bank name cannot fabricate a verdict — pipeline still OCR-routes', async () => {
+    const receiptId = await uploadReceipt(merchantAuth(), 'qr-hint.jpg');
+
+    const submit = await request(app.getHttpServer())
+      .post('/api/v1/verifications')
+      .set(merchantAuth())
+      .send({
+        receiptId,
+        qrContent: 'FT26195DBK5W81465291',
+        qrType: 'reference',
+      })
+      .expect(202);
+
+    const detail = (await pollUntilTerminal(
+      submit.body.verificationId as string,
+      merchantAuth(),
+    )) as { status: string; errorCode: string | null };
+
+    // Mock OCR text names no bank, so detection still fails: the QR
+    // reference is a hint, never a verdict.
+    expect(detail.status).toBe('ERROR');
+    expect(detail.errorCode).toBe('VERIFICATION_BANK_NOT_DETECTED');
+  }, 40_000);
+
   it('sub-merchant cannot verify a receipt they did not upload (403)', async () => {
     const receiptId = await uploadReceipt(merchantAuth(), 'merchant-owned.jpg');
 

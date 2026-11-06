@@ -369,6 +369,113 @@ describe('VerificationsService.process', () => {
     expect(adapter.verify).toHaveBeenCalledWith(expect.objectContaining({ rawOcrText: OCR_TEXT }));
   });
 
+  // ── v1.8.4 QR fast path ─────────────────────────────────────────────
+
+  it('QR hint (bank + reference): skips storage, OCR and reference extraction', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    const deps = makeDeps(adapter);
+    deps.repo.loadForProcessing.mockResolvedValue({
+      kind: 'pending',
+      verification: pendingRow({
+        qrContent: 'CBE FT26195DBK5W81465291',
+        qrType: 'reference',
+      }),
+    });
+    const service = makeService(deps);
+
+    const result = await service.process(input());
+
+    expect(result.status).toBe('VERIFIED');
+    expect(deps.storage.getObject).not.toHaveBeenCalled();
+    expect(deps.ocr.recognize).not.toHaveBeenCalled();
+    expect(deps.repo.persistOcr).not.toHaveBeenCalled();
+    expect(adapter.extractReference).not.toHaveBeenCalled();
+    expect(adapter.verify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reference: 'FT26195DBK5W81465291',
+        referenceNormalized: 'FT26195DBK5W81465291',
+        rawOcrText: '',
+      }),
+    );
+
+    // Fast-path marker persisted, raw payload never stored in metadata.
+    const outcome = deps.repo.updateWithOutcome.mock.calls[0][2];
+    expect(outcome.metadata.qr).toEqual({
+      type: 'reference',
+      bank: 'CBE',
+      referenceFromQr: true,
+      ocrSkipped: true,
+    });
+    expect(JSON.stringify(outcome)).not.toContain('CBE FT26195');
+  });
+
+  it('QR reference without a bank: OCR still runs for detection, QR reference wins', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    const deps = makeDeps(adapter);
+    deps.repo.loadForProcessing.mockResolvedValue({
+      kind: 'pending',
+      verification: pendingRow({
+        qrContent: 'https://example.test/pay?id=FT26195DBK5W81465291',
+        qrType: 'url',
+      }),
+    });
+    const service = makeService(deps);
+
+    const result = await service.process(input());
+
+    expect(result.status).toBe('VERIFIED');
+    expect(deps.ocr.recognize).toHaveBeenCalledTimes(1);
+    expect(adapter.extractReference).not.toHaveBeenCalled();
+    expect(adapter.verify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reference: 'FT26195DBK5W81465291',
+        rawOcrText: OCR_TEXT,
+      }),
+    );
+    const outcome = deps.repo.updateWithOutcome.mock.calls[0][2];
+    expect(outcome.metadata.qr).toMatchObject({ type: 'url', ocrSkipped: false });
+  });
+
+  it('unusable QR payload falls back to the normal OCR pipeline', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    const deps = makeDeps(adapter);
+    deps.repo.loadForProcessing.mockResolvedValue({
+      kind: 'pending',
+      verification: pendingRow({ qrContent: 'hello world', qrType: 'unknown' }),
+    });
+    const service = makeService(deps);
+
+    const result = await service.process(input());
+
+    expect(result.status).toBe('VERIFIED');
+    expect(deps.ocr.recognize).toHaveBeenCalledTimes(1);
+    expect(adapter.extractReference).toHaveBeenCalledWith(OCR_TEXT);
+    expect(adapter.verify).toHaveBeenCalledWith(
+      expect.objectContaining({ reference: 'FT26195DBK5W81465291' }),
+    );
+  });
+
+  it('QR names a bank with no registered adapter: falls back to OCR routing', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    const deps = makeDeps(adapter);
+    deps.repo.loadForProcessing.mockResolvedValue({
+      kind: 'pending',
+      verification: pendingRow({
+        qrContent: 'ZEMEN FT26195DBK5W81465291',
+        qrType: 'reference',
+      }),
+    });
+    const service = makeService(deps);
+
+    const result = await service.process(input());
+
+    expect(result.status).toBe('VERIFIED');
+    expect(deps.ocr.recognize).toHaveBeenCalledTimes(1);
+    expect(adapter.verify).toHaveBeenCalledWith(
+      expect.objectContaining({ reference: 'FT26195DBK5W81465291' }),
+    );
+  });
+
   it('OCR provider throws → ERROR VERIFICATION_OCR_FAILED', async () => {
     const adapter = makeStubAdapter(verifiedAdapterResult());
     const deps = makeDeps(adapter);
@@ -683,6 +790,34 @@ describe('VerificationsService 13E.3 HTTP surface', () => {
       expect.objectContaining({ action: 'verification.submitted' }),
     );
     expect(deps.queue.enqueue).toHaveBeenCalledWith('verif-1');
+  });
+
+  it('submit: QR hint is persisted for the worker, only its type is audited', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    const service = makeService(deps);
+
+    await service.submit({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      dto: {
+        receiptId: 'receipt-1',
+        source: 'TRANSACTION',
+        qrContent: 'CBE FT26195DBK5W81465291',
+        qrType: 'reference',
+      },
+      requestId: 'req-1',
+    });
+
+    expect(deps.repo.createPending).toHaveBeenCalledWith(
+      expect.objectContaining({
+        qrContent: 'CBE FT26195DBK5W81465291',
+        qrType: 'reference',
+      }),
+    );
+    const auditEntry = deps.audit.log.mock.calls[0][0];
+    expect(auditEntry.metadata.qrType).toBe('reference');
+    expect(JSON.stringify(auditEntry)).not.toContain('FT26195');
   });
 
   it('submit: sub-merchant cannot verify another user\u2019s receipt', async () => {
