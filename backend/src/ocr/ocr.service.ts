@@ -8,7 +8,7 @@
 // anything: storage of results lands in `verifications` in Step 13E.
 // ============================================================
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { AppConfigService } from '../config/config.service';
 import { GoogleVisionProvider } from './providers/google-vision.provider';
 import { MockProvider } from './providers/mock.provider';
@@ -17,6 +17,8 @@ import { TesseractProvider } from './providers/tesseract.provider';
 
 @Injectable()
 export class OcrService {
+  private readonly logger = new Logger(OcrService.name);
+
   constructor(
     private readonly config: AppConfigService,
     private readonly mock: MockProvider,
@@ -36,8 +38,25 @@ export class OcrService {
     }
   }
 
+  /**
+   * Runs the configured provider. When Google Vision fails (quota,
+   * auth, transient network), Tesseract is the last-resort fallback so
+   * a receipt is not lost to a cloud outage; mock/tesseract failures
+   * surface as-is.
+   */
   async recognize(imageBuffer: Buffer, mimeType: string): Promise<OcrResult> {
-    return this.active().recognize(imageBuffer, mimeType);
+    const provider = this.active();
+    try {
+      return await provider.recognize(imageBuffer, mimeType);
+    } catch (err) {
+      if (this.config.ocr.provider !== 'google-vision') {
+        throw err;
+      }
+      this.logger.warn(
+        `Google Vision OCR failed (${err instanceof Error ? err.message : 'unknown'}) — falling back to Tesseract`,
+      );
+      return this.tesseract.recognize(imageBuffer, mimeType);
+    }
   }
 
   async health(): Promise<boolean> {

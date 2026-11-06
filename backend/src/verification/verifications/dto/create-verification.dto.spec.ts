@@ -66,3 +66,47 @@ describe('CreateVerificationDtoSchema — QR hint fields', () => {
     }
   });
 });
+
+describe('CreateVerificationDtoSchema — client OCR fields', () => {
+  it('accepts clientOcrText + clientOcrConfidence together', () => {
+    const result = parse({
+      clientOcrText: 'CBE transfer FT26195DBK5W81465291',
+      clientOcrConfidence: 0.9,
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.clientOcrConfidence).toBe(0.9);
+    }
+  });
+
+  it('rejects clientOcrText without confidence', () => {
+    const result = parse({ clientOcrText: 'CBE transfer' });
+
+    expect(result.success).toBe(false);
+    expect(issuePaths(result)).toContain('clientOcrConfidence');
+  });
+
+  it('rejects confidence without text', () => {
+    const result = parse({ clientOcrConfidence: 0.9 });
+
+    expect(result.success).toBe(false);
+    expect(issuePaths(result)).toContain('clientOcrText');
+  });
+
+  it('rejects an out-of-range confidence', () => {
+    expect(issuePaths(parse({ clientOcrText: 'text', clientOcrConfidence: 1.2 }))).toContain(
+      'clientOcrConfidence',
+    );
+    expect(issuePaths(parse({ clientOcrText: 'text', clientOcrConfidence: -0.1 }))).toContain(
+      'clientOcrConfidence',
+    );
+  });
+
+  it('caps clientOcrText at 20000 characters', () => {
+    const result = parse({ clientOcrText: 'a'.repeat(20001), clientOcrConfidence: 0.9 });
+
+    expect(result.success).toBe(false);
+    expect(issuePaths(result)).toContain('clientOcrText');
+  });
+});

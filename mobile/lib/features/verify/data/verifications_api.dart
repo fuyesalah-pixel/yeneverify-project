@@ -21,14 +21,19 @@ class VerificationsApi {
   ///
   /// [qrContent]/[qrType] carry the scanned QR payload as a hint; the
   /// backend may use it to skip OCR, but the verdict still comes from
-  /// the bank adapter.
+  /// the bank adapter. [clientOcrText]/[clientOcrConfidence] carry the
+  /// on-device ML Kit result; the backend prefers it only above its
+  /// confidence floor.
   Future<ApiResult<VerificationSubmitted>> submit({
     required String receiptId,
     String source = 'TRANSACTION',
     String? qrContent,
     String? qrType,
+    String? clientOcrText,
+    double? clientOcrConfidence,
   }) async {
     final hasQr = qrContent != null && qrType != null;
+    final hasClientOcr = clientOcrText != null && clientOcrConfidence != null;
     return _request<VerificationSubmitted>(
       '/verifications',
       method: 'POST',
@@ -37,6 +42,12 @@ class VerificationsApi {
         'source': source,
         if (hasQr) 'qrContent': qrContent,
         if (hasQr) 'qrType': qrType,
+        // Backend DTO caps this at 20000 characters.
+        if (hasClientOcr)
+          'clientOcrText': clientOcrText.length > 20000
+              ? clientOcrText.substring(0, 20000)
+              : clientOcrText,
+        if (hasClientOcr) 'clientOcrConfidence': clientOcrConfidence,
       },
       fromJson: VerificationSubmitted.fromJson,
     );

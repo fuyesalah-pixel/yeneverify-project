@@ -74,6 +74,10 @@ const List<String> _jsonReferenceKeys = [
   'txnRef',
 ];
 
+/// True when [text] contains a reference shape the bank adapters
+/// understand. Shared with the on-device OCR confidence heuristic.
+bool containsReference(String text) => _referenceRe.hasMatch(text);
+
 /// Classifies a decoded QR payload. Returns null when nothing usable
 /// can be derived — the caller then submits without a QR hint.
 QrScanResult? parseQrPayload(String raw) {

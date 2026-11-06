@@ -607,6 +607,10 @@ model Verification {
   /// Client-scanned QR hint (v1.8.4). Never trusted as a verdict.
   qrContent           String?            @map("qr_content")
   qrType              String?            @map("qr_type")
+  /// On-device ML Kit OCR hint (v1.8.5). Preferred over server OCR
+  /// only above the confidence floor; the verdict is still server-side.
+  clientOcrText       String?            @map("client_ocr_text")
+  clientOcrConfidence Decimal?           @map("client_ocr_confidence") @db.Decimal(4, 3)
   adapterMetadata     Json?              @map("adapter_metadata")
   errorCode           String?            @map("error_code")
   errorMessage        String?            @map("error_message")

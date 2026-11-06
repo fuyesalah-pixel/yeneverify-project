@@ -81,6 +81,7 @@ dependencies:
   flutter_image_compress: ^2.3.0
   zxing2: ^0.2.4
   image: 4.9.2
+  google_mlkit_text_recognition: ^1.0.1
 
 dev_dependencies:
   flutter_test:

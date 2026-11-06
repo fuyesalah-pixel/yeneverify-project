@@ -37,6 +37,10 @@ export const CreateVerificationDtoSchema = z
     // decides the verdict; the pipeline may use it to skip OCR.
     qrContent: z.string().trim().min(1).max(2048).optional(),
     qrType: z.enum(QR_CONTENT_TYPES).optional(),
+    // On-device (ML Kit) OCR result (v1.8.5). Used only when its
+    // confidence clears CLIENT_OCR_MIN_CONFIDENCE; untrusted otherwise.
+    clientOcrText: z.string().trim().min(1).max(20000).optional(),
+    clientOcrConfidence: z.number().min(0).max(1).optional(),
   })
   .superRefine((dto, ctx) => {
     if ((dto.qrContent === undefined) !== (dto.qrType === undefined)) {
@@ -44,6 +48,13 @@ export const CreateVerificationDtoSchema = z
         code: z.ZodIssueCode.custom,
         path: [dto.qrContent === undefined ? 'qrContent' : 'qrType'],
         message: 'qrContent and qrType must be provided together',
+      });
+    }
+    if ((dto.clientOcrText === undefined) !== (dto.clientOcrConfidence === undefined)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [dto.clientOcrText === undefined ? 'clientOcrText' : 'clientOcrConfidence'],
+        message: 'clientOcrText and clientOcrConfidence must be provided together',
       });
     }
     if (dto.source === 'BILLING') {

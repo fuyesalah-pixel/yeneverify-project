@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_result.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/image_prep.dart';
+import '../domain/on_device_ocr.dart';
 import '../domain/poll_verification.dart';
 import '../domain/qr_detector.dart';
 import 'models/receipt_response.dart';
@@ -28,15 +29,18 @@ class VerifyRepository {
     required VerificationsApi verifications,
     ImagePrep? imagePrep,
     QrDetector? qrDetector,
+    OnDeviceOcr? onDeviceOcr,
   })  : _receipts = receipts,
         _verifications = verifications,
         _imagePrep = imagePrep ?? ImagePrep(),
-        _qrDetector = qrDetector ?? const ZxingQrDetector();
+        _qrDetector = qrDetector ?? const ZxingQrDetector(),
+        _onDeviceOcr = onDeviceOcr ?? const MlKitOnDeviceOcr();
 
   final ReceiptsApi _receipts;
   final VerificationsApi _verifications;
   final ImagePrep _imagePrep;
   final QrDetector _qrDetector;
+  final OnDeviceOcr _onDeviceOcr;
 
   /// Compresses and hashes the picked/captured image. Throws
   /// [ImagePrepException] (RECEIPT_TOO_LARGE / RECEIPT_INVALID_TYPE).
@@ -87,19 +91,33 @@ class VerifyRepository {
       return Failure(complete.errorOrNull!);
     }
 
-    // Best-effort: a missing/unreadable QR must never fail a submit.
+    // Best-effort hints. A missing/unreadable QR or a failed on-device
+    // OCR must never fail a submit.
     final qr = _detectQr(image.bytes);
+    // A complete QR hint already skips OCR server-side; there is no
+    // point spending ML Kit time on it.
+    final clientOcr = qr == null ? await _recognizeOnDevice(image.bytes) : null;
 
     return _verifications.submit(
       receiptId: complete.data.receiptId,
       qrContent: qr?.rawValue,
       qrType: qr?.type.wire,
+      clientOcrText: clientOcr?.text,
+      clientOcrConfidence: clientOcr?.confidence,
     );
   }
 
   QrScanResult? _detectQr(Uint8List bytes) {
     try {
       return _qrDetector.detect(bytes);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<OnDeviceOcrResult?> _recognizeOnDevice(Uint8List bytes) async {
+    try {
+      return await _onDeviceOcr.recognize(bytes);
     } catch (_) {
       return null;
     }
@@ -129,11 +147,14 @@ final imagePrepProvider = Provider<ImagePrep>((ref) => ImagePrep());
 
 final qrDetectorProvider = Provider<QrDetector>((ref) => const ZxingQrDetector());
 
+final onDeviceOcrProvider = Provider<OnDeviceOcr>((ref) => const MlKitOnDeviceOcr());
+
 final verifyRepositoryProvider = Provider<VerifyRepository>(
   (ref) => VerifyRepository(
     receipts: ref.watch(receiptsApiProvider),
     verifications: ref.watch(verificationsApiProvider),
     imagePrep: ref.watch(imagePrepProvider),
     qrDetector: ref.watch(qrDetectorProvider),
+    onDeviceOcr: ref.watch(onDeviceOcrProvider),
   ),
 );

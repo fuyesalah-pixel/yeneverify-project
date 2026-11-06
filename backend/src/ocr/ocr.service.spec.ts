@@ -89,6 +89,47 @@ describe('OcrService (unit)', () => {
     const service = new OcrService(configWith('google-vision'), mock, vision, {} as never);
     expect(service.active().name).toBe('google-vision');
   });
+
+  it('falls back to Tesseract when Google Vision fails', async () => {
+    const vision = {
+      name: 'google-vision',
+      recognize: jest.fn().mockRejectedValue(new Error('quota exceeded')),
+    };
+    const tesseract = {
+      name: 'tesseract',
+      recognize: jest.fn().mockResolvedValue({
+        text: 'CBE transfer FT26195DBK5W81465291',
+        confidence: 0.9,
+        provider: 'tesseract',
+        durationMs: 12,
+      }),
+    };
+    const service = new OcrService(
+      configWith('google-vision'),
+      mock,
+      vision as never,
+      tesseract as never,
+    );
+
+    const result = await service.recognize(Buffer.from('img'), 'image/jpeg');
+
+    expect(vision.recognize).toHaveBeenCalledTimes(1);
+    expect(tesseract.recognize).toHaveBeenCalledTimes(1);
+    expect(result.text).toBe('CBE transfer FT26195DBK5W81465291');
+  });
+
+  it('does not hide a Tesseract failure behind a fallback', async () => {
+    const tesseract = {
+      name: 'tesseract',
+      recognize: jest.fn().mockRejectedValue(new Error('tesseract down')),
+    };
+    const service = new OcrService(configWith('tesseract'), mock, {} as never, tesseract as never);
+
+    await expect(service.recognize(Buffer.from('img'), 'image/jpeg')).rejects.toThrow(
+      'tesseract down',
+    );
+    expect(tesseract.recognize).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('TesseractProvider (unit, worker stubbed)', () => {

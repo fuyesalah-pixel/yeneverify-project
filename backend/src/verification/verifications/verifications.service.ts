@@ -19,6 +19,7 @@ import type { VerifyInput, BankAdapter } from '../adapters/adapter.interface';
 import { AdapterRegistry } from '../adapters/adapter.registry';
 import { resolveQrHints } from '../qr/qr-hints';
 import { OcrService } from '../../ocr/ocr.service';
+import { usableClientOcr } from '../../ocr/client-ocr';
 import { StorageService } from '../../storage/storage.service';
 import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -129,7 +130,7 @@ export class VerificationsService {
 
     // ── Stage 1: OCR (cached from a prior partial run when present) ──
     let ocrText = verification.ocrRawText;
-    let ocrRan = false;
+    let ocrSource: 'cached' | 'client' | 'server' | null = ocrText ? 'cached' : null;
     const state: DetectionStageResult = {
       ocrConfidence: verification.ocrConfidence?.toNumber() ?? null,
       bankCode: null,
@@ -153,24 +154,40 @@ export class VerificationsService {
     }
 
     if (!ocrText && !adapter) {
-      try {
-        const bytes = await this.storage.getObject(verification.receipt.storageKey);
-        const ocr = await this.ocr.recognize(bytes, verification.receipt.mimeType);
-        ocrText = ocr.text;
-        ocrRan = true;
-        state.ocrConfidence = ocr.confidence;
-        if (!ocrText) {
-          throw new Error('empty result');
+      // On-device OCR (ML Kit) is preferred when it clears the
+      // confidence floor: it already ran on the phone, so skipping the
+      // server provider removes the 14–48 s Tesseract wait.
+      const clientOcr = usableClientOcr(
+        verification.clientOcrText,
+        verification.clientOcrConfidence?.toNumber(),
+      );
+
+      if (clientOcr) {
+        ocrText = clientOcr.text;
+        state.ocrConfidence = clientOcr.confidence;
+        ocrSource = 'client';
+        // Canonicalize immediately so a retry never re-runs anything.
+        await this.repo.persistOcr(verification.id, clientOcr.text, clientOcr.confidence);
+      } else {
+        try {
+          const bytes = await this.storage.getObject(verification.receipt.storageKey);
+          const ocr = await this.ocr.recognize(bytes, verification.receipt.mimeType);
+          ocrText = ocr.text;
+          ocrSource = 'server';
+          state.ocrConfidence = ocr.confidence;
+          if (!ocrText) {
+            throw new Error('empty result');
+          }
+          // Persist early so a later retry never re-runs OCR.
+          await this.repo.persistOcr(verification.id, ocrText, ocr.confidence);
+        } catch (err) {
+          return this.finalize(input, startedAt, {
+            status: 'ERROR',
+            errorCode: 'VERIFICATION_OCR_FAILED',
+            errorMessage: 'Could not extract text from the receipt image.',
+            metadata: { stage: 'ocr', reason: err instanceof Error ? err.message : 'unknown' },
+          });
         }
-        // Persist early so a later retry never re-runs OCR.
-        await this.repo.persistOcr(verification.id, ocrText, ocr.confidence);
-      } catch (err) {
-        return this.finalize(input, startedAt, {
-          status: 'ERROR',
-          errorCode: 'VERIFICATION_OCR_FAILED',
-          errorMessage: 'Could not extract text from the receipt image.',
-          metadata: { stage: 'ocr', reason: err instanceof Error ? err.message : 'unknown' },
-        });
       }
     }
 
@@ -274,15 +291,20 @@ export class VerificationsService {
     outcome.referenceNormalized = referenceNormalized;
     // Persisted alongside bankCode so the status endpoint shows it.
     outcome.bankReference ??= referenceNormalized;
-    if (qr) {
+    if (qr || ocrSource) {
       outcome.metadata = {
         ...outcome.metadata,
-        qr: {
-          type: qr.contentType,
-          bank: qr.bankCode,
-          referenceFromQr: qr.reference !== null,
-          ocrSkipped: !ocrRan,
-        },
+        ...(qr
+          ? {
+              qr: {
+                type: qr.contentType,
+                bank: qr.bankCode,
+                referenceFromQr: qr.reference !== null,
+                ocrSkipped: ocrSource === null,
+              },
+            }
+          : {}),
+        ...(ocrSource ? { ocr: { source: ocrSource, confidence: state.ocrConfidence } } : {}),
       };
     }
 
@@ -343,6 +365,8 @@ export class VerificationsService {
       source: dto.source,
       qrContent: dto.qrContent ?? null,
       qrType: dto.qrType ?? null,
+      clientOcrText: dto.clientOcrText ?? null,
+      clientOcrConfidence: dto.clientOcrConfidence ?? null,
     });
 
     this.audit.log({
@@ -358,6 +382,12 @@ export class VerificationsService {
         source: dto.source,
         // Type only — the payload may carry PII or tokens.
         qrType: dto.qrType ?? null,
+        // Presence + confidence only; the OCR text itself never enters
+        // the audit ledger.
+        clientOcr:
+          dto.clientOcrText !== undefined
+            ? { provided: true, confidence: dto.clientOcrConfidence ?? null }
+            : undefined,
         billing:
           dto.source === 'BILLING' ? { packageCode: dto.billingPackageCode ?? null } : undefined,
       },

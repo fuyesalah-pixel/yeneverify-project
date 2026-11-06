@@ -61,6 +61,9 @@ const pendingRow = (overrides: Partial<VerificationWithReceipt> = {}): Verificat
 
 const OCR_TEXT = 'CBE transfer FT26195DBK5W81465291 1200.00 Selam Coffee';
 
+/** Prisma Decimal stand-in for fixtures that read .toNumber(). */
+const decimal = (value: number) => ({ toNumber: () => value }) as never;
+
 /** VERIFIED VerifyResult used by both the process() and HTTP-surface suites. */
 const verifiedAdapterResult = (): VerifyResult => ({
   status: 'VERIFIED',
@@ -476,6 +479,81 @@ describe('VerificationsService.process', () => {
     );
   });
 
+  // ── v1.8.5 client OCR fast path ─────────────────────────────────────
+
+  it('client OCR above the floor: server OCR and storage never touched', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    const deps = makeDeps(adapter);
+    const clientText = 'CBE transfer FT26195DBK5W81465291';
+    deps.repo.loadForProcessing.mockResolvedValue({
+      kind: 'pending',
+      verification: pendingRow({
+        clientOcrText: clientText,
+        clientOcrConfidence: decimal(0.9),
+      }),
+    });
+    const service = makeService(deps);
+
+    const result = await service.process(input());
+
+    expect(result.status).toBe('VERIFIED');
+    expect(deps.storage.getObject).not.toHaveBeenCalled();
+    expect(deps.ocr.recognize).not.toHaveBeenCalled();
+    // Canonicalized so a retry does not run any OCR again.
+    expect(deps.repo.persistOcr).toHaveBeenCalledWith('verif-1', clientText, 0.9);
+    expect(adapter.extractReference).toHaveBeenCalledWith(clientText);
+    expect(adapter.verify).toHaveBeenCalledWith(
+      expect.objectContaining({ rawOcrText: clientText }),
+    );
+
+    const outcome = deps.repo.updateWithOutcome.mock.calls[0][2];
+    expect(outcome.metadata.ocr).toEqual({ source: 'client', confidence: 0.9 });
+  });
+
+  it('client OCR at/below the floor falls back to the server provider', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    const deps = makeDeps(adapter);
+    deps.repo.loadForProcessing.mockResolvedValue({
+      kind: 'pending',
+      verification: pendingRow({
+        clientOcrText: 'garbage text',
+        clientOcrConfidence: decimal(0.4),
+      }),
+    });
+    const service = makeService(deps);
+
+    const result = await service.process(input());
+
+    expect(result.status).toBe('VERIFIED');
+    expect(deps.ocr.recognize).toHaveBeenCalledTimes(1);
+    expect(deps.repo.persistOcr).toHaveBeenCalledWith('verif-1', OCR_TEXT, 0.98);
+    expect(adapter.extractReference).toHaveBeenCalledWith(OCR_TEXT);
+
+    const outcome = deps.repo.updateWithOutcome.mock.calls[0][2];
+    expect(outcome.metadata.ocr).toEqual({ source: 'server', confidence: 0.98 });
+  });
+
+  it('client OCR does not override a cached server OCR result on retry', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    const deps = makeDeps(adapter);
+    deps.repo.loadForProcessing.mockResolvedValue({
+      kind: 'pending',
+      verification: pendingRow({
+        ocrRawText: OCR_TEXT,
+        ocrConfidence: decimal(0.98),
+        clientOcrText: 'other text FT11111111111111111111',
+        clientOcrConfidence: decimal(0.9),
+      }),
+    });
+    const service = makeService(deps);
+
+    await service.process(input());
+
+    expect(deps.ocr.recognize).not.toHaveBeenCalled();
+    expect(deps.repo.persistOcr).not.toHaveBeenCalled();
+    expect(adapter.extractReference).toHaveBeenCalledWith(OCR_TEXT);
+  });
+
   it('OCR provider throws → ERROR VERIFICATION_OCR_FAILED', async () => {
     const adapter = makeStubAdapter(verifiedAdapterResult());
     const deps = makeDeps(adapter);
@@ -817,6 +895,34 @@ describe('VerificationsService 13E.3 HTTP surface', () => {
     );
     const auditEntry = deps.audit.log.mock.calls[0][0];
     expect(auditEntry.metadata.qrType).toBe('reference');
+    expect(JSON.stringify(auditEntry)).not.toContain('FT26195');
+  });
+
+  it('submit: client OCR is persisted for the worker, text never reaches the audit ledger', async () => {
+    const deps = makeDeps(makeStubAdapter(verifiedAdapterResult()));
+    deps.repo.createPending = jest.fn(async () => ({ ...row(), createdAt: new Date() }));
+    const service = makeService(deps);
+
+    await service.submit({
+      user: user('MERCHANT'),
+      merchantId: 'merchant-1',
+      dto: {
+        receiptId: 'receipt-1',
+        source: 'TRANSACTION',
+        clientOcrText: 'CBE transfer FT26195DBK5W81465291',
+        clientOcrConfidence: 0.9,
+      },
+      requestId: 'req-1',
+    });
+
+    expect(deps.repo.createPending).toHaveBeenCalledWith(
+      expect.objectContaining({
+        clientOcrText: 'CBE transfer FT26195DBK5W81465291',
+        clientOcrConfidence: 0.9,
+      }),
+    );
+    const auditEntry = deps.audit.log.mock.calls[0][0];
+    expect(auditEntry.metadata.clientOcr).toEqual({ provided: true, confidence: 0.9 });
     expect(JSON.stringify(auditEntry)).not.toContain('FT26195');
   });
 
