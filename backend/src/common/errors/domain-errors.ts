@@ -135,6 +135,12 @@ export class StepUpRequiredError extends AppError {
   }
 }
 
+export class StepUpExpiredError extends AppError {
+  constructor(message = 'Step-up authentication expired. Please verify again.') {
+    super('AUTH_STEP_UP_EXPIRED', message, 401);
+  }
+}
+
 export class DeviceMismatchError extends AppError {
   constructor(message = 'Device fingerprint does not match.') {
     super('AUTH_DEVICE_MISMATCH', message, 401);

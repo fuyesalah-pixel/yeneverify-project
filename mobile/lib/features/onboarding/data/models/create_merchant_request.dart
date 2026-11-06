@@ -8,6 +8,7 @@ class CreateMerchantRequest {
     this.address,
     this.city,
     this.region,
+    this.verificationAccounts,
   });
 
   final String businessName;
@@ -16,6 +17,7 @@ class CreateMerchantRequest {
   final String? address;
   final String? city;
   final String? region;
+  final Map<String, dynamic>? verificationAccounts;
 
   Map<String, dynamic> toJson() => {
         'businessName': businessName,
@@ -24,5 +26,7 @@ class CreateMerchantRequest {
         if (address != null && address!.isNotEmpty) 'address': address,
         if (city != null && city!.isNotEmpty) 'city': city,
         if (region != null && region!.isNotEmpty) 'region': region,
+        if (verificationAccounts != null)
+          'verificationAccounts': verificationAccounts,
       };
 }

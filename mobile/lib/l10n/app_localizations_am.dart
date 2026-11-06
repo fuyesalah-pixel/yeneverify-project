@@ -1378,4 +1378,74 @@ class AppLocalizationsAm extends AppLocalizations {
   String profileBusiness(String name) {
     return 'ንግድ: $name';
   }
+
+  @override
+  String get verdictConfigureAccount => 'አሁን ያዘጋጁ';
+
+  @override
+  String get verdictConfigureAccountTitle => 'የባንክ መለያ መረጃዎን ያክሉ';
+
+  @override
+  String get profileVerificationAccounts => 'የማረጋገጫ መለያዎች';
+
+  @override
+  String get profileVerificationAccountsSubtitle =>
+      'ክፍያዎችን ለማረጋገጥ የሚያገለግሉ የባንክ መለያዎች';
+
+  @override
+  String get verificationAccountsTitle => 'የማረጋገጫ መለያዎች';
+
+  @override
+  String get verificationAccountsIntro =>
+      'እነዚህ ቁጥሮች በደረሰኞች ላይ አይታዩም። ከእነዚህ ባንኮች የሚመጡ ክፍያዎችን በራስ-ሰር ለማረጋገጥ አንድ ጊዜ ያስገቡ።';
+
+  @override
+  String get verificationAccountsCbe => 'የኢትዮጵያ ንግድ ባንክ (CBE)';
+
+  @override
+  String get verificationAccountsCbeField => 'የመጨረሻዎቹ 8 አሃዞች';
+
+  @override
+  String get verificationAccountsAbyssinia => 'ባንክ አቢሲኒያ';
+
+  @override
+  String get verificationAccountsAbyssiniaField => 'የመጨረሻዎቹ 5 አሃዞች';
+
+  @override
+  String get verificationAccountsAwash => 'አዋሽ ባንክ';
+
+  @override
+  String get verificationAccountsAwashField => 'የመለያ ቁጥር (10–16 አሃዞች)';
+
+  @override
+  String get verificationAccountsOptional => 'የማይጠቀሙበትን ባንክ ባዶ ይተውት።';
+
+  @override
+  String get verificationAccountsInvalid8 => 'በትክክል 8 አሃዞች ያስገቡ';
+
+  @override
+  String get verificationAccountsInvalid5 => 'በትክክል 5 አሃዞች ያስገቡ';
+
+  @override
+  String get verificationAccountsInvalidAwash => 'ከ10 እስከ 16 አሃዞች ያስገቡ';
+
+  @override
+  String get verificationAccountsSaved => 'የማረጋገጫ መለያዎች ተቀምጠዋል';
+
+  @override
+  String get verificationAccountsStepUpTitle => 'በPIN ያረጋግጡ';
+
+  @override
+  String get verificationAccountsStepUpBody =>
+      'የባንክ መለያ መረጃን ለማስቀመጥ PINዎን ያስገቡ።';
+
+  @override
+  String get onboardingAccountsTitle => 'የባንክ መለያ መረጃ (አማራጭ)';
+
+  @override
+  String get onboardingAccountsSubtitle =>
+      'ባንክዎ ክፍያን ለማረጋገጥ የሚፈልገውን የመለያ ቁጥር ያክሉ።';
+
+  @override
+  String get onboardingAccountsInvalid => 'ለተመረጡት ባንኮች የአሃዝ ብዛት ያረጋግጡ።';
 }

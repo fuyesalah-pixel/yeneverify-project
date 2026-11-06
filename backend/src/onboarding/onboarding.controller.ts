@@ -8,11 +8,12 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagg
 import { Request } from 'express';
 import { OnboardingService } from './onboarding.service';
 import { OnboardingStatusService } from './onboarding-status.service';
-import { CreateMerchantDto } from './dto/create-merchant.dto';
+import { CreateMerchantDto, CreateMerchantDtoSchema } from './dto/create-merchant.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { SkipOnboarding } from '../common/decorators/skip-onboarding.decorator';
 import { SkipTenant } from '../common/decorators/skip-tenant.decorator';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 
 @ApiTags('Onboarding')
 @Controller({ path: 'onboarding', version: '1' })
@@ -46,7 +47,7 @@ export class OnboardingController {
   @ApiResponse({ status: 400, description: 'Validation failed' })
   async createMerchant(
     @CurrentUser() user: { id: string; role: string },
-    @Body() dto: CreateMerchantDto,
+    @Body(new ZodValidationPipe(CreateMerchantDtoSchema)) dto: CreateMerchantDto,
     @Req() req: Request,
     @Ip() ip: string,
   ) {

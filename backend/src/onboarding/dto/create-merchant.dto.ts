@@ -3,6 +3,7 @@
 // ============================================================
 
 import { z } from 'zod';
+import { VerificationAccountsUpdateSchema } from '../../merchants/dto/verification-accounts.dto';
 
 export const CreateMerchantDtoSchema = z.object({
   businessName: z
@@ -15,6 +16,8 @@ export const CreateMerchantDtoSchema = z.object({
   address: z.string().max(200).optional(),
   city: z.string().max(100).optional(),
   region: z.string().max(100).optional(),
+  /** Optional bank accounts, so the first verification can run immediately. */
+  verificationAccounts: VerificationAccountsUpdateSchema.optional(),
 });
 
 export type CreateMerchantDto = z.infer<typeof CreateMerchantDtoSchema>;

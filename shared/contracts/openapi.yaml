@@ -802,6 +802,45 @@ paths:
       tags: *ref_11
       security:
         - access-token: []
+  /merchants/me/verification-accounts:
+    get:
+      operationId: MerchantsController_getVerificationAccounts
+      summary: Get bank accounts used for verification
+      parameters: []
+      responses:
+        '200':
+          description: Configured verification accounts
+      tags: *ref_11
+      security:
+        - access-token: []
+    put:
+      operationId: MerchantsController_updateVerificationAccounts
+      summary: Update verification accounts (requires step-up)
+      parameters:
+        - name: X-Step-Up-Token
+          in: header
+          description: Step-up token from PIN verify or biometric step-up
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Verification accounts updated
+        '401':
+          description: Missing, invalid, or expired step-up token
+      tags: *ref_11
+      security:
+        - access-token: []
+  /merchants/me/verification-accounts/supported-banks:
+    get:
+      operationId: MerchantsController_getSupportedBanks
+      summary: List banks and fields supported for verification accounts
+      parameters: []
+      responses:
+        '200':
+          description: Supported banks and their required fields
+      tags: *ref_11
+      security:
+        - access-token: []
   /packages:
     get:
       operationId: PackagesController_list

@@ -32,13 +32,13 @@ async function bootstrap(): Promise<void> {
     origin: cfg.cors.origins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Step-Up-Token', 'x-request-id'],
     exposedHeaders: ['x-request-id'],
   });
 
   // ── Routing ───────────────────────────────────────────────────────────
   app.setGlobalPrefix(cfg.runtime.apiPrefix, {
-    exclude: ['health', 'health/ready', 'docs', 'version', '/'],
+    exclude: ['health', 'docs', 'version', '/'],
   });
 
   app.enableVersioning({

@@ -123,6 +123,13 @@ class ProfileScreen extends ConsumerWidget {
                 enabled: false,
               ),
               AppListTile(
+                leading: const Icon(Icons.account_balance_outlined),
+                title: l10n.profileVerificationAccounts,
+                subtitle: l10n.profileVerificationAccountsSubtitle,
+                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                onTap: () => context.push(Routes.verificationAccounts),
+              ),
+              AppListTile(
                 leading: const Icon(Icons.pin_outlined),
                 title: l10n.profileChangePin,
                 subtitle: l10n.profileComingSoon,
@@ -159,7 +166,8 @@ class ProfileScreen extends ConsumerWidget {
                 title:
                     planLabel.isEmpty ? l10n.billingCurrentPlan : planLabel,
                 subtitle: _planSubtitle(subscription?.daysRemaining, l10n, planLabel),
-                enabled: false,
+                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                onTap: () => context.push(Routes.billing),
               ),
             ],
           ),

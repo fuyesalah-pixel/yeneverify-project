@@ -372,4 +372,70 @@ void main() {
       expect(find.byType(MerchantSetupScreen), findsOneWidget);
     });
   });
+
+  group('MerchantSetupScreen verification accounts', () {
+    Future<void> pumpForm(
+      WidgetTester tester,
+      _FakeOnboardingRepository repo,
+    ) async {
+      tester.view.physicalSize = const Size(1000, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_routedApp(
+        overrides: [
+          authProvider.overrideWith(() => _FakeAuthNotifier(_merchantState)),
+          onboardingRepositoryProvider.overrideWithValue(repo),
+        ],
+        onboardingBuilder: const MerchantSetupScreen(),
+      ));
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField), 'Test Coffee Shop');
+      await tester.pump();
+
+      await tester.tap(find.text('Bank account details (optional)'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('checked accounts are sent with the merchant request',
+        (tester) async {
+      final repo = _FakeOnboardingRepository();
+      await pumpForm(tester, repo);
+
+      await tester.tap(find.text('Commercial Bank of Ethiopia (CBE)'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).at(1), '12345678');
+      await tester.pumpAndSettle();
+
+      expect(_button(tester, 'Create business').onPressed, isNotNull);
+
+      await tester.tap(find.widgetWithText(AppButton, 'Create business'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(repo.createCalls, 1);
+      expect(repo.lastRequest?.verificationAccounts, {
+        'cbe': {'last8': '12345678'},
+      });
+    });
+
+    testWidgets('an invalid account number blocks merchant creation',
+        (tester) async {
+      final repo = _FakeOnboardingRepository();
+      await pumpForm(tester, repo);
+
+      await tester.tap(find.text('Commercial Bank of Ethiopia (CBE)'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).at(1), '123');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Check the number of digits for the selected banks.'),
+        findsOneWidget,
+      );
+      expect(_button(tester, 'Create business').onPressed, isNull);
+    });
+  });
 }

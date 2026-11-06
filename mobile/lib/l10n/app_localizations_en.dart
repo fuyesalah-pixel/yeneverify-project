@@ -1420,4 +1420,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String profileBusiness(String name) {
     return 'Business: $name';
   }
+
+  @override
+  String get verdictConfigureAccount => 'Configure now';
+
+  @override
+  String get verdictConfigureAccountTitle => 'Add your bank account details';
+
+  @override
+  String get profileVerificationAccounts => 'Verification accounts';
+
+  @override
+  String get profileVerificationAccountsSubtitle =>
+      'Bank accounts used to verify payments';
+
+  @override
+  String get verificationAccountsTitle => 'Verification accounts';
+
+  @override
+  String get verificationAccountsIntro =>
+      'These numbers are not printed on receipts. Add them once so payments from these banks can be verified automatically.';
+
+  @override
+  String get verificationAccountsCbe => 'Commercial Bank of Ethiopia (CBE)';
+
+  @override
+  String get verificationAccountsCbeField => 'Last 8 digits';
+
+  @override
+  String get verificationAccountsAbyssinia => 'Bank of Abyssinia';
+
+  @override
+  String get verificationAccountsAbyssiniaField => 'Last 5 digits';
+
+  @override
+  String get verificationAccountsAwash => 'Awash Bank';
+
+  @override
+  String get verificationAccountsAwashField => 'Account number (10–16 digits)';
+
+  @override
+  String get verificationAccountsOptional =>
+      'Leave a field empty if you don\'t use that bank.';
+
+  @override
+  String get verificationAccountsInvalid8 => 'Enter exactly 8 digits';
+
+  @override
+  String get verificationAccountsInvalid5 => 'Enter exactly 5 digits';
+
+  @override
+  String get verificationAccountsInvalidAwash => 'Enter 10 to 16 digits';
+
+  @override
+  String get verificationAccountsSaved => 'Verification accounts saved';
+
+  @override
+  String get verificationAccountsStepUpTitle => 'Confirm with your PIN';
+
+  @override
+  String get verificationAccountsStepUpBody =>
+      'Enter your PIN to save bank account details.';
+
+  @override
+  String get onboardingAccountsTitle => 'Bank account details (optional)';
+
+  @override
+  String get onboardingAccountsSubtitle =>
+      'Add the account numbers your bank needs to verify payments.';
+
+  @override
+  String get onboardingAccountsInvalid =>
+      'Check the number of digits for the selected banks.';
 }

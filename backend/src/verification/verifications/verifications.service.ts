@@ -41,6 +41,7 @@ import {
 import { DuplicateDetector } from './duplicate-detector';
 import { TransactionProjector } from './transaction-projector';
 import { resolveVerdict } from './verdict-resolver';
+import { buildSupplementaryData } from '../../merchants/verification-accounts';
 import { VerificationsRepository } from './verifications.repository';
 import type {
   DetectionStageResult,
@@ -173,11 +174,21 @@ export class VerificationsService {
     const referenceNormalized = normalizeReference(reference);
     state.referenceNormalized = referenceNormalized;
 
-    // ── Stage 4: adapter call (supplementary extraction left to the adapter) ──
+    // ── Stage 4: adapter call (supplementary = OCR guesses + merchant config) ──
+    const merchant = await this.prisma.merchant.findUnique({
+      where: { id: input.merchantId },
+      select: { verificationAccounts: true },
+    });
+    const ocrSupplementary = adapter.extractSupplementary?.(ocrText) ?? {};
+    const configuredSupplementary = buildSupplementaryData(
+      adapter.bankCode,
+      merchant?.verificationAccounts,
+    );
     const adapterInput: VerifyInput = {
       reference,
       referenceNormalized,
-      supplementary: adapter.extractSupplementary?.(ocrText) ?? {},
+      // Merchant-configured accounts win over OCR-derived guesses.
+      supplementary: { ...ocrSupplementary, ...configuredSupplementary },
       rawOcrText: ocrText,
       merchantId: input.merchantId,
       requestId,

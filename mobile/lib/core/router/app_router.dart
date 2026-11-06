@@ -13,6 +13,7 @@ import '../../features/design_system/presentation/screens/design_system_showcase
 import '../../features/onboarding/presentation/screens/merchant_setup_success_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/verification_accounts_screen.dart';
 import '../../features/shell/presentation/screens/shell_placeholder_screen.dart';
 import '../../features/sub_merchants/presentation/screens/invite_sub_merchant_screen.dart';
 import '../../features/sub_merchants/presentation/screens/sub_merchant_detail_screen.dart';
@@ -52,6 +53,9 @@ abstract final class Routes {
   static const String subMerchants = '/profile/sub-merchants';
   static const String subMerchantInvite = '/profile/sub-merchants/invite';
   static String subMerchantFor(String id) => '$subMerchants/$id';
+
+  /// Part 0 — bank accounts used by the verification adapters.
+  static const String verificationAccounts = '/profile/verification-accounts';
 
   /// Route to one verdict. The screen refetches by id, so nothing but the
   /// id travels through navigation.
@@ -162,6 +166,10 @@ final appRouter = GoRouter(
               path: Routes.profile,
               builder: (_, __) => const ProfileScreen(),
               routes: [
+                GoRoute(
+                  path: 'verification-accounts',
+                  builder: (_, __) => const VerificationAccountsScreen(),
+                ),
                 GoRoute(
                   path: 'sub-merchants',
                   builder: (_, __) => const SubMerchantsScreen(),

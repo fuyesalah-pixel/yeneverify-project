@@ -131,7 +131,10 @@ class _VerdictBody extends ConsumerWidget {
         ],
         if (result.status == VerificationStatus.needsReview) ...[
           const SizedBox(height: AppSpacing.lg),
-          NeedsSupplementaryCard(prompt: result.needsSupplementary),
+          NeedsSupplementaryCard(
+            prompt: result.needsSupplementary,
+            onConfigure: () => context.push(Routes.verificationAccounts),
+          ),
         ],
         const SizedBox(height: AppSpacing.lg),
         VerdictDetailsCard(

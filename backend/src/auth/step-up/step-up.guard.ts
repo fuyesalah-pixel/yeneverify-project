@@ -6,6 +6,7 @@
 
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { StepUpExpiredError, StepUpRequiredError } from '../../common/errors/domain-errors';
 import { StepUpService } from './step-up.service';
 
 export const REQUIRE_STEP_UP_KEY = 'requireStepUp';
@@ -57,7 +58,7 @@ export class StepUpGuard implements CanActivate {
     // Get step-up token from header
     const stepUpToken = req.headers['x-step-up-token'];
     if (!stepUpToken) {
-      throw new Error('AUTH_STEP_UP_REQUIRED');
+      throw new StepUpRequiredError();
     }
 
     try {
@@ -65,18 +66,19 @@ export class StepUpGuard implements CanActivate {
 
       // Verify the step-up token matches the current user and session
       if (claims.sub !== user.id || claims.sid !== user.sessionId || claims.did !== user.deviceId) {
-        throw new Error('Invalid step-up token');
+        throw new StepUpRequiredError();
       }
 
       // Attach step-up claims to request for downstream use
       (req as any).stepUpClaims = claims;
       return true;
     } catch (error) {
+      if (error instanceof StepUpRequiredError) throw error;
       const err = error as Error;
       if (err.message === 'Step-up token expired') {
-        throw new Error('AUTH_STEP_UP_EXPIRED');
+        throw new StepUpExpiredError();
       }
-      throw new Error('AUTH_STEP_UP_REQUIRED');
+      throw new StepUpRequiredError();
     }
   }
 }

@@ -4,11 +4,13 @@
 // ============================================================
 
 import { Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { AppError } from '../common/errors/app-error';
 import { ERROR_CODES } from '../common/constants/error-codes';
 import { CreateMerchantDto } from './dto/create-merchant.dto';
+import { mergeVerificationAccounts } from '../merchants/verification-accounts';
 
 const FREE_PLAN_INITIAL_CREDITS = 10n;
 
@@ -77,6 +79,10 @@ export class OnboardingService {
           status: 'ACTIVE',
           creditsBalance: 0n,
           currentPackageCode: 'FREE',
+          verificationAccounts: mergeVerificationAccounts(
+            {},
+            dto.verificationAccounts,
+          ) as Prisma.InputJsonValue,
         },
       });
 

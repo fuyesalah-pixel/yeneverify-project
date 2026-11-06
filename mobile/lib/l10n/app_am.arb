@@ -833,5 +833,27 @@
 
   "profilePlanNoRenewal": "{plan}",
 
-  "profileBusiness": "ንግድ: {name}"
+  "profileBusiness": "ንግድ: {name}",
+  "verdictConfigureAccount": "አሁን ያዘጋጁ",
+  "verdictConfigureAccountTitle": "የባንክ መለያ መረጃዎን ያክሉ",
+  "profileVerificationAccounts": "የማረጋገጫ መለያዎች",
+  "profileVerificationAccountsSubtitle": "ክፍያዎችን ለማረጋገጥ የሚያገለግሉ የባንክ መለያዎች",
+  "verificationAccountsTitle": "የማረጋገጫ መለያዎች",
+  "verificationAccountsIntro": "እነዚህ ቁጥሮች በደረሰኞች ላይ አይታዩም። ከእነዚህ ባንኮች የሚመጡ ክፍያዎችን በራስ-ሰር ለማረጋገጥ አንድ ጊዜ ያስገቡ።",
+  "verificationAccountsCbe": "የኢትዮጵያ ንግድ ባንክ (CBE)",
+  "verificationAccountsCbeField": "የመጨረሻዎቹ 8 አሃዞች",
+  "verificationAccountsAbyssinia": "ባንክ አቢሲኒያ",
+  "verificationAccountsAbyssiniaField": "የመጨረሻዎቹ 5 አሃዞች",
+  "verificationAccountsAwash": "አዋሽ ባንክ",
+  "verificationAccountsAwashField": "የመለያ ቁጥር (10–16 አሃዞች)",
+  "verificationAccountsOptional": "የማይጠቀሙበትን ባንክ ባዶ ይተውት።",
+  "verificationAccountsInvalid8": "በትክክል 8 አሃዞች ያስገቡ",
+  "verificationAccountsInvalid5": "በትክክል 5 አሃዞች ያስገቡ",
+  "verificationAccountsInvalidAwash": "ከ10 እስከ 16 አሃዞች ያስገቡ",
+  "verificationAccountsSaved": "የማረጋገጫ መለያዎች ተቀምጠዋል",
+  "verificationAccountsStepUpTitle": "በPIN ያረጋግጡ",
+  "verificationAccountsStepUpBody": "የባንክ መለያ መረጃን ለማስቀመጥ PINዎን ያስገቡ።",
+  "onboardingAccountsTitle": "የባንክ መለያ መረጃ (አማራጭ)",
+  "onboardingAccountsSubtitle": "ባንክዎ ክፍያን ለማረጋገጥ የሚፈልገውን የመለያ ቁጥር ያክሉ።",
+  "onboardingAccountsInvalid": "ለተመረጡት ባንኮች የአሃዝ ብዛት ያረጋግጡ።"
 }

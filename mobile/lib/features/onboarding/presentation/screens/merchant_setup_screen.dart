@@ -1,6 +1,7 @@
 // Merchant creation — the onboarding gate for a MERCHANT with no profile.
 // Step 22A. No back button and no skip: this is required.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yene_verify/l10n/app_localizations.dart';
@@ -63,6 +64,7 @@ class MerchantSetupScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.xxl),
               _DetailsExpander(
+                label: l10n.addMoreDetails,
                 expanded: state.showDetails,
                 onToggle: ref.read(merchantSetupProvider.notifier).toggleDetails,
               ),
@@ -95,11 +97,82 @@ class MerchantSetupScreen extends ConsumerWidget {
                   onChanged: ref.read(merchantSetupProvider.notifier).setCity,
                 ),
               ],
+              const SizedBox(height: AppSpacing.md),
+              _DetailsExpander(
+                label: l10n.onboardingAccountsTitle,
+                expanded: state.showAccounts,
+                onToggle: ref.read(merchantSetupProvider.notifier).toggleAccounts,
+              ),
+              if (state.showAccounts) ...[
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  l10n.onboardingAccountsSubtitle,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _BankAccountField(
+                  label: l10n.verificationAccountsCbe,
+                  hint: l10n.verificationAccountsCbeField,
+                  enabled: state.cbeEnabled,
+                  errorText: state.isCbeValid
+                      ? null
+                      : l10n.verificationAccountsInvalid8,
+                  maxLength: 8,
+                  onEnabled:
+                      ref.read(merchantSetupProvider.notifier).setCbeEnabled,
+                  onChanged:
+                      ref.read(merchantSetupProvider.notifier).setCbeLast8,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _BankAccountField(
+                  label: l10n.verificationAccountsAbyssinia,
+                  hint: l10n.verificationAccountsAbyssiniaField,
+                  enabled: state.abyssiniaEnabled,
+                  errorText: state.isAbyssiniaValid
+                      ? null
+                      : l10n.verificationAccountsInvalid5,
+                  maxLength: 5,
+                  onEnabled: ref
+                      .read(merchantSetupProvider.notifier)
+                      .setAbyssiniaEnabled,
+                  onChanged: ref
+                      .read(merchantSetupProvider.notifier)
+                      .setAbyssiniaLast5,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _BankAccountField(
+                  label: l10n.verificationAccountsAwash,
+                  hint: l10n.verificationAccountsAwashField,
+                  enabled: state.awashEnabled,
+                  errorText: state.isAwashValid
+                      ? null
+                      : l10n.verificationAccountsInvalidAwash,
+                  maxLength: 16,
+                  onEnabled:
+                      ref.read(merchantSetupProvider.notifier).setAwashEnabled,
+                  onChanged: ref
+                      .read(merchantSetupProvider.notifier)
+                      .setAwashAccountNumber,
+                ),
+                if (!state.areAccountsValid) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    l10n.onboardingAccountsInvalid,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.error,
+                    ),
+                  ),
+                ],
+              ],
               const SizedBox(height: AppSpacing.xxxl),
               AppButton(
                 label: l10n.createBusiness,
                 isLoading: state.isSubmitting,
-                onPressed: state.isBusinessNameValid && !state.isSubmitting
+                onPressed: state.isBusinessNameValid &&
+                        state.areAccountsValid &&
+                        !state.isSubmitting
                     ? () => _submit(context, ref)
                     : null,
               ),
@@ -165,14 +238,18 @@ class MerchantSetupScreen extends ConsumerWidget {
 }
 
 class _DetailsExpander extends StatelessWidget {
-  const _DetailsExpander({required this.expanded, required this.onToggle});
+  const _DetailsExpander({
+    required this.label,
+    required this.expanded,
+    required this.onToggle,
+  });
 
+  final String label;
   final bool expanded;
   final VoidCallback onToggle;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final colors = context.colors;
 
     return Align(
@@ -185,12 +262,64 @@ class _DetailsExpander extends StatelessWidget {
           color: colors.primaryAction,
         ),
         label: Text(
-          l10n.addMoreDetails,
+          label,
           style: AppTypography.labelMedium.copyWith(
             color: colors.primaryAction,
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BankAccountField extends StatelessWidget {
+  const _BankAccountField({
+    required this.label,
+    required this.hint,
+    required this.enabled,
+    required this.errorText,
+    required this.maxLength,
+    required this.onEnabled,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String hint;
+  final bool enabled;
+  final String? errorText;
+  final int maxLength;
+  final ValueChanged<bool> onEnabled;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CheckboxListTile(
+          value: enabled,
+          onChanged: (value) => onEnabled(value ?? false),
+          title: Text(
+            label,
+            style: AppTypography.bodyMedium.copyWith(color: colors.textPrimary),
+          ),
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+        if (enabled) ...[
+          const SizedBox(height: AppSpacing.xs),
+          AppTextField(
+            label: hint,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            maxLength: maxLength,
+            errorText: errorText,
+            onChanged: onChanged,
+          ),
+        ],
+      ],
     );
   }
 }

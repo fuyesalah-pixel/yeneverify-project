@@ -2635,6 +2635,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Business: {name}'**
   String profileBusiness(String name);
+
+  /// No description provided for @verdictConfigureAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure now'**
+  String get verdictConfigureAccount;
+
+  /// No description provided for @verdictConfigureAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your bank account details'**
+  String get verdictConfigureAccountTitle;
+
+  /// No description provided for @profileVerificationAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification accounts'**
+  String get profileVerificationAccounts;
+
+  /// No description provided for @profileVerificationAccountsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank accounts used to verify payments'**
+  String get profileVerificationAccountsSubtitle;
+
+  /// No description provided for @verificationAccountsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification accounts'**
+  String get verificationAccountsTitle;
+
+  /// No description provided for @verificationAccountsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'These numbers are not printed on receipts. Add them once so payments from these banks can be verified automatically.'**
+  String get verificationAccountsIntro;
+
+  /// No description provided for @verificationAccountsCbe.
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial Bank of Ethiopia (CBE)'**
+  String get verificationAccountsCbe;
+
+  /// No description provided for @verificationAccountsCbeField.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 8 digits'**
+  String get verificationAccountsCbeField;
+
+  /// No description provided for @verificationAccountsAbyssinia.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank of Abyssinia'**
+  String get verificationAccountsAbyssinia;
+
+  /// No description provided for @verificationAccountsAbyssiniaField.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 5 digits'**
+  String get verificationAccountsAbyssiniaField;
+
+  /// No description provided for @verificationAccountsAwash.
+  ///
+  /// In en, this message translates to:
+  /// **'Awash Bank'**
+  String get verificationAccountsAwash;
+
+  /// No description provided for @verificationAccountsAwashField.
+  ///
+  /// In en, this message translates to:
+  /// **'Account number (10–16 digits)'**
+  String get verificationAccountsAwashField;
+
+  /// No description provided for @verificationAccountsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave a field empty if you don\'t use that bank.'**
+  String get verificationAccountsOptional;
+
+  /// No description provided for @verificationAccountsInvalid8.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter exactly 8 digits'**
+  String get verificationAccountsInvalid8;
+
+  /// No description provided for @verificationAccountsInvalid5.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter exactly 5 digits'**
+  String get verificationAccountsInvalid5;
+
+  /// No description provided for @verificationAccountsInvalidAwash.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 10 to 16 digits'**
+  String get verificationAccountsInvalidAwash;
+
+  /// No description provided for @verificationAccountsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification accounts saved'**
+  String get verificationAccountsSaved;
+
+  /// No description provided for @verificationAccountsStepUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm with your PIN'**
+  String get verificationAccountsStepUpTitle;
+
+  /// No description provided for @verificationAccountsStepUpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your PIN to save bank account details.'**
+  String get verificationAccountsStepUpBody;
+
+  /// No description provided for @onboardingAccountsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank account details (optional)'**
+  String get onboardingAccountsTitle;
+
+  /// No description provided for @onboardingAccountsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the account numbers your bank needs to verify payments.'**
+  String get onboardingAccountsSubtitle;
+
+  /// No description provided for @onboardingAccountsInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the number of digits for the selected banks.'**
+  String get onboardingAccountsInvalid;
 }
 
 class _AppLocalizationsDelegate

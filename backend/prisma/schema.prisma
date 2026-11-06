@@ -369,6 +369,9 @@ model Merchant {
   creditsUpdatedAt   DateTime?      @map("credits_updated_at") @db.Timestamptz(6)
   currentPackageCode PackageCode?   @map("current_package_code")
   subscriptionId     String?        @map("subscription_id") @db.Uuid
+  /// Bank account identifiers used by adapters that need them, e.g.
+  /// { "cbe": { "last8": "12345678" }, "abyssinia": { "last5": "12345" } }.
+  verificationAccounts Json         @default("{}") @map("verification_accounts")
   createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt          DateTime?      @map("deleted_at") @db.Timestamptz(6)

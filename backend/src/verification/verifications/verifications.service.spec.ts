@@ -117,6 +117,9 @@ const makeDeps = (stubAdapter: BankAdapter): Deps => ({
     ),
   },
   prisma: {
+    merchant: {
+      findUnique: jest.fn(async () => ({ verificationAccounts: {} })),
+    },
     $transaction: jest.fn(async (fn: (tx: unknown) => Promise<void>) =>
       fn({ the_tx_client: true }),
     ),
@@ -264,6 +267,39 @@ describe('VerificationsService.process', () => {
     const auditEntry = deps.audit.log.mock.calls[0][0];
     expect(auditEntry.action).toBe('verification.verified');
     expect(JSON.stringify(auditEntry)).not.toContain('FT26195DBK5W81465291Selam');
+  });
+
+  it('injects merchant-configured accounts into adapter supplementary (config wins over OCR)', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    adapter.extractSupplementary = jest.fn(() => ({ accountSuffix: '99999999' }));
+    const deps = makeDeps(adapter);
+    (deps.prisma.merchant as unknown as { findUnique: jest.Mock }).findUnique.mockResolvedValue({
+      verificationAccounts: { cbe: { last8: '12345678' } },
+    });
+    const service = makeService(deps);
+
+    await service.process(input());
+
+    expect(adapter.verify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        supplementary: { accountSuffix: '12345678' },
+      }),
+    );
+  });
+
+  it('leaves OCR-derived supplementary intact when the merchant has no account configured', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    adapter.extractSupplementary = jest.fn(() => ({ accountSuffix: '99999999' }));
+    const deps = makeDeps(adapter);
+    const service = makeService(deps);
+
+    await service.process(input());
+
+    expect(adapter.verify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        supplementary: { accountSuffix: '99999999' },
+      }),
+    );
   });
 
   it('BILLING source: verified outcome does NOT project a transaction', async () => {

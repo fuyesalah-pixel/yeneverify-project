@@ -20,6 +20,13 @@ class MerchantSetupState {
     this.city = 'Addis Ababa',
     this.isSubmitting = false,
     this.showDetails = false,
+    this.showAccounts = false,
+    this.cbeEnabled = false,
+    this.cbeLast8 = '',
+    this.abyssiniaEnabled = false,
+    this.abyssiniaLast5 = '',
+    this.awashEnabled = false,
+    this.awashAccountNumber = '',
     this.error,
     this.businessNameError,
     this.merchant,
@@ -32,11 +39,37 @@ class MerchantSetupState {
   final String city;
   final bool isSubmitting;
   final bool showDetails;
+  final bool showAccounts;
+  final bool cbeEnabled;
+  final String cbeLast8;
+  final bool abyssiniaEnabled;
+  final String abyssiniaLast5;
+  final bool awashEnabled;
+  final String awashAccountNumber;
   final ApiError? error;
   final BusinessNameError? businessNameError;
   final CreateMerchantResponse? merchant;
 
   bool get isBusinessNameValid => validateBusinessName(businessName) == null;
+
+  bool get isCbeValid =>
+      !cbeEnabled || RegExp(r'^\d{8}$').hasMatch(cbeLast8.trim());
+  bool get isAbyssiniaValid =>
+      !abyssiniaEnabled || RegExp(r'^\d{5}$').hasMatch(abyssiniaLast5.trim());
+  bool get isAwashValid =>
+      !awashEnabled ||
+      RegExp(r'^\d{10,16}$').hasMatch(awashAccountNumber.trim());
+
+  bool get areAccountsValid => isCbeValid && isAbyssiniaValid && isAwashValid;
+
+  /// Only checked banks travel to the backend; unchecked banks stay absent.
+  Map<String, dynamic>? get verificationAccountsPatch {
+    final patch = <String, dynamic>{};
+    if (cbeEnabled) patch['cbe'] = {'last8': cbeLast8.trim()};
+    if (abyssiniaEnabled) patch['abyssinia'] = {'last5': abyssiniaLast5.trim()};
+    if (awashEnabled) patch['awash'] = {'accountNumber': awashAccountNumber.trim()};
+    return patch.isEmpty ? null : patch;
+  }
 
   MerchantSetupState copyWith({
     String? businessName,
@@ -46,6 +79,13 @@ class MerchantSetupState {
     String? city,
     bool? isSubmitting,
     bool? showDetails,
+    bool? showAccounts,
+    bool? cbeEnabled,
+    String? cbeLast8,
+    bool? abyssiniaEnabled,
+    String? abyssiniaLast5,
+    bool? awashEnabled,
+    String? awashAccountNumber,
     ApiError? error,
     BusinessNameError? businessNameError,
     CreateMerchantResponse? merchant,
@@ -62,6 +102,13 @@ class MerchantSetupState {
       city: city ?? this.city,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       showDetails: showDetails ?? this.showDetails,
+      showAccounts: showAccounts ?? this.showAccounts,
+      cbeEnabled: cbeEnabled ?? this.cbeEnabled,
+      cbeLast8: cbeLast8 ?? this.cbeLast8,
+      abyssiniaEnabled: abyssiniaEnabled ?? this.abyssiniaEnabled,
+      abyssiniaLast5: abyssiniaLast5 ?? this.abyssiniaLast5,
+      awashEnabled: awashEnabled ?? this.awashEnabled,
+      awashAccountNumber: awashAccountNumber ?? this.awashAccountNumber,
       error: clearError ? null : (error ?? this.error),
       businessNameError: clearBusinessNameError
           ? null
@@ -122,6 +169,48 @@ class MerchantSetupNotifier
     _update(current.copyWith(showDetails: !current.showDetails));
   }
 
+  void toggleAccounts() {
+    final current = _current;
+    if (current == null) return;
+    _update(current.copyWith(showAccounts: !current.showAccounts));
+  }
+
+  void setCbeEnabled(bool value) {
+    final current = _current;
+    if (current == null) return;
+    _update(current.copyWith(cbeEnabled: value));
+  }
+
+  void setCbeLast8(String value) {
+    final current = _current;
+    if (current == null) return;
+    _update(current.copyWith(cbeLast8: value));
+  }
+
+  void setAbyssiniaEnabled(bool value) {
+    final current = _current;
+    if (current == null) return;
+    _update(current.copyWith(abyssiniaEnabled: value));
+  }
+
+  void setAbyssiniaLast5(String value) {
+    final current = _current;
+    if (current == null) return;
+    _update(current.copyWith(abyssiniaLast5: value));
+  }
+
+  void setAwashEnabled(bool value) {
+    final current = _current;
+    if (current == null) return;
+    _update(current.copyWith(awashEnabled: value));
+  }
+
+  void setAwashAccountNumber(String value) {
+    final current = _current;
+    if (current == null) return;
+    _update(current.copyWith(awashAccountNumber: value));
+  }
+
   /// Submits the form. The repository refreshes /onboarding/status on
   /// success, so the router releases /dashboard before the success screen
   /// hands over.
@@ -135,6 +224,9 @@ class MerchantSetupNotifier
     final validation = validateBusinessName(name);
     if (validation != null) {
       _update(current.copyWith(businessNameError: validation));
+      return MerchantSubmitOutcome.failed;
+    }
+    if (!current.areAccountsValid) {
       return MerchantSubmitOutcome.failed;
     }
 
@@ -152,6 +244,7 @@ class MerchantSetupNotifier
             tin: _optional(current.tin),
             address: _optional(current.address),
             city: _optional(current.city),
+            verificationAccounts: current.verificationAccountsPatch,
           ),
         );
 
