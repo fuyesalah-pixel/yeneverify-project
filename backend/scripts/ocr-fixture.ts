@@ -13,10 +13,10 @@
 // (JPEG q80, longest edge 1600px, aspect preserved) and the sha256 of
 // those compressed bytes becomes the fixture key.
 //
-// OCR text comes from Google Vision when OCR_PROVIDER=google-vision,
-// otherwise from a sidecar <image>.txt — the mock engine has no
-// recognizer and this script fails loudly rather than writing empty
-// text.
+// OCR text comes from a sidecar <image>.txt when present, otherwise
+// from the engine selected by OCR_PROVIDER: tesseract (local) or
+// google-vision. The mock engine has no recognizer, so the script
+// fails loudly rather than writing empty text.
 //
 // Output discipline: hash, dimensions, byte counts and text length
 // only — never the OCR text, which may contain payer names and
@@ -27,15 +27,12 @@ import { existsSync } from 'fs';
 import { basename } from 'path';
 import {
   SIDECAR_TEXT_CONFIDENCE,
-  assertFixtureTextSource,
-  createVisionClient,
+  createFixtureTextSource,
   describePreparation,
   loadBackendEnv,
   prepareFixtureImage,
   readFixtureText,
-  recognizeWithVision,
   requireReadableImage,
-  resolveVisionCredentials,
   sidecarTextPath,
   upsertFixture,
 } from './lib/ocr-fixtures';
@@ -110,11 +107,10 @@ async function main(): Promise<void> {
   const { path, bytes } = requireReadableImage(options.imagePath);
   const sidecar = sidecarTextPath(path);
   const textPath = options.textFile ?? (existsSync(sidecar) ? sidecar : null);
-  assertFixtureTextSource(textPath !== null);
 
-  // Resolve credentials before the decode/encode work so a missing file
-  // fails in milliseconds instead of after processing an image.
-  const vision = textPath === null ? createVisionClient(resolveVisionCredentials()) : null;
+  // Build the engine before the decode/encode work so a missing credential
+  // file fails in milliseconds instead of after processing an image.
+  const source = textPath === null ? createFixtureTextSource() : null;
 
   const prepared = await prepareFixtureImage(bytes, { compress: options.compress });
   const fixture =
@@ -123,7 +119,7 @@ async function main(): Promise<void> {
           text: readFixtureText(textPath),
           confidence: options.confidence ?? SIDECAR_TEXT_CONFIDENCE,
         }
-      : await recognizeWithVision(vision!, prepared.bytes);
+      : await source!.recognize(prepared.bytes);
 
   upsertFixture(prepared.sha256, fixture);
 

@@ -41,6 +41,28 @@ describe('envSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('accepts tesseract as a development OCR provider', () => {
+    const result = envSchema.safeParse({
+      ...developmentEnvironment(),
+      OCR_PROVIDER: 'tesseract',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects the local tesseract engine in hosted environments', () => {
+    const result = envSchema.safeParse({
+      ...developmentEnvironment(),
+      NODE_ENV: 'staging',
+      SENTRY_ENVIRONMENT: 'staging',
+      AFROMESSAGE_MOCK: true,
+      OCR_PROVIDER: 'tesseract',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path[0] === 'OCR_PROVIDER')).toBe(true);
+    }
+  });
+
   it('rejects mock adapters in hosted environments', () => {
     const result = envSchema.safeParse({
       ...developmentEnvironment(),

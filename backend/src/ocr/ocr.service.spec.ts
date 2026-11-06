@@ -10,6 +10,7 @@ import { AppConfigService } from '../config/config.service';
 import { OcrService } from './ocr.service';
 import { GoogleVisionProvider } from './providers/google-vision.provider';
 import { MockProvider } from './providers/mock.provider';
+import { TesseractProvider } from './providers/tesseract.provider';
 import { capRawPayload, OcrResult } from './providers/ocr-provider.interface';
 import { createHash } from 'crypto';
 
@@ -17,7 +18,7 @@ const sha256 = (buf: Buffer) => createHash('sha256').update(buf).digest('hex');
 
 /** Minimal AppConfigService stand-in exposing only what OCR reads. */
 const configWith = (
-  provider: 'mock' | 'google-vision',
+  provider: 'mock' | 'tesseract' | 'google-vision',
   credentialsPath = '/run/secrets/gcp-vision.json',
 ) =>
   ({
@@ -70,16 +71,81 @@ describe('OcrService (unit)', () => {
   });
 
   it('selects the mock provider when OCR_PROVIDER=mock', async () => {
-    const service = new OcrService(configWith('mock'), mock, {} as never);
+    const service = new OcrService(configWith('mock'), mock, {} as never, {} as never);
     expect(service.active().name).toBe('mock');
+  });
+
+  it('selects tesseract when OCR_PROVIDER=tesseract', async () => {
+    // The constructor performs no I/O; the worker starts on first recognize().
+    const tesseract = new TesseractProvider();
+    const service = new OcrService(configWith('tesseract'), mock, {} as never, tesseract);
+    expect(service.active().name).toBe('tesseract');
   });
 
   it('selects google-vision when OCR_PROVIDER=google-vision', async () => {
     // The real provider's constructor performs no I/O; the Vision client is
     // built lazily on first recognize() call.
     const vision = new GoogleVisionProvider(configWith('google-vision'));
-    const service = new OcrService(configWith('google-vision'), mock, vision);
+    const service = new OcrService(configWith('google-vision'), mock, vision, {} as never);
     expect(service.active().name).toBe('google-vision');
+  });
+});
+
+describe('TesseractProvider (unit, worker stubbed)', () => {
+  const worker = {
+    recognize: jest.fn().mockResolvedValue({
+      data: { text: 'Commercial Bank of Ethiopia\nAmount: ETB 1,200.00', confidence: 92.5 },
+    }),
+    terminate: jest.fn().mockResolvedValue(undefined),
+  };
+
+  class StubProvider extends TesseractProvider {
+    readonly spawns: number[] = [];
+    protected override spawnWorker(): Promise<never> {
+      this.spawns.push(Date.now());
+      return Promise.resolve(worker) as never;
+    }
+  }
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('returns local OCR text with confidence in 0..1', async () => {
+    const provider = new StubProvider();
+    const result = await provider.recognize(Buffer.from('img'), 'image/jpeg');
+
+    expect(result.text).toContain('Amount: ETB 1,200.00');
+    expect(result.confidence).toBeCloseTo(0.925, 5);
+    expect(result.provider).toBe('tesseract');
+  });
+
+  it('reuses one worker across calls', async () => {
+    const provider = new StubProvider();
+    await provider.recognize(Buffer.from('one'), 'image/jpeg');
+    await provider.recognize(Buffer.from('two'), 'image/jpeg');
+
+    expect(provider.spawns).toHaveLength(1);
+  });
+
+  it('reports ready without starting the worker', async () => {
+    const provider = new StubProvider();
+    await expect(provider.health()).resolves.toBe(true);
+    expect(provider.spawns).toHaveLength(0);
+  });
+
+  it('wraps worker failures in OCR_PROVIDER_ERROR', async () => {
+    const failing = {
+      recognize: jest.fn().mockRejectedValue(new Error('language model unavailable')),
+      terminate: jest.fn(),
+    };
+    class FailingProvider extends TesseractProvider {
+      protected override spawnWorker(): Promise<never> {
+        return Promise.resolve(failing) as never;
+      }
+    }
+
+    await expect(
+      new FailingProvider().recognize(Buffer.from('img'), 'image/jpeg'),
+    ).rejects.toMatchObject({ code: 'OCR_PROVIDER_ERROR', httpStatus: 502 });
   });
 });
 

@@ -1,0 +1,37 @@
+{
+  "test-abyssinia-001": {
+    "text": "Bank of Abyssinia\nTransaction Reference: FT26201XP8NP\nSender: K*** M*** A***\nReceiver: S*** A*** M***\nAmount: 2,980.00 ETB\nDate: 19/07/2026 10:30 AM\nBank Name: Commercial Bank of Ethiopia",
+    "confidence": 0.95,
+    "note": "Sample Abyssinia receipt. Note the receiver bank mention."
+  },
+  "test-awash-001": {
+    "text": "Awash Bank\nAwash Bank Transaction\nTransaction ID: 260310152465470\nSender: M*** K*** A***\nAmount: 100.00 ETB\nDate: 2026-03-10 3:00 PM\nBeneficiary Bank: Commercial Bank of Ethiopia",
+    "confidence": 0.95,
+    "note": "Sample Awash receipt."
+  },
+  "test-cbe-001": {
+    "text": "Commercial Bank of Ethiopia\nTransaction Receipt\nReference: FT2620595CST\nSender: F*** N***\nReceiver: H*** Y***\nAmount: 1,150.00 ETB\nDate: 24-Jul-2026 2:15 PM",
+    "confidence": 0.95,
+    "note": "Sample CBE receipt for dev/CI. Not real PII."
+  },
+  "test-cbe-digital-001": {
+    "text": "Commercial Bank of Ethiopia\nDigital Receipt\nTransaction Reference: FT2430559TH6\nPayer: F*** N***\nAmount: 1,361.96 ETB\nDate: 31-Oct-2024 9:45 AM",
+    "confidence": 0.95,
+    "note": "Sample CBE digital receipt."
+  },
+  "test-cbe-ussd-001": {
+    "text": "CBE\nTransaction Alert\nFrom: F*** N***\nTo: M*** D*** Z***-5517\nAmount: 66,506.00 ETB\nDate: 23/09/2026\nRef: FT26266BPF18",
+    "confidence": 0.95,
+    "note": "Sample CBE USSD SMS — no bank name in text."
+  },
+  "test-dashen-001": {
+    "text": "Dashen Bank\nFT Ref: F57LTWI2620600WL\nTransaction Ref: LTWII1375340040437489180\nPayer: F*** N*** H***\nReceiver: F*** N*** H***\nAmount: 300.00 ETB\nDate: 25-Jul-2026 4:30 PM\nReason: Telebirr Transfer",
+    "confidence": 0.95,
+    "note": "Sample Dashen receipt — note Telebirr mention."
+  },
+  "test-telebirr-001": {
+    "text": "Telebirr\nTransfer Confirmed\nTransaction Number: DFD1U83ETH\nTo: Murad\nAmount: 302.00 ETB\nDate: 2026-06-13 11:20 AM",
+    "confidence": 0.95,
+    "note": "Sample Telebirr receipt."
+  }
+}

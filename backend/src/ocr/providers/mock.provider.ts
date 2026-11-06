@@ -6,8 +6,8 @@
 // stable MOCK_OCR_UNMATCHED response so pipelines have a predictable
 // value to assert against.
 //
-// Never selected when OCR_PROVIDER=google-vision, and environment
-// validation rejects mock engines outside development/test.
+// Never selected when OCR_PROVIDER=tesseract or google-vision, and
+// environment validation rejects mock engines outside development/test.
 // ============================================================
 
 import { createHash } from 'crypto';

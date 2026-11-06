@@ -3,8 +3,12 @@
 //
 // Feeds backend/src/ocr/providers/mock-fixtures.json from real
 // receipt images so the mock OCR engine can return the text a real
-// Vision call would produce. Keyed by the sha256 of the EXACT bytes
+// OCR call would produce. Keyed by the sha256 of the EXACT bytes
 // the mobile app uploads (q80, max 1600px), not the original photo.
+//
+// Text comes from a sidecar <image>.txt when present, otherwise from
+// the configured engine: tesseract (local, free), google-vision
+// (credentials required), or a loud failure for mock.
 //
 // Byte-exact caveat: the key is only reproducible when the bytes fed
 // to this script are the bytes the app uploaded. Re-encoding here
@@ -22,6 +26,7 @@ import { existsSync, readFileSync, renameSync, writeFileSync } from 'fs';
 import { basename, dirname, extname, resolve } from 'path';
 import { ImageAnnotatorClient, protos } from '@google-cloud/vision';
 import Jimp from 'jimp';
+import { createWorker, type Worker } from 'tesseract.js';
 
 /** A single image → text entry in mock-fixtures.json. */
 export interface MockFixture {
@@ -139,18 +144,83 @@ export function readFixtureText(textPath: string): string {
   return text;
 }
 
+/** Engines that can actually read a receipt image. */
+export type FixtureOcrProvider = 'tesseract' | 'google-vision' | 'mock';
+
+/** Shown whenever a fixture run produced nothing because no engine is set. */
+export const FIXTURE_OCR_SETUP_HINT =
+  'To generate fixtures, install OCR: set OCR_PROVIDER=tesseract (local, free) ' +
+  'or provide VISION_CREDENTIALS_JSON (Vision API, paid).';
+
+export function configuredFixtureProvider(): FixtureOcrProvider {
+  const raw = (process.env.OCR_PROVIDER ?? 'mock').toLowerCase().trim();
+  if (raw === 'tesseract' || raw === 'google-vision') return raw;
+  return 'mock';
+}
+
+/** A source of OCR text for prepared image bytes. */
+export interface FixtureTextSource {
+  recognize(bytes: Buffer): Promise<MockFixture>;
+  dispose?(): Promise<void>;
+}
+
+class TesseractFixtureTextSource implements FixtureTextSource {
+  private workerPromise: Promise<Worker> | null = null;
+
+  async recognize(bytes: Buffer): Promise<MockFixture> {
+    const worker = await this.worker();
+    const { data } = await worker.recognize(bytes);
+    const text = (data.text ?? '').trim();
+    if (!text) {
+      throw new Error('tesseract returned no text for this image');
+    }
+    const confidence = Math.min(1, Math.max(0, (data.confidence ?? 0) / 100));
+    return { text, confidence };
+  }
+
+  async dispose(): Promise<void> {
+    if (!this.workerPromise) return;
+    const pending = this.workerPromise;
+    this.workerPromise = null;
+    try {
+      const worker = await pending;
+      await worker.terminate();
+    } catch {
+      // A worker that never started has nothing to clean up.
+    }
+  }
+
+  private worker(): Promise<Worker> {
+    if (!this.workerPromise) {
+      this.workerPromise = createWorker('eng').catch((error: unknown) => {
+        this.workerPromise = null;
+        throw error;
+      });
+    }
+    return this.workerPromise;
+  }
+}
+
 /**
- * Loud, actionable failure instead of silently writing empty OCR text.
- * The mock engine ships no recognizer; only Vision (or a sidecar .txt)
- * can produce the text a fixture needs.
+ * Creates the configured text source. Vision credentials resolve eagerly so
+ * a missing file fails before any image is compressed.
+ *
+ * The mock engine ships no recognizer; failing loudly beats writing empty
+ * text that later looks like a successful fixture.
  */
-export function assertFixtureTextSource(hasTextFile: boolean): void {
-  if (hasTextFile) return;
-  if ((process.env.OCR_PROVIDER ?? 'mock').toLowerCase() === 'google-vision') return;
+export function createFixtureTextSource(
+  provider: FixtureOcrProvider = configuredFixtureProvider(),
+): FixtureTextSource {
+  if (provider === 'google-vision') {
+    const client = createVisionClient(resolveVisionCredentials());
+    return { recognize: (bytes) => recognizeWithVision(client, bytes) };
+  }
+  if (provider === 'tesseract') {
+    return new TesseractFixtureTextSource();
+  }
   throw new Error(
-    'OCR_PROVIDER=mock and no local OCR engine is installed, so fixture text ' +
-      'cannot be generated. Set OCR_PROVIDER=google-vision with ' +
-      'VISION_CREDENTIALS_JSON, or put the OCR text in a sidecar ' +
+    `OCR_PROVIDER=mock has no recognizer, so fixture text cannot be generated. ` +
+      `${FIXTURE_OCR_SETUP_HINT} Alternatively, put the OCR text in a sidecar ` +
       '<image>.txt file next to the image.',
   );
 }
@@ -217,6 +287,57 @@ export function fixtureCount(): number {
   return Object.keys(readRawFixtureFile()).filter(
     (key) => !key.startsWith(DOCUMENTATION_KEY_PREFIX),
   ).length;
+}
+
+/** Path to the committed documentation fixtures used by `--seed`. */
+export function seedFixturePath(): string {
+  const fromCwd = resolve(process.cwd(), 'src/ocr/providers/seed-fixtures.json');
+  if (existsSync(fromCwd)) return fromCwd;
+  return resolve(__dirname, '../../src/ocr/providers/seed-fixtures.json');
+}
+
+/**
+ * Reads seed-fixtures.json. Entries are semantic keys, not image hashes, so
+ * they exercise extraction/detection but never match a real upload. The
+ * `note` field is documentation and is not copied into the fixture map.
+ */
+export function readSeedFixtures(path = seedFixturePath()): Record<string, MockFixture> {
+  if (!existsSync(path)) {
+    throw new Error(`seed fixtures not found: ${path}`);
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (error) {
+    throw new Error(`seed-fixtures.json is not valid JSON (${path}): ${(error as Error).message}`);
+  }
+
+  const entries: Record<string, MockFixture> = {};
+  for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+    if (key.startsWith(DOCUMENTATION_KEY_PREFIX)) continue;
+    const entry = value as Partial<MockFixture> | null;
+    if (!entry || typeof entry.text !== 'string' || !entry.text.trim()) {
+      throw new Error(`seed fixture ${key} has no text`);
+    }
+    if (typeof entry.confidence !== 'number') {
+      throw new Error(`seed fixture ${key} has no numeric confidence`);
+    }
+    entries[key] = { text: entry.text, confidence: entry.confidence };
+  }
+  return entries;
+}
+
+/** Merges the committed seed fixtures into the mock map; returns the count. */
+export function seedFixtures(
+  options: { fixtureFile?: string; seedFile?: string } = {},
+): number {
+  const entries = readSeedFixtures(options.seedFile);
+  const keys = Object.keys(entries).sort();
+  for (const key of keys) {
+    upsertFixture(key, entries[key], { path: options.fixtureFile });
+  }
+  return keys.length;
 }
 
 /**

@@ -2,9 +2,10 @@
 // Yene Verify — OCR readiness E2E
 //
 // /health/ready must surface the OCR engine state: 0 mock fixtures is
-// `degraded` (503), and a populated fixture map is `up`. The test
-// mutates the in-process mock map instead of the JSON file so it never
-// touches the fixture artifact on disk.
+// `degraded` (still 200 — the process is ready, receipts are not), and
+// a populated fixture map is `up`. The test mutates the in-process mock
+// map instead of the JSON file so it never touches the fixture artifact
+// on disk; it clears first because a seeded map may boot with entries.
 // ============================================================
 
 import { Test } from '@nestjs/testing';
@@ -46,9 +47,9 @@ describe('OCR readiness (e2e)', () => {
     await app.close();
   });
 
-  afterEach(() => {
-    // Every test starts from the state it describes, never from the
-    // previous test's leftover fixture.
+  beforeEach(() => {
+    // Every test starts from the state it describes, never from the boot
+    // map (which may be seeded locally) or the previous test's fixtures.
     fixtures.clear();
   });
 

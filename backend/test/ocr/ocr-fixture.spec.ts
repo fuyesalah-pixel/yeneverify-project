@@ -12,13 +12,15 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import Jimp from 'jimp';
 import {
+  FIXTURE_OCR_SETUP_HINT,
   JPEG_QUALITY,
   MAX_IMAGE_DIMENSION,
   prepareFixtureImage,
+  readSeedFixtures,
   sha256Bytes,
   upsertFixture,
 } from '../../scripts/lib/ocr-fixtures';
-import { isBatchImage, runFixtureBatch } from '../../scripts/ocr-fixture-batch';
+import { isBatchImage, runFixtureBatch, runSeed } from '../../scripts/ocr-fixture-batch';
 
 const sha256 = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex');
 
@@ -162,6 +164,26 @@ describe('runFixtureBatch', () => {
     expect(Object.keys(written)).toHaveLength(2);
   });
 
+  it('explains how to enable OCR when nothing could be read', async () => {
+    writeFileSync(join(root, 'a.jpg'), await jpeg(400, 300));
+
+    const lines: string[] = [];
+    const result = await runFixtureBatch(root, {
+      compress: true,
+      fixtureFile: fixtures,
+      log: (line) => lines.push(line),
+      textSource: {
+        recognize: async () => {
+          throw new Error('no engine configured');
+        },
+      },
+    });
+
+    expect(result.written).toBe(0);
+    expect(result.failed).toBe(1);
+    expect(lines[lines.length - 1]).toBe(`Wrote 0 fixtures, 1 failed. ${FIXTURE_OCR_SETUP_HINT}`);
+  });
+
   it('continues after one broken image and reports the failure', async () => {
     writeFileSync(join(root, 'a-broken.jpg'), 'definitely not a jpeg');
     writeFileSync(join(root, 'b-good.jpg'), await jpeg(800, 600));
@@ -179,5 +201,51 @@ describe('runFixtureBatch', () => {
     expect(lines.some((line) => line.includes('a-broken.jpg... failed'))).toBe(true);
     expect(lines).toContain('Processing 2/2: b-good.jpg... done (text length=21)');
     expect(lines).toContain('Wrote 1 fixtures, 1 failed (see log)');
+  });
+});
+
+describe('seed fixtures (--seed)', () => {
+  let root: string;
+  let fixtures: string;
+
+  beforeEach(() => {
+    root = temporaryDirectory();
+    fixtures = join(root, 'mock-fixtures.json');
+  });
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it('ships 7 documentation entries with text and confidence', () => {
+    const entries = readSeedFixtures();
+
+    expect(Object.keys(entries)).toHaveLength(7);
+    for (const entry of Object.values(entries)) {
+      expect(entry.text.trim().length).toBeGreaterThan(0);
+      expect(entry.confidence).toBeGreaterThan(0);
+    }
+  });
+
+  it('merges every entry into the map and logs the count', () => {
+    const lines: string[] = [];
+    const seeded = runSeed({ fixtureFile: fixtures, log: (line) => lines.push(line) });
+
+    expect(seeded).toBe(7);
+    expect(lines).toEqual(['Seeded 7 fixtures (these are documentation samples, not real OCR)']);
+
+    const written = JSON.parse(readFileSync(fixtures, 'utf8'));
+    expect(Object.keys(written)).toHaveLength(7);
+    expect(written['test-cbe-001'].text).toContain('Commercial Bank of Ethiopia');
+    // Documentation-only field is not copied into the runtime map.
+    expect(written['test-cbe-001'].note).toBeUndefined();
+  });
+
+  it('is idempotent — running --seed twice changes nothing', () => {
+    runSeed({ fixtureFile: fixtures, log: () => undefined });
+    const first = readFileSync(fixtures, 'utf8');
+    runSeed({ fixtureFile: fixtures, log: () => undefined });
+
+    expect(readFileSync(fixtures, 'utf8')).toBe(first);
   });
 });

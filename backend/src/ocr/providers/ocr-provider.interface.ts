@@ -2,9 +2,10 @@
 // Yene Verify — OCR Provider Interface
 //
 // Receipt images are turned into raw text by a pluggable OCR
-// engine. Two providers exist today:
+// engine. Three providers exist today:
 //
 //   mock           — deterministic dev engine (fixtures by sha256)
+//   tesseract      — local engine (tesseract.js); no credentials
 //   google-vision  — Google Cloud Vision textDetection
 //
 // Providers never persist anything; the OCR layer only returns
@@ -12,7 +13,7 @@
 // (Step 13E). Provider selection is configured with OCR_PROVIDER.
 // ============================================================
 
-export type OcrProviderName = 'mock' | 'google-vision';
+export type OcrProviderName = 'mock' | 'tesseract' | 'google-vision';
 
 export interface OcrResult {
   text: string;

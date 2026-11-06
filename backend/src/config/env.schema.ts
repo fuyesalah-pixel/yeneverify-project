@@ -285,8 +285,8 @@ export const envSchema = z
 
     // ── OCR provider selection ───────────────────────────────────────────
     OCR_PROVIDER: z
-      .enum(['mock', 'google-vision'], {
-        errorMap: () => ({ message: 'must be mock or google-vision.' }),
+      .enum(['mock', 'tesseract', 'google-vision'], {
+        errorMap: () => ({ message: 'must be mock, tesseract or google-vision.' }),
       })
       .default('mock'),
 

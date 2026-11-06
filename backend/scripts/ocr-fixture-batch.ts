@@ -2,11 +2,17 @@
 // Yene Verify — OCR fixtures (batch)
 //
 // Usage:  npm run ocr:fixture:batch -- <image-dir> [--no-compress]
+//         npm run ocr:fixture:batch -- --seed
 //
 // Processes every *.jpg / *.jpeg / *.png in a directory (non-recursive)
 // with the same rules as ocr-fixture.ts: compress to the app's upload
-// spec, hash the compressed bytes, OCR with Vision (or a sidecar .txt),
-// and upsert into mock-fixtures.json in sorted order.
+// spec, hash the compressed bytes, OCR with Tesseract/Vision (or a
+// sidecar .txt), and upsert into mock-fixtures.json in sorted order.
+//
+// `--seed` merges the committed documentation fixtures
+// (src/ocr/providers/seed-fixtures.json) into the map so the pipeline
+// can be exercised with zero OCR setup. Seed keys are semantic, not
+// image hashes, so they never match a real upload.
 //
 // A single bad image never aborts the run: it is reported as failed and
 // the remaining files are still processed.
@@ -17,25 +23,25 @@
 
 import { existsSync, readdirSync, statSync } from 'fs';
 import { resolve } from 'path';
-import type { ImageAnnotatorClient } from '@google-cloud/vision';
 import {
+  FIXTURE_OCR_SETUP_HINT,
   SIDECAR_TEXT_CONFIDENCE,
-  assertFixtureTextSource,
-  createVisionClient,
+  createFixtureTextSource,
   loadBackendEnv,
   prepareFixtureImage,
   readFixtureText,
-  recognizeWithVision,
   requireReadableImage,
-  resolveVisionCredentials,
+  seedFixtures,
   sidecarTextPath,
   upsertFixture,
+  type FixtureTextSource,
 } from './lib/ocr-fixtures';
 
 /** Batch input types are narrower than the single-image script on purpose. */
 const BATCH_EXTENSIONS = ['.jpg', '.jpeg', '.png'] as const;
 
-const USAGE = 'usage: ts-node scripts/ocr-fixture-batch.ts <image-dir> [--no-compress]';
+const USAGE =
+  'usage: ts-node scripts/ocr-fixture-batch.ts [<image-dir>] [--seed] [--no-compress]';
 
 export function isBatchImage(fileName: string): boolean {
   const lower = fileName.toLowerCase();
@@ -48,31 +54,14 @@ export interface BatchOptions {
   fixtureFile?: string;
   /** Receives one line per image plus the summary; defaults to console.log. */
   log?: (line: string) => void;
+  /** Test seam: supplies OCR text instead of building the configured engine. */
+  textSource?: FixtureTextSource;
 }
 
 export interface BatchResult {
   images: string[];
   written: number;
   failed: number;
-}
-
-/** Vision client, created once on first need; failures are sticky. */
-class VisionTextSource {
-  private client: ImageAnnotatorClient | null = null;
-  private failure: Error | null = null;
-
-  async recognize(bytes: Buffer): Promise<{ text: string; confidence: number }> {
-    if (this.failure) throw this.failure;
-    if (!this.client) {
-      try {
-        this.client = createVisionClient(resolveVisionCredentials());
-      } catch (error) {
-        this.failure = error as Error;
-        throw this.failure;
-      }
-    }
-    return recognizeWithVision(this.client, bytes);
-  }
 }
 
 /**
@@ -98,7 +87,7 @@ export async function runFixtureBatch(
     return { images, written: 0, failed: 0 };
   }
 
-  const vision = new VisionTextSource();
+  let source = options.textSource ?? null;
   let written = 0;
   let failed = 0;
 
@@ -111,10 +100,14 @@ export async function runFixtureBatch(
 
       const sidecar = sidecarTextPath(imagePath);
       const hasSidecar = existsSync(sidecar);
-      assertFixtureTextSource(hasSidecar);
+      if (!hasSidecar) {
+        // Built on first need so a folder of sidecar .txt files never
+        // requires any OCR engine.
+        source ??= createFixtureTextSource();
+      }
       const fixture = hasSidecar
         ? { text: readFixtureText(sidecar), confidence: SIDECAR_TEXT_CONFIDENCE }
-        : await vision.recognize(prepared.bytes);
+        : await source!.recognize(prepared.bytes);
 
       upsertFixture(prepared.sha256, fixture, { path: options.fixtureFile });
       written += 1;
@@ -125,8 +118,22 @@ export async function runFixtureBatch(
     }
   }
 
-  log(`Wrote ${written} fixtures, ${failed} failed (see log)`);
+  if (written === 0 && failed > 0) {
+    log(`Wrote 0 fixtures, ${failed} failed. ${FIXTURE_OCR_SETUP_HINT}`);
+  } else {
+    log(`Wrote ${written} fixtures, ${failed} failed (see log)`);
+  }
   return { images, written, failed };
+}
+
+/** Merges the committed seed fixtures into the map; logs the count. */
+export function runSeed(
+  options: { fixtureFile?: string; seedFile?: string; log?: (line: string) => void } = {},
+): number {
+  const log = options.log ?? ((line: string) => console.log(line));
+  const seeded = seedFixtures({ fixtureFile: options.fixtureFile, seedFile: options.seedFile });
+  log(`Seeded ${seeded} fixtures (these are documentation samples, not real OCR)`);
+  return seeded;
 }
 
 async function main(): Promise<void> {
@@ -137,18 +144,25 @@ async function main(): Promise<void> {
     return;
   }
 
+  const seed = argv.includes('--seed');
   const compress = !argv.includes('--no-compress');
   const positional = argv.filter((arg) => !arg.startsWith('-'));
-  if (positional.length !== 1) {
-    console.error(`✖ expected exactly one directory\n${USAGE}`);
+  if (positional.length > 1 || (!seed && positional.length === 0)) {
+    console.error(`✖ expected one directory, --seed, or both\n${USAGE}`);
     process.exitCode = 1;
     return;
   }
 
   loadBackendEnv();
-  const result = await runFixtureBatch(positional[0], { compress });
-  if (result.failed > 0) {
-    process.exitCode = 1;
+
+  if (seed) {
+    runSeed();
+  }
+  if (positional.length === 1) {
+    const result = await runFixtureBatch(positional[0], { compress });
+    if (result.failed > 0) {
+      process.exitCode = 1;
+    }
   }
 }
 

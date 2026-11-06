@@ -57,12 +57,15 @@ export class OcrHealthIndicator extends HealthIndicator {
       });
     }
 
+    const provider = this.config.ocr.provider;
     const reachable = await this.ocr.health();
     const result = this.getStatus(key, reachable, {
-      provider: this.config.ocr.provider,
+      provider,
       message: reachable
-        ? `ocr: ${this.config.ocr.provider} reachable`
-        : `ocr: ${this.config.ocr.provider} credentials unavailable`,
+        ? provider === 'tesseract'
+          ? 'ocr: tesseract (local)'
+          : `ocr: ${provider} reachable`
+        : `ocr: ${provider} credentials unavailable`,
     });
     if (!reachable) {
       throw new HealthCheckError('OCR provider is not reachable', result);

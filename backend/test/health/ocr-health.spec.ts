@@ -13,7 +13,7 @@ import type { OcrService } from '../../src/ocr/ocr.service';
 import type { MockProvider } from '../../src/ocr/providers/mock.provider';
 
 interface Scenario {
-  provider: 'mock' | 'google-vision';
+  provider: 'mock' | 'tesseract' | 'google-vision';
   fixtures?: number;
   visionHealthy?: boolean;
 }
@@ -48,6 +48,16 @@ describe('OcrHealthIndicator', () => {
       fixtures: 7,
     });
     expect(String(result.ocr.message)).toContain('7 fixtures');
+  });
+
+  it('reports up for the local tesseract engine', async () => {
+    const result = await indicatorFor({ provider: 'tesseract' }).isHealthy('ocr');
+
+    expect(result.ocr).toMatchObject({
+      status: 'up',
+      provider: 'tesseract',
+      message: 'ocr: tesseract (local)',
+    });
   });
 
   it('reports up when Vision is reachable with credentials', async () => {
