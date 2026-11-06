@@ -60,6 +60,15 @@ export class MockProvider implements OcrProvider {
     }
   }
 
+  /**
+   * Number of image hashes the mock can resolve. Zero means every real
+   * receipt degrades to MOCK_OCR_UNMATCHED, so verification cannot pass —
+   * surfaced by /health/ready and /health/ocr.
+   */
+  get fixtureCount(): number {
+    return this.fixtures.size;
+  }
+
   /** Test seam: register expected image hashes without editing the static JSON. */
   addFixtures(entries: Record<string, MockFixture>): void {
     for (const [hash, fixture] of Object.entries(entries)) {

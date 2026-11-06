@@ -402,6 +402,15 @@ paths:
                           type: string
                       additionalProperties: true
       tags: *ref_7
+  /health/ocr:
+    get:
+      operationId: HealthController_ocrDiagnostics
+      summary: OCR + bank adapter diagnostics
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags: *ref_7
   /auth/request-otp:
     post:
       operationId: AuthController_requestOtp

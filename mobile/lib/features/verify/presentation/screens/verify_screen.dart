@@ -23,6 +23,7 @@ import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/layout/app_error_state.dart';
 import '../providers/verify_controller.dart';
 import '../verify_copy.dart';
+import '../widgets/ocr_debug_banner.dart';
 import '../widgets/submitting_state.dart';
 import '../widgets/upload_progress.dart';
 
@@ -55,24 +56,34 @@ class VerifyScreen extends ConsumerWidget {
         title: Text(l10n.verifyTitle),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: AppSpacing.screenH,
-          child: switch (current) {
-            IdleState() => _IdleBody(),
-            CapturingState() => const _Preparing(),
-            CompressingState() => const _Preparing(),
-            UploadingState(:final progress) => Center(
-                child: UploadProgress(progress: progress),
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: AppSpacing.screenH,
+                child: switch (current) {
+                  IdleState() => _IdleBody(),
+                  CapturingState() => const _Preparing(),
+                  CompressingState() => const _Preparing(),
+                  UploadingState(:final progress) => Center(
+                      child: UploadProgress(progress: progress),
+                    ),
+                  SubmittingState() =>
+                    const Center(child: VerifyingSkeleton()),
+                  PollingState(:final elapsed) =>
+                    Center(child: VerifyingSkeleton(elapsed: elapsed)),
+                  ResultState() =>
+                    const Center(child: VerifyingSkeleton()),
+                  ErrorState(:final code, :final retryable) => _ErrorBody(
+                      message: verifyErrorMessage(l10n, code),
+                      retryable: retryable,
+                    ),
+                },
               ),
-            SubmittingState() => const Center(child: VerifyingSkeleton()),
-            PollingState(:final elapsed) =>
-              Center(child: VerifyingSkeleton(elapsed: elapsed)),
-            ResultState() => const Center(child: VerifyingSkeleton()),
-            ErrorState(:final code, :final retryable) => _ErrorBody(
-                message: verifyErrorMessage(l10n, code),
-                retryable: retryable,
-              ),
-          },
+            ),
+            // Debug builds only: says out loud whether OCR is mocked out.
+            const OcrDebugBanner(),
+          ],
         ),
       ),
     );

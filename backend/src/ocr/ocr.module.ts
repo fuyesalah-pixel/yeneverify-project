@@ -11,6 +11,8 @@ import { MockProvider } from './providers/mock.provider';
 
 @Module({
   providers: [OcrService, MockProvider, GoogleVisionProvider],
-  exports: [OcrService],
+  // MockProvider is exported so health/diagnostics can report the fixture
+  // count without touching the OCR pipeline.
+  exports: [OcrService, MockProvider],
 })
 export class OcrModule {}

@@ -53,6 +53,8 @@ describe('envSchema', () => {
 
   it('recognizes obvious placeholder markers without printing their values', () => {
     expect(looksLikePlaceholder('replace_me_provider_key')).toBe(true);
-    expect(looksLikePlaceholder('x'.repeat(64))).toBe(false);
+    // A repeated filler character is itself a marker ("xxx"), so a key made
+    // only of one character must never reach a hosted environment.
+    expect(looksLikePlaceholder('x'.repeat(64))).toBe(true);
   });
 });

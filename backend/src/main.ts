@@ -38,7 +38,9 @@ async function bootstrap(): Promise<void> {
 
   // ── Routing ───────────────────────────────────────────────────────────
   app.setGlobalPrefix(cfg.runtime.apiPrefix, {
-    exclude: ['health', 'docs', 'version', '/'],
+    // 'health/(.*)' keeps every health subpath (readiness + /health/ocr) off
+    // the versioned prefix; listing paths individually 404s new ones.
+    exclude: ['health', 'health/(.*)', 'docs', 'version', '/'],
   });
 
   app.enableVersioning({
