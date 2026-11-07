@@ -129,6 +129,29 @@ describe('resolveVerdict', () => {
     expect(outcome.needsSupplementary).toBeNull();
   });
 
+  it('branch 4c: CBE supplementary REQUIRED → NEEDS_REVIEW with the last8 configure prompt', () => {
+    const sup: VerifyResult = {
+      status: 'ERROR',
+      errorCode: 'BANK_SUPPLEMENTARY_REQUIRED',
+      errorMessage: 'CBE requires the last 8 digits of your receiving account',
+      retryable: false,
+      metadata: { field: 'last8', bankCode: 'CBE', action: 'CONFIGURE_ACCOUNT' },
+    };
+
+    const outcome = resolveVerdict({
+      adapterResult: sup,
+      adapterBankCode: 'CBE',
+      duplicate: null,
+      errorContext: null,
+    });
+
+    expect(outcome.status).toBe('NEEDS_REVIEW');
+    expect(outcome.needsSupplementary).toEqual({
+      field: 'last8',
+      hint: 'Add your CBE account number in Settings → Verification Accounts',
+    });
+  });
+
   it('branch 5: ERROR (transport) → ERROR, not NEEDS_REVIEW', () => {
     const err: VerifyResult = {
       status: 'ERROR',

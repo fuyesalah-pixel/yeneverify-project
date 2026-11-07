@@ -21,6 +21,9 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/layout/app_error_state.dart';
+import '../../../transactions/domain/transactions_query.dart';
+import '../../../transactions/presentation/providers/transactions_provider.dart';
+import '../../data/models/verification_result.dart';
 import '../providers/verify_controller.dart';
 import '../verify_copy.dart';
 import '../widgets/ocr_debug_banner.dart';
@@ -72,6 +75,8 @@ class VerifyScreen extends ConsumerWidget {
                     const Center(child: VerifyingSkeleton()),
                   PollingState(:final elapsed) =>
                     Center(child: VerifyingSkeleton(elapsed: elapsed)),
+                  PendingVerificationState(:final isRefreshing) =>
+                    _PendingBody(isRefreshing: isRefreshing),
                   ResultState() =>
                     const Center(child: VerifyingSkeleton()),
                   ErrorState(:final code, :final retryable) => _ErrorBody(
@@ -177,6 +182,85 @@ class _Preparing extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Pending ────────────────────────────────────────────────────────────────
+
+/// Slow-bank state: polling continues in the background, but the user is told
+/// this can take a minute instead of being shown an error.
+class _PendingBody extends ConsumerWidget {
+  const _PendingBody({required this.isRefreshing});
+
+  final bool isRefreshing;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final colors = context.colors;
+
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: colors.primaryAction.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.hourglass_top_rounded,
+                  size: 40,
+                  color: colors.primaryAction,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            Text(
+              l10n.verifyStillWorking,
+              style: AppTypography.headingSmall.copyWith(
+                color: colors.textPrimary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n.verifyPendingBody,
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            AppButton(
+              label: l10n.refreshNow,
+              isLoading: isRefreshing,
+              onPressed: isRefreshing
+                  ? null
+                  : () => ref
+                      .read(verifyControllerProvider.notifier)
+                      .refreshPending(),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AppButton(
+              label: l10n.checkTransactions,
+              variant: AppButtonVariant.secondary,
+              onPressed: () {
+                ref.read(transactionsQueryProvider.notifier).state =
+                    const TransactionsQuery(
+                  statuses: {VerificationStatus.pending},
+                );
+                context.go(Routes.history);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

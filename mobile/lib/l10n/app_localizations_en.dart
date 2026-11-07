@@ -727,6 +727,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifyStillWorking => 'Still verifying…';
 
   @override
+  String get verifyPendingBody =>
+      'Still verifying — this can take up to a minute for some banks.';
+
+  @override
+  String get refreshNow => 'Refresh now';
+
+  @override
+  String get checkTransactions => 'Check transactions';
+
+  @override
   String get verifyTooLong =>
       'Verification is taking too long. Check back in a minute.';
 

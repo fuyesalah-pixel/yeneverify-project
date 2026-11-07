@@ -1388,6 +1388,24 @@ abstract class AppLocalizations {
   /// **'Still verifying…'**
   String get verifyStillWorking;
 
+  /// No description provided for @verifyPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Still verifying — this can take up to a minute for some banks.'**
+  String get verifyPendingBody;
+
+  /// No description provided for @refreshNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh now'**
+  String get refreshNow;
+
+  /// No description provided for @checkTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Check transactions'**
+  String get checkTransactions;
+
   /// No description provided for @verifyTooLong.
   ///
   /// In en, this message translates to:

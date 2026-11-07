@@ -16,7 +16,11 @@ import type {
 } from './verifications.types';
 
 /** User-facing hints for banks that need an extra input before verifying. */
-export const SUPPLEMENTARY_HINTS: Record<string, { field: 'accountSuffix'; hint: string }> = {
+export const SUPPLEMENTARY_HINTS: Record<string, SupplementaryPrompt> = {
+  CBE: {
+    field: 'last8',
+    hint: 'Add your CBE account number in Settings → Verification Accounts',
+  },
   ABYSSINIA: {
     field: 'accountSuffix',
     hint: 'Please provide the last 5 digits of the account you received payment to.',

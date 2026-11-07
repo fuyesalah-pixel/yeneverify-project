@@ -709,6 +709,16 @@ class AppLocalizationsAm extends AppLocalizations {
   String get verifyStillWorking => 'አሁንም እያረጋገጠ ነው…';
 
   @override
+  String get verifyPendingBody =>
+      'እያረጋገጠ ነው — ለአንዳንድ ባንኮች እስከ አንድ ደቂቃ ሊወስድ ይችላል።';
+
+  @override
+  String get refreshNow => 'አሁን አድስ';
+
+  @override
+  String get checkTransactions => 'ግብይቶችን ይመልከቱ';
+
+  @override
   String get verifyTooLong => 'ማረጋገጫው ብዙ ጊዜ እየወሰደ ነው። ከአንድ ደቂቃ በኋላ ይመልከቱ።';
 
   @override

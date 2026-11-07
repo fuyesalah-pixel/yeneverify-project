@@ -123,16 +123,23 @@ class VerifyRepository {
     }
   }
 
-  /// Polls until a terminal status, the 30 s ceiling, or a hard failure.
+  /// Polls until a terminal status, the 5-minute ceiling, or a hard failure.
+  /// [onPending] fires once at the 60 s mark while polling continues.
   Future<PollOutcome> poll(
     String verificationId, {
     void Function(Duration elapsed)? onElapsed,
+    void Function(Duration elapsed)? onPending,
   }) {
     return PollVerification(
       fetch: _verifications.getById,
       onElapsed: onElapsed,
+      onPending: onPending,
     ).run(verificationId);
   }
+
+  /// Single status check used by the pending screen's manual refresh.
+  Future<ApiResult<VerificationResult>> status(String verificationId) =>
+      _verifications.getById(verificationId);
 }
 
 final receiptsApiProvider = Provider<ReceiptsApi>(

@@ -402,3 +402,22 @@ A `showDateRangePicker` flow is deferred because the backend takes arbitrary
 questions. Add a "Custom" option that opens the platform range picker, caps
 the span at 365 days client-side, and shows the chosen dates in the filter
 sheet. Trigger: first merchant who needs "last quarter" or a specific month.
+
+## 46. Historical date parsing corrections
+
+If a date-parsing bug is found after launch (for example the month-first /
+day-first issue found in CBE PDF receipts) and it has already written dates
+into real merchant data, add a one-off backfill script that re-parses the
+affected receipts for the bank and time window. Consider persisting a
+`parserVersion` in verification metadata so a later correction can identify
+every row produced by an older parser. Trigger: a parser fix that changes
+stored values, not just future ones.
+
+## 47. Slow bank UX — push notification instead of polling
+
+The client now polls for up to 60 s and then keeps checking every 10 s for
+five minutes. If a bank endpoint is consistently slower than that (some
+Ethiopian endpoints take 40 s+), move completion to an async channel: a push
+notification (or web socket event) when the verification reaches a terminal
+verdict, even if the user has left the screen. Defer until a live bank
+routinely exceeds the polling window.

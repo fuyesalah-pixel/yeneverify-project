@@ -738,6 +738,15 @@
   "verifyStillWorking": "Still verifying…",
   "@verifyStillWorking": {},
 
+  "verifyPendingBody": "Still verifying — this can take up to a minute for some banks.",
+  "@verifyPendingBody": {},
+
+  "refreshNow": "Refresh now",
+  "@refreshNow": {},
+
+  "checkTransactions": "Check transactions",
+  "@checkTransactions": {},
+
   "verifyTooLong": "Verification is taking too long. Check back in a minute.",
   "@verifyTooLong": {},
 

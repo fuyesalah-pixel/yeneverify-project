@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yene_verify/core/router/app_router.dart';
 import 'package:yene_verify/core/theme/app_theme.dart';
+import 'package:yene_verify/features/transactions/presentation/providers/transactions_provider.dart';
 import 'package:yene_verify/features/verify/data/models/verification_result.dart';
 import 'package:yene_verify/features/verify/presentation/providers/verify_controller.dart';
 import 'package:yene_verify/features/verify/presentation/screens/verify_screen.dart';
@@ -22,6 +23,7 @@ class _FakeVerifyController extends VerifyController {
   int cameraCalls = 0;
   int galleryCalls = 0;
   int retryCalls = 0;
+  int refreshPendingCalls = 0;
 
   @override
   Future<VerifyState> build() async => initial;
@@ -31,6 +33,9 @@ class _FakeVerifyController extends VerifyController {
 
   @override
   Future<void> startGallery() async => galleryCalls++;
+
+  @override
+  Future<void> refreshPending() async => refreshPendingCalls++;
 
   @override
   void retry() {
@@ -47,6 +52,17 @@ VerificationResult _verifiedResult() => VerificationResult.fromJson({
       'source': 'TRANSACTION',
       'bankCode': 'CBE',
       'bankReference': 'FT123',
+    });
+
+VerificationResult _errorResult() => VerificationResult.fromJson({
+      'id': 'v-99',
+      'status': 'ERROR',
+      'source': 'TRANSACTION',
+      'bankCode': 'CBE',
+      'bankReference': 'FT123',
+      'errorCode': 'VERIFICATION_BANK_NOT_DETECTED',
+      'errorMessage':
+          'We could not detect a bank in the uploaded receipt image. Try another image.',
     });
 
 Widget _app(_FakeVerifyController fake) {
@@ -68,6 +84,10 @@ Widget _app(_FakeVerifyController fake) {
             ),
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.history,
+        builder: (_, __) => const Scaffold(body: Text('HISTORY_ROUTE')),
       ),
     ],
   );
@@ -183,6 +203,65 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('VERDICT_ROUTE:v-42'), findsOneWidget);
+  });
+
+  testWidgets('a terminal ERROR result also navigates to the verdict route',
+      (tester) async {
+    final fake = _FakeVerifyController(const IdleState());
+    await tester.pumpWidget(_app(fake));
+    await tester.pump();
+
+    fake.emit(ResultState(_errorResult()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('VERDICT_ROUTE:v-99'), findsOneWidget);
+  });
+
+  testWidgets('pending state stays calm — no timeout error, manual refresh',
+      (tester) async {
+    final fake = _FakeVerifyController(
+      const PendingVerificationState(verificationId: 'v-7'),
+    );
+    await tester.pumpWidget(_app(fake));
+    await tester.pump();
+
+    expect(find.text('Still verifying…'), findsOneWidget);
+    expect(
+      find.text(
+        'Still verifying — this can take up to a minute for some banks.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Refresh now'), findsOneWidget);
+    expect(find.text('Check transactions'), findsOneWidget);
+    expect(find.textContaining('taking too long'), findsNothing);
+
+    await tester.tap(find.text('Refresh now'));
+    await tester.pump();
+
+    expect(fake.refreshPendingCalls, 1);
+  });
+
+  testWidgets('pending state opens transactions filtered to PENDING',
+      (tester) async {
+    final fake = _FakeVerifyController(
+      const PendingVerificationState(verificationId: 'v-7'),
+    );
+    await tester.pumpWidget(_app(fake));
+    await tester.pump();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(VerifyScreen)),
+    );
+
+    await tester.tap(find.text('Check transactions'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HISTORY_ROUTE'), findsOneWidget);
+    expect(
+      container.read(transactionsQueryProvider).statuses,
+      {VerificationStatus.pending},
+    );
   });
 
   testWidgets('polling shows the verifying skeleton and the expectation caption',

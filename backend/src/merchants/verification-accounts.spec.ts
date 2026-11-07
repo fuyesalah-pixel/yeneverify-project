@@ -103,9 +103,9 @@ describe('buildSupplementaryData', () => {
     awash: { full: '0123456789', accountNumber: '0123456789' },
   };
 
-  it('maps CBE to accountSuffix', () => {
+  it('maps CBE to last8 (the adapter field)', () => {
     expect(buildSupplementaryData('CBE', accounts)).toEqual({
-      accountSuffix: '23456789',
+      last8: '23456789',
     });
   });
 
@@ -123,7 +123,7 @@ describe('buildSupplementaryData', () => {
 
   it('still reads legacy last-N-only rows', () => {
     expect(buildSupplementaryData('CBE', { cbe: { last8: '12345678' } })).toEqual({
-      accountSuffix: '12345678',
+      last8: '12345678',
     });
   });
 

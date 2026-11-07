@@ -274,7 +274,7 @@ describe('VerificationsService.process', () => {
 
   it('injects merchant-configured accounts into adapter supplementary (config wins over OCR)', async () => {
     const adapter = makeStubAdapter(verifiedAdapterResult());
-    adapter.extractSupplementary = jest.fn(() => ({ accountSuffix: '99999999' }));
+    adapter.extractSupplementary = jest.fn(() => ({ last8: '99999999' }));
     const deps = makeDeps(adapter);
     (deps.prisma.merchant as unknown as { findUnique: jest.Mock }).findUnique.mockResolvedValue({
       verificationAccounts: { cbe: { last8: '12345678' } },
@@ -285,14 +285,14 @@ describe('VerificationsService.process', () => {
 
     expect(adapter.verify).toHaveBeenCalledWith(
       expect.objectContaining({
-        supplementary: { accountSuffix: '12345678' },
+        supplementary: { last8: '12345678' },
       }),
     );
   });
 
   it('leaves OCR-derived supplementary intact when the merchant has no account configured', async () => {
     const adapter = makeStubAdapter(verifiedAdapterResult());
-    adapter.extractSupplementary = jest.fn(() => ({ accountSuffix: '99999999' }));
+    adapter.extractSupplementary = jest.fn(() => ({ last8: '99999999' }));
     const deps = makeDeps(adapter);
     const service = makeService(deps);
 
@@ -300,7 +300,7 @@ describe('VerificationsService.process', () => {
 
     expect(adapter.verify).toHaveBeenCalledWith(
       expect.objectContaining({
-        supplementary: { accountSuffix: '99999999' },
+        supplementary: { last8: '99999999' },
       }),
     );
   });

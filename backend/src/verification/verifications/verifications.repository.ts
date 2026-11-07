@@ -438,9 +438,7 @@ export class VerificationsRepository {
 }
 
 function isSupplementaryPrompt(value: unknown): boolean {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    (value as Record<string, unknown>)['field'] === 'accountSuffix'
-  );
+  if (typeof value !== 'object' || value === null) return false;
+  const field = (value as Record<string, unknown>)['field'];
+  return field === 'accountSuffix' || field === 'last8';
 }

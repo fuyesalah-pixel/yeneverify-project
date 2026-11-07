@@ -136,7 +136,7 @@ export function buildSupplementaryData(
 
   switch (bankCode) {
     case 'CBE':
-      return stored.cbe ? { accountSuffix: stored.cbe.last8 } : {};
+      return stored.cbe ? { last8: stored.cbe.last8 } : {};
     case 'ABYSSINIA':
       return stored.abyssinia ? { accountSuffix: stored.abyssinia.last5 } : {};
     case 'AWASH':

@@ -35,7 +35,7 @@ export type VerificationResult = {
   errorCode: string | null;
   durationMs: number;
   duplicateOfVerificationId?: string | null;
-  needsSupplementary?: { field: 'accountSuffix'; hint: string } | null;
+  needsSupplementary?: SupplementaryPrompt | null;
 };
 
 /** The decision `finalize()` persists. Built by VerdictResolver. */
@@ -52,7 +52,7 @@ export type VerdictOutcome = {
   errorCode?: string | null;
   errorMessage?: string | null;
   duplicateOfVerificationId?: string | null;
-  needsSupplementary?: { field: 'accountSuffix'; hint: string } | null;
+  needsSupplementary?: SupplementaryPrompt | null;
   metadata?: Record<string, unknown>;
 };
 
@@ -80,4 +80,6 @@ export type DetectionStageResult = {
 };
 
 /** Supplementary prompt the client should surface to the user. */
-export type SupplementaryPrompt = { field: 'accountSuffix'; hint: string };
+export type SupplementaryField = 'accountSuffix' | 'last8';
+
+export type SupplementaryPrompt = { field: SupplementaryField; hint: string };

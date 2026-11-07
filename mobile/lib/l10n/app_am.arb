@@ -472,6 +472,12 @@
 
   "verifyStillWorking": "አሁንም እያረጋገጠ ነው…",
 
+  "verifyPendingBody": "እያረጋገጠ ነው — ለአንዳንድ ባንኮች እስከ አንድ ደቂቃ ሊወስድ ይችላል።",
+
+  "refreshNow": "አሁን አድስ",
+
+  "checkTransactions": "ግብይቶችን ይመልከቱ",
+
   "verifyTooLong": "ማረጋገጫው ብዙ ጊዜ እየወሰደ ነው። ከአንድ ደቂቃ በኋላ ይመልከቱ።",
 
   "errorImageTooLarge": "ምስሉ በጣም ትልቅ ነው። ያነሰ ስክሪንሾት ይሞክሩ።",

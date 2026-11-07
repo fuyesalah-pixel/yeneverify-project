@@ -2,8 +2,14 @@
 // Yene Verify — CBE Bank Adapter
 //
 // Reference implementation for all 13D.* bank adapters.
-// CBE exposes the simplest public endpoint of the 7 banks: an
-// HTML receipt page keyed by the FT reference — no login, no JS.
+//
+// CBE's public receipt endpoint requires BOTH the FT reference
+// and the last 8 digits of the receiving account:
+//
+//   /BranchReceipt/{FT_REF}&{LAST_8_DIGITS}
+//
+// The endpoint answers with a viewable HTML page or a PDF, so the
+// adapter sniffs the content type and parses either.
 //
 // Contract with 13E: this adapter's job is ONLY "reference
 // resolves → here is the real receipt". Whether the receipt
@@ -13,17 +19,63 @@
 
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import type { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { AppConfigService } from '../../../config/config.service';
 import type { BankAdapter, VerifyInput, VerifyResult } from '../adapter.interface';
 import { AdapterBase } from '../adapter.base';
 import { REFERENCE_PATTERNS, normalizeReference } from '../../regex/reference-patterns';
-import { parseCbeReceipt } from './cbe.parser';
+import { extractPdfText } from '../../parsers/pdf.parser';
+import { parseCbeReceipt, type CbeParsedReceipt } from './cbe.parser';
 import { ERROR_CODES } from '../../../common/constants/error-codes';
 
 const CBE_BASE_URL = 'https://apps.cbe.com.et:100';
+const BRANCH_RECEIPT_PATH = '/BranchReceipt';
 const HEALTH_TIMEOUT_MS = 3000;
-const ACCOUNT_SUFFIX_RE = /(?:account|acct)[:\s]{0,10}(?:ending|last)?[\s:]{0,5}(\d{4,8})\b/i;
+const LAST8_RE = /^\d{8}$/;
+/** OCR fallback: "Account ending 12345678" supplies the configured digits. */
+const ACCOUNT_SUFFIX_RE = /(?:account|acct)[:\s]{0,10}(?:ending|last)?[\s:]{0,5}(\d{8})\b/i;
+
+type ContentKind = 'html' | 'pdf' | 'unknown';
+
+function toBuffer(data: unknown): Buffer {
+  if (Buffer.isBuffer(data)) return data;
+  if (data instanceof ArrayBuffer) return Buffer.from(new Uint8Array(data));
+  if (ArrayBuffer.isView(data)) {
+    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+  }
+  if (typeof data === 'string') return Buffer.from(data, 'utf8');
+  return Buffer.alloc(0);
+}
+
+function contentTypeOf(response: AxiosResponse): string {
+  const header = (response.headers as Record<string, unknown> | undefined)?.['content-type'];
+  return typeof header === 'string' ? header.toLowerCase() : '';
+}
+
+function looksLikePdf(body: Buffer): boolean {
+  return body.toString('latin1', 0, 4) === '%PDF';
+}
+
+function looksLikeHtml(body: Buffer): boolean {
+  const head = body.toString('utf8', 0, 512).trimStart().toLowerCase();
+  return head.startsWith('<!doctype html') || head.startsWith('<html') || head.includes('<html');
+}
+
+/**
+ * Content-Type is advisory: CBE has served receipts as
+ * `application/octet-stream` and with no header at all. Magic bytes
+ * decide when the header is ambiguous.
+ */
+function contentKind(contentType: string, body: Buffer): ContentKind {
+  if (contentType.includes('application/pdf')) return 'pdf';
+  if (contentType.includes('text/html') || contentType.includes('application/xhtml')) {
+    return 'html';
+  }
+  if (looksLikePdf(body)) return 'pdf';
+  if (looksLikeHtml(body)) return 'html';
+  return 'unknown';
+}
 
 @Injectable()
 export class CbeAdapter extends AdapterBase implements BankAdapter {
@@ -47,32 +99,77 @@ export class CbeAdapter extends AdapterBase implements BankAdapter {
   }
 
   /**
-   * CBE sometimes requires the last digits of the recipient's
-   * account alongside the reference; OCR text that carries an
-   * "account ending 1234" line supplies them here.
+   * OCR text carrying an "account ending 12345678" line supplies the
+   * digits when the merchant has not configured an account.
    */
   extractSupplementary(rawOcrText: string): Record<string, string> {
     const match = rawOcrText.match(ACCOUNT_SUFFIX_RE);
-    return match ? { accountSuffix: match[1] } : {};
+    return match ? { last8: match[1] } : {};
+  }
+
+  /** The last 8 digits are mandatory; validate BEFORE any HTTP call. */
+  private last8Of(input: VerifyInput): { error: VerifyResult } | { last8: string } {
+    const last8 = input.supplementary?.last8?.trim() ?? '';
+
+    if (last8.length === 0) {
+      return {
+        error: {
+          status: 'ERROR',
+          errorCode: ERROR_CODES.BANK_SUPPLEMENTARY_REQUIRED,
+          errorMessage: 'CBE requires the last 8 digits of your receiving account',
+          retryable: false,
+          metadata: {
+            field: 'last8',
+            bankCode: 'CBE',
+            action: 'CONFIGURE_ACCOUNT',
+            actionHint: 'Add your CBE account number in Settings → Verification Accounts',
+          },
+        },
+      };
+    }
+
+    if (!LAST8_RE.test(last8)) {
+      return {
+        error: {
+          status: 'ERROR',
+          errorCode: ERROR_CODES.BANK_SUPPLEMENTARY_INVALID,
+          errorMessage: 'Last 8 digits must be numeric',
+          retryable: false,
+          metadata: { field: 'last8', received: last8 },
+        },
+      };
+    }
+
+    return { last8 };
   }
 
   protected async doVerify(input: VerifyInput): Promise<VerifyResult> {
-    const url = `${CBE_BASE_URL}/?id=${encodeURIComponent(input.referenceNormalized)}`;
+    const validated = this.last8Of(input);
+    if ('error' in validated) {
+      return validated.error;
+    }
+    const last8 = validated.last8;
+
+    // CBE URL format: /BranchReceipt/{FT_REF}&{LAST_8_DIGITS}
+    const url = `${CBE_BASE_URL}${BRANCH_RECEIPT_PATH}/${encodeURIComponent(
+      input.referenceNormalized,
+    )}&${last8}`;
     const { timeoutMs, userAgent } = this.config.bankAdapters;
 
-    let html: string;
+    let response: AxiosResponse;
     try {
-      const response = await firstValueFrom(
-        this.httpClient.get<string>(url, {
+      response = await firstValueFrom(
+        this.httpClient.get<ArrayBuffer>(url, {
           timeout: timeoutMs,
-          responseType: 'text',
+          responseType: 'arraybuffer',
           headers: {
             'User-Agent': userAgent,
-            Accept: 'text/html',
+            Accept: 'text/html, application/pdf',
           },
+          // Body-qualified endpoint: the checks below classify the answer.
+          validateStatus: () => true,
         }),
       );
-      html = response.data;
     } catch (err) {
       const status =
         err && typeof err === 'object' && 'response' in err
@@ -87,18 +184,66 @@ export class CbeAdapter extends AdapterBase implements BankAdapter {
       };
     }
 
-    const parsed = parseCbeReceipt(html);
-    if (!parsed.found) {
+    // A 404 is a definitive "no such receipt" verdict.
+    if (response.status === 404) {
+      return this.referenceNotFound(input);
+    }
+
+    const body = toBuffer(response.data);
+    const contentType = contentTypeOf(response);
+    const parsed = await this.parseResponse(body, contentType, input.referenceNormalized);
+
+    // A wrong account suffix is definitive: the reference may be real,
+    // but this merchant's configured digits do not belong to it.
+    if (parsed.accountMismatch) {
       return {
         status: 'FAKE',
-        errorCode: 'BANK_REFERENCE_NOT_FOUND',
-        errorMessage: 'Receipt not found on CBE server',
+        errorCode: ERROR_CODES.BANK_SUPPLEMENTARY_INVALID,
+        errorMessage: 'The last 8 digits do not match this CBE receipt',
         retryable: false,
-        metadata: { reference: input.referenceNormalized },
+        metadata: {
+          reason: 'account-mismatch',
+          suggestedAction: 'CHECK_ACCOUNT_DIGITS',
+          reference: input.referenceNormalized,
+        },
       };
     }
 
-    // Resolved page but the fields we need are absent — a parser or
+    if (parsed.notFound) {
+      return this.referenceNotFound(input, parsed.notFoundReason);
+    }
+
+    // Server-side failures and ambiguous content are transient — NEVER
+    // a verdict against the merchant's receipt.
+    if (response.status >= 500) {
+      return {
+        status: 'ERROR',
+        errorCode: ERROR_CODES.BANK_ADAPTER_ERROR,
+        errorMessage: 'CBE endpoint returned a server error',
+        retryable: true,
+        metadata: { httpStatus: response.status },
+      };
+    }
+    if (response.status < 200 || response.status >= 300) {
+      return {
+        status: 'ERROR',
+        errorCode: ERROR_CODES.BANK_ADAPTER_ERROR,
+        errorMessage: 'CBE endpoint returned an unexpected status',
+        retryable: false,
+        metadata: { httpStatus: response.status },
+      };
+    }
+    if (!parsed.found) {
+      return {
+        status: 'ERROR',
+        errorCode: ERROR_CODES.BANK_ADAPTER_ERROR,
+        errorMessage: 'CBE returned an ambiguous receipt response',
+        retryable: true,
+        metadata: { httpStatus: response.status, contentType, format: parsed.format },
+      };
+    }
+
+    // Resolved receipt but the fields we need are absent — a parser or
     // page-shape drift, not a transient bank problem.
     const missing: string[] = [];
     if (parsed.amountMinor === null) missing.push('amount');
@@ -123,14 +268,73 @@ export class CbeAdapter extends AdapterBase implements BankAdapter {
       senderName: parsed.senderName,
       receiverName: parsed.receiverName,
       paidAt: parsed.paidAt!,
-      metadata: { source: 'cbe-html' },
+      metadata: { source: parsed.format === 'pdf' ? 'cbe-pdf' : 'cbe-html' },
+    };
+  }
+
+  /**
+   * HTML → cheerio, PDF → shared labelled-text extractor. When the
+   * content type is ambiguous, try HTML first and fall back to PDF
+   * (the spec's ordering).
+   */
+  private async parseResponse(
+    body: Buffer,
+    contentType: string,
+    reference: string,
+  ): Promise<CbeParsedReceipt> {
+    const kind = contentKind(contentType, body);
+
+    if (kind === 'pdf') {
+      const text = await this.tryExtractPdfText(body);
+      return text === null
+        ? parseCbeReceipt('', 'pdf') // ambiguous: no extractable text
+        : parseCbeReceipt(text, 'pdf', reference);
+    }
+
+    if (kind === 'html') {
+      return parseCbeReceipt(body.toString('utf8'), 'html');
+    }
+
+    // Ambiguous: HTML first, then PDF.
+    const htmlParsed = parseCbeReceipt(body.toString('utf8'), 'html');
+    if (htmlParsed.found || htmlParsed.notFound || htmlParsed.accountMismatch) {
+      return htmlParsed;
+    }
+    const pdfText = await this.tryExtractPdfText(body);
+    return pdfText === null ? htmlParsed : parseCbeReceipt(pdfText, 'pdf', reference);
+  }
+
+  /** Never throws; empty/garbled PDF text means "ambiguous", not "fake". */
+  private async tryExtractPdfText(body: Buffer): Promise<string | null> {
+    if (body.length === 0) return null;
+    try {
+      const { text } = await extractPdfText(body);
+      return text.trim().length > 0 ? text : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private referenceNotFound(
+    input: VerifyInput,
+    reason: CbeParsedReceipt['notFoundReason'] = 'not-found',
+  ): VerifyResult {
+    return {
+      status: 'FAKE',
+      errorCode: ERROR_CODES.BANK_REFERENCE_NOT_FOUND,
+      errorMessage:
+        reason === 'reference-mismatch'
+          ? 'The receipt returned by CBE carries a different reference'
+          : 'Receipt not found on CBE server',
+      retryable: false,
+      metadata: { reason, reference: input.referenceNormalized },
     };
   }
 
   async health(): Promise<boolean> {
     try {
       await firstValueFrom(
-        this.httpClient.head(`${CBE_BASE_URL}/`, {
+        this.httpClient.head(`${CBE_BASE_URL}${BRANCH_RECEIPT_PATH}/`, {
           timeout: HEALTH_TIMEOUT_MS,
           // Any HTTP response proves reachability; codes are irrelevant.
           validateStatus: () => true,

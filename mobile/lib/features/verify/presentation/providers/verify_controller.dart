@@ -67,6 +67,18 @@ class PollingState extends VerifyState {
   final Duration elapsed;
 }
 
+/// The poll ceiling was reached but the backend may still finish. The screen
+/// keeps checking every 10 s and offers a manual refresh; this is deliberately
+/// not an error state.
+class PendingVerificationState extends VerifyState {
+  const PendingVerificationState({
+    required this.verificationId,
+    this.isRefreshing = false,
+  });
+  final String verificationId;
+  final bool isRefreshing;
+}
+
 /// Terminal verdict — the screen navigates to the verdict route.
 class ResultState extends VerifyState {
   const ResultState(this.result);
@@ -236,6 +248,7 @@ class VerifyController extends AsyncNotifier<VerifyState> {
 
   Future<void> _poll(String verificationId, int gen) async {
     _emit(PollingState(verificationId: verificationId));
+    var sawPending = false;
 
     final outcome = await _repo.poll(
       verificationId,
@@ -243,6 +256,13 @@ class VerifyController extends AsyncNotifier<VerifyState> {
         if (gen != _generation) return;
         if (_current is PollingState) {
           _emit(PollingState(verificationId: verificationId, elapsed: elapsed));
+        }
+      },
+      onPending: (_) {
+        if (gen != _generation) return;
+        sawPending = true;
+        if (_current is PollingState) {
+          _emit(PendingVerificationState(verificationId: verificationId));
         }
       },
     );
@@ -253,12 +273,40 @@ class VerifyController extends AsyncNotifier<VerifyState> {
       case PollFinished(:final result):
         _emit(ResultState(result));
       case PollTimedOut():
-        _emit(const ErrorState(
-          code: VerifyErrorCodes.timeout,
-          message: 'Verification is taking too long. Check back in a minute.',
-        ));
+        // The loop stopped at its hard ceiling; the verification may still
+        // land, so keep the calm pending screen instead of an error.
+        _emit(PendingVerificationState(verificationId: verificationId));
       case PollFailed(:final error):
-        _emit(_errorFor(error));
+        // A network failure after the pending threshold is transient — the
+        // backend may still finish, so do not turn it into a red error.
+        if (sawPending && error.isNetwork) {
+          _emit(PendingVerificationState(verificationId: verificationId));
+        } else {
+          _emit(_errorFor(error));
+        }
+    }
+  }
+
+  /// One-shot check from the pending screen. Terminal results move straight
+  /// to the verdict; anything else stays pending.
+  Future<void> refreshPending() async {
+    final current = _current;
+    if (current is! PendingVerificationState || current.isRefreshing) return;
+
+    final gen = _generation;
+    _emit(PendingVerificationState(
+      verificationId: current.verificationId,
+      isRefreshing: true,
+    ));
+
+    final result = await _repo.status(current.verificationId);
+    if (gen != _generation) return;
+
+    switch (result) {
+      case Success<VerificationResult>(:final data) when data.isTerminal:
+        _emit(ResultState(data));
+      case Success<VerificationResult>() || Failure<VerificationResult>():
+        _emit(PendingVerificationState(verificationId: current.verificationId));
     }
   }
 
