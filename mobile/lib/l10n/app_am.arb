@@ -1,564 +1,338 @@
 {
   "@@locale": "am",
   "@@last_modified": "2026-09-24",
-
   "appName": "ዬን ቨሪፋይ",
-
   "loginTitle": "ዬን ቨሪፋይ",
-
   "loginSubtitle": "ለመጀመር የስልክ ቁጥርዎን ያስገቡ",
-
   "taglinePrimary": "ማንኛውንም የኢትዮጵያ ባንክ ክፍያ ያረጋግጡ። በሰከንዶች።",
-
   "taglineShort": "ያረጋግጡ። ይምኑ። ያድጉ።",
-
   "continueLabel": "ቀጥል",
-
   "cancelLabel": "ሰርዝ",
-
   "confirmLabel": "አረጋግጥ",
-
   "saveLabel": "አስቀምጥ",
-
   "deleteLabel": "ሰርዝ",
-
   "retryLabel": "እንደገና ሞክር",
-
   "okLabel": "እሺ",
-
   "closeLabel": "ዝጋ",
-
   "backLabel": "ተመለስ",
-
   "doneLabel": "ተጠናቀቀ",
-
   "loadingLabel": "በመጫን ላይ…",
-
   "requiredField": "ይህ መስክ ያስፈልጋል",
-
   "genericError": "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
-
   "networkError": "የኢንተርኔት ግንኙነት የለም። ኔትወርክዎን ያረጋግጡ።",
-
   "sessionExpired": "ክፍለ ጊዜዎ ጊዜው አልፏል። እንደገና ይግቡ።",
-
   "phoneNumber": "ስልክ ቁጥር",
-
   "phoneHint": "+251 9XX XXX XXX",
-
   "phoneInvalid": "የሚሰራ የኢትዮጵያ ስልክ ቁጥር ያስገቡ",
-
   "otpTitle": "የማረጋገጫ ኮድ ያስገቡ",
-
   "otpSubtitle": "ወደ {phone} 6 አሃዝ ኮድ ልከናል",
-
   "otpResend": "ኮድ እንደገና ላክ",
-
   "otpResendIn": "በ{seconds} ሰከንድ ውስጥ እንደገና ላክ",
-
   "otpInvalid": "ኮዱ ስህተት ነው። እንደገና ይሞክሩ።",
-
   "otpExpired": "ኮዱ ጊዜው አልፏል። አዲስ ኮድ ይጠይቁ።",
-
   "pinIncorrect": "የPIN ኮድ ስህተት ነው። እንደገና ይሞክሩ።",
-
   "authWeakPin": "PIN በጣም ደካማ ነው። 4 ወይም 6 አሃዞችን ይጠቀሙ፤ ተከታታይ ወይም የሚደጋገሙ ቁጥሮችን ያስወግዱ።",
-
   "pinLocked": "በጣም ብዙ ሙከራዎች። እንደገና በ{minutes} ደቂቃ ውስጥ ይሞክሩ።",
   "@pinLocked": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
-
   "errorDeviceLimit": "በጣም ብዙ መሳሪያዎች። ከቅንብሮች ውስጥ አንዱን ያስወግዱ።",
-
   "errorAccountBanned": "ይህ መለያ ታግዷል። ድጋፍን ያግኙ።",
-
   "otpMaxAttempts": "ብዙ ሙከራዎች። ከጥቂት ጊዜ በኋላ እንደገና ይሞክሩ።",
-
   "pinTitle": "PIN ያቀናብሩ",
-
   "pinSubtitle": "መለያዎን ለመጠበቅ {length} አሃዝ PIN ይምረጡ",
-
   "pinConfirmTitle": "PIN ያረጋግጡ",
-
   "pinMismatch": "PINs አይዛመዱም። እንደገና ይሞክሩ።",
-
   "pinWrong": "PIN ትክክል አይደለም። {attemptsLeft} ሙከራ ቀርቷል።",
-
   "pinSetupTitle": "PIN ይፍጠሩ",
   "@pinSetupTitle": {},
-
   "pinSetupSubtitle": "Yene Verify ን በየጊዜው ሲከፍቱ ይህን PIN ይጠቀሙ",
   "@pinSetupSubtitle": {},
-
   "pinEntryTitle": "እንኳን ደህና መጡ",
   "@pinEntryTitle": {},
-
   "pinEntryForgot": "PIN ረስዋል?",
   "@pinEntryForgot": {},
-
   "enterPin": "PINዎን ያስገቡ",
-
   "biometricTitle": "ባዮሜትሪክ መክፈቻ አንቃ",
-
   "biometricSubtitle": "በፍጥነት እና ደህንነቱ በተጠበቀ ሁኔታ ለመክፈት የጣት አሻራ ወይም Face ID ይጠቀሙ።",
-
   "biometricEnable": "ባዮሜትሪክ አንቃ",
-
   "biometricSkip": "አሁን ዝለል",
-
   "biometricPrompt": "ማንነትዎን ያረጋግጡ",
-
   "biometricFailed": "ባዮሜትሪክ ማረጋገጥ አልተሳካም። PINዎን ይጠቀሙ።",
-
   "verifyTitle": "ክፍያ ያረጋግጡ",
-
   "verifySubtitle": "የደንበኛውን የክፍያ ማረጋገጫ ፎቶ ያንሱ ወይም ይስቀሉ።",
-
   "takePhoto": "ፎቶ አንሳ",
-
   "uploadImage": "ምስል ስቀል",
-
   "choosePhotoSource": "የደረሰኝ ፎቶ አክል",
-
   "takePhotoDescription": "የክፍያ ማረጋገጫ ስክሪኑን ያንሱ",
-
   "uploadImageDescription": "ከማዕከለ-ስዕሎት ያለ ፎቶ ይምረጡ",
-
   "verificationPending": "በማረጋገጥ ላይ…",
-
   "verificationPendingDetail": "ደረሰኙን ከ{bank} ጋር እየፈተሽን ነው። ይህ ከ10 ሰከንድ ያነሰ ጊዜ ይወስዳል።",
-
   "verdictVerified": "ተረጋግጧል",
-
   "verdictFake": "ውሸት",
-
   "verdictDuplicate": "ተባዝቷል",
-
   "verdictPending": "በጥበቃ ላይ",
-
   "verdictNeedsReview": "ግምገማ",
-
   "verdictError": "ስህተት",
-
   "verdictVerifiedMessage": "ይህ ደረሰኝ ትክክለኛ ነው።",
-
   "verdictFakeMessage": "ይህ ደረሰኝ ሊረጋገጥ አልቻለም። ሐሰተኛ ሊሆን ይችላል።",
-
   "verdictDuplicateMessage": "ይህ ደረሰኝ ቀደም ሲል {date} ተረጋግጧል።",
-
   "verdictErrorMessage": "አሁን ወደ {bank} ማዳረስ አልተቻለም። እንደገና ይሞክሩ።",
-
   "transactionReference": "የግብይት ማጣቀሻ",
-
   "transactionAmount": "መጠን",
-
   "transactionDate": "ቀን",
-
   "transactionBank": "ባንክ",
-
   "transactionSender": "ላኪ",
-
   "transactionReceiver": "ተቀባይ",
-
   "transactionsTitle": "ግብይቶች",
-
   "noTransactionsTitle": "ምንም ማረጋገጫ የለም",
-
   "noTransactionsBody": "የተረጋገጡ ክፍያዎች እዚህ ይታያሉ።",
-
   "verifyFirst": "ክፍያ ያረጋግጡ",
-
   "homeTitle": "መነሻ",
-
   "analyticsTitle": "ትንታኔ",
-
   "profileTitle": "መገለጫ",
-
   "settingsTitle": "ቅንብሮች",
-
   "historyTitle": "ታሪክ",
-
   "subMerchantsTitle": "ቡድን",
-
   "addSubMerchant": "የቡድን አባል አክል",
-
   "noSubMerchantsTitle": "ምንም የቡድን አባላት የሉም",
-
   "noSubMerchantsBody": "ካሽ ሰጭዎችን ወይም ቅርንጫፍ ሰራተኞችን ክፍያ ለማረጋገጥ ያክሉ።",
-
   "creditsRemaining": "{count} ክሬዲቶች ቀርተዋል",
-
   "creditsLow": "ትንሽ ክሬዲቶች ብቻ ቀርተዋል ({count})። ጥቅሉን ያድሱ።",
-
   "creditsEmpty": "ደረሰኞችን ማረጋገጥ ለመቀጠል ጥቅሉን ያድሱ።",
-
   "creditsUnlimited": "ያልተገደበ",
-
   "renewPackage": "ጥቅሉን አድስ",
-
   "billingTitle": "ደንበኝነት",
-
   "billingCurrentPlan": "አሁን ያለው እቅድ",
-
   "billingPaymentInstructions": "{amount} ወደ ታች ወዳለው መለያ ያስተላልፉ፣ ከዚያም የክፍያ ስክሪን ፎቶ ይስቀሉ።",
-
   "billingUploadProof": "የክፍያ ማረጋገጫ ስቀል",
-
   "billingVerifying": "ክፍያዎን እያረጋገጥን…",
-
   "billingSuccess": "ክፍያ ተረጋግጧል። እቅድዎ አሁን ነቅቷል።",
-
   "billingFailed": "ክፍያ ሊረጋገጥ አልቻለም። ድጋፍ ያግኙ።",
-
   "billingNeedsReview": "ክፍያዎ በግምገማ ላይ ነው። በቅርቡ እናሳውቅዎታለን።",
-
   "planFree": "ነፃ",
-
   "planPremium": "ፕሪሚየም",
-
   "planBusiness": "ቢዝነስ",
-
   "planBusinessPro": "ቢዝነስ ፕሮ",
-
   "planApiIntegration": "API ውህደት",
-
   "planVerificationsPerMonth": "{count} ማረጋገጫዎች / ወር",
-
   "planUnlimitedVerifications": "ያልተገደበ ማረጋገጫዎች",
-
   "notificationsTitle": "ማሳወቂያዎች",
-
   "noNotificationsTitle": "ሁሉም ወቅታዊ ነው",
-
   "noNotificationsBody": "አዲስ ማሳወቂያዎች የሉም።",
-
   "logoutLabel": "ውጣ",
-
   "logoutConfirmTitle": "ይወጡ?",
-
   "logoutConfirmBody": "ለመግባት ማንነትዎን ማረጋገጥ ያስፈልግዎታል።",
-
   "devicesTitle": "የታመኑ መሳሪያዎች",
-
   "deviceThisDevice": "ይህ መሳሪያ",
-
   "deviceRevoke": "መሳሪያ አስወግድ",
-
   "deviceRevokeConfirm": "ይህን መሳሪያ ያስወግዱ? ዳግም ማረጋገጥ ያስፈልጋል።",
-
   "businessName": "የንግድ ስም",
-
   "businessType": "የንግድ ዓይነት",
-
   "onboardingMerchantTitle": "ንግድዎን እናስተካክል",
-
   "onboardingMerchantSubtitle": "የYene Verify ተሞክሮዎን ለማበጀት ይህን እንጠቀምበታለን",
-
   "businessNameHint": "ለምሳሌ፦ ሰላም ካፌ፣ አዲስ ኤሌክትሮኒክስ",
-
   "businessNameRequired": "የንግድ ስም ያስገቡ",
-
   "businessNameTooShort": "የንግድ ስም ቢያንስ 2 ፊደሎች መሆን አለበት",
-
   "businessNameTooLong": "የንግድ ስም ከ80 ፊደሎች መብለጥ የለበትም",
-
   "addMoreDetails": "ተጨማሪ ዝርዝሮችን ያክሉ",
-
   "businessTypeCafe": "ካፌ",
-
   "businessTypeRestaurant": "ምግብ ቤት",
-
   "businessTypeRetail": "ችርቻሮ",
-
   "businessTypeServices": "አገልግሎቶች",
-
   "businessTypeOther": "ሌላ",
-
   "tinLabel": "TIN (የታክስ መለያ)",
-
   "addressLabel": "አድራሻ",
-
   "cityLabel": "ከተማ",
-
   "createBusiness": "ንግድ ይፍጠሩ",
-
   "onboardingSuccessTitle": "ሁሉም ዝግጁ ነው",
-
   "onboardingSuccessSubtitle": "ንግድዎ {businessName} አሁን በYene Verify ላይ ነው።",
   "@onboardingSuccessSubtitle": {
     "placeholders": {
-      "businessName": { "type": "String" }
+      "businessName": {
+        "type": "String"
+      }
     }
   },
-
   "inviteTitle": "ተጋብዘዋል",
-
   "inviteBody": "{merchantName} ቡድናቸውን እንዲቀላቀሉ ጋብዘውዎታል",
   "@inviteBody": {
     "placeholders": {
-      "merchantName": { "type": "String" }
+      "merchantName": {
+        "type": "String"
+      }
     }
   },
-
   "inviteBranch": "ቅርንጫፍ፦ {branchLabel}",
   "@inviteBranch": {
     "placeholders": {
-      "branchLabel": { "type": "String" }
+      "branchLabel": {
+        "type": "String"
+      }
     }
   },
-
   "inviteAbility": "ለዚህ ንግድ ክፍያዎችን ማረጋገጥ ይችላሉ።",
-
   "inviteCodeLabel": "ከSMS የመጣውን ኮድ ያስገቡ",
-
   "inviteCodeHint": "የግብዣ ኮድዎን ይለጥፉ",
-
   "acceptInvite": "ግብዣውን ተቀበል",
-
   "declineInvite": "አትቀበል",
-
   "declineInviteConfirmTitle": "ይህን ግብዣ ውድቅ ይላሉ?",
-
   "declineInviteConfirmBody": "ወደ {merchantName} ለመቀላቀል አዲስ ግብዣ ያስፈልግዎታል።",
   "@declineInviteConfirmBody": {
     "placeholders": {
-      "merchantName": { "type": "String" }
+      "merchantName": {
+        "type": "String"
+      }
     }
   },
-
   "inviteExpired": "ይህ ግብዣ ጊዜው አልፏል። ከ{merchantName} አዲስ ይጠይቁ።",
   "@inviteExpired": {
     "placeholders": {
-      "merchantName": { "type": "String" }
+      "merchantName": {
+        "type": "String"
+      }
     }
   },
-
   "inviteConsumed": "ይህ ግብዣ አስቀድሞ ጥቅም ላይ ውሏል።",
-
   "inviteInvalid": "ኮዱ አልተስማማም። SMSውን ይመልከቱ።",
-
   "fullName": "ሙሉ ስም",
-
   "language": "ቋንቋ",
-
   "languageEnglish": "English",
-
   "languageAmharic": "አማርኛ",
-
   "darkMode": "ጨለማ ሁነታ",
-
   "appVersion": "ስሪት {version}",
-
   "copyReference": "ማጣቀሻ ቅዳ",
-
   "copied": "ተቀድቷል!",
-
   "shareLabel": "አጋራ",
-
   "exportLabel": "ወደ ውጭ ላክ",
-
   "filterLabel": "አጣራ",
-
   "searchLabel": "ፈልግ",
-
   "searchHint": "ግብይቶችን ፈልግ…",
-
   "noSearchResults": "ለ\"{query}\" ምንም ውጤት የለም",
-
   "dateRangeLabel": "የቀን ክልል",
-
   "bankLabel": "ባንክ",
-
   "allBanks": "ሁሉም ባንኮች",
-
   "bankCbe": "የኢትዮጵያ ንግድ ባንክ",
-
   "bankTelebirr": "ቴሌብር",
-
   "bankAwash": "ዓዋሽ ባንክ",
-
   "bankDashen": "ዳሸን ባንክ",
-
   "bankAbyssinia": "አቢሲኒያ ባንክ",
-
   "bankMpesa": "M-Pesa",
-
   "bankZemen": "ዘመን ባንክ",
-
   "insightsTitle": "ግንዛቤዎች",
-
   "insightBestProducts": "ምርጥ ሸቀጦች",
-
   "insightPeakHours": "ከፍተኛ ሰዓቶች",
-
   "insightBestDays": "ምርጥ ቀናት",
-
   "insightTrend": "አዝማሚያ",
-
   "insightRecommendations": "ምክሮች",
-
   "insightAnomalies": "ያልተለመዱ ሁኔታዎች",
-
   "noInsightsTitle": "በቂ ዳታ የለም",
-
   "noInsightsBody": "ግንዛቤዎችን ለማግኘት ተጨማሪ ማረጋገጫዎችን ያጠናቅቁ።",
-
   "trendUp": "+{percent}% ካለፈው {period} ጋር ሲነጻጸር",
-
   "trendDown": "-{percent}% ካለፈው {period} ጋር ሲነጻጸር",
-
   "periodWeek": "ሳምንት",
-
   "periodMonth": "ወር",
-
   "auditLogTitle": "የኦዲት ምዝገባ",
-
   "permissionCameraTitle": "የካሜራ ፈቃድ ያስፈልጋል",
-
   "permissionCameraBody": "ዬን ቨሪፋይ የክፍያ ፎቶዎችን ለማንሳት የካሜራ ፈቃድ ያስፈልገዋል።",
-
   "permissionGalleryTitle": "የፎቶ ማዕከለ-ስዕሎት ፈቃድ ያስፈልጋል",
-
   "permissionGalleryBody": "ዬን ቨሪፋይ ፎቶዎችን ለመስቀል የፎቶ ማዕከለ-ስዕሎት ፈቃድ ያስፈልገዋል።",
-
   "permissionOpenSettings": "ቅንብሮች ክፈት",
-
   "onboardingStep1Title": "ክፍያዎችን ወዲያውኑ ያረጋግጡ",
-
   "onboardingStep1Body": "ማንኛውንም የኢትዮጵያ ባንክ ደረሰኝ ፎቶ ያንሱ እና ውጤቱን በ10 ሰከንድ ያነሰ ጊዜ ያግኙ።",
-
   "onboardingStep2Title": "የክፍያ ማጭበርበርን ያስቁ",
-
   "onboardingStep2Body": "ተመሳሳይ ደረሰኝ ሁለት ጊዜ ጥቅም ላይ ከዋለ ቢዝነስዎን የሚከላከለው የድብልቅ ደረሰኝ ፍለጋ።",
-
   "onboardingStep3Title": "በግንዛቤዎች ያድጉ",
-
   "onboardingStep3Body": "ከፍተኛ ሰዓቶችዎን፣ ምርጥ ምርቶችዎን እና የሽያጭ አዝማሚያዎችዎን ያውቁ።",
-
   "getStarted": "ጀምር",
-
   "learnMoreLabel": "ተጨማሪ ይወቁ",
-
   "authComingSoon": "የምስገት ፍሰት — በStep 21 ይመጣል",
-
   "debugDesignSystem": "ዴበግ: የንድፍ ስርዓት",
-
   "verifyHeading": "ክፍያ ያረጋግጡ",
-
   "verifyHeadingSubtitle": "የደንበኛውን የባንክ ማረጋገጫ ፎቶ ያንሱ ወይም ይስቀሉ — በሰከንዶች ውስጥ ያረጋግጡ።",
-
   "takePhotoCardSubtitle": "ማረጋገጫውን በካሜራዎ ያንሱ",
-
   "uploadImageCardSubtitle": "ከማዕከለ-ስዕሎትዎ ስክሪንሾት ይምረጡ",
-
   "verificationsRemaining": "{count} ማረጋገጫዎች ቀርተውዎታል።",
   "@verificationsRemaining": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "unlimitedVerifications": "ያልተገደበ ማረጋገጫ",
-
   "preparingImage": "ምስሉ እየተዘጋጀ ነው…",
-
   "uploadingPercent": "እየተሰቀለ ነው… {percent}%",
   "@uploadingPercent": {
-    "placeholders": { "percent": { "type": "int" } }
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
-
   "verifyTakesSeconds": "ጥቂት ሰከንዶች ይወስዳል…",
-
   "verifyStillWorking": "አሁንም እያረጋገጠ ነው…",
-
   "verifyPendingBody": "እያረጋገጠ ነው — ለአንዳንድ ባንኮች እስከ አንድ ደቂቃ ሊወስድ ይችላል።",
-
   "refreshNow": "አሁን አድስ",
-
   "checkTransactions": "ግብይቶችን ይመልከቱ",
-
   "verifyTooLong": "ማረጋገጫው ብዙ ጊዜ እየወሰደ ነው። ከአንድ ደቂቃ በኋላ ይመልከቱ።",
-
   "errorImageTooLarge": "ምስሉ በጣም ትልቅ ነው። ያነሰ ስክሪንሾት ይሞክሩ።",
-
   "errorInvalidImageType": "ልክ ያልሆነ የምስል ቅርጸት። JPEG ወይም PNG ይጠቀሙ።",
-
   "errorUploadMismatch": "የሰቀለው ምስል ማረጋገጫ አልተሳካም። በድጋሚ ይሞክሩ።",
-
   "errorUploadIncomplete": "ስቀላው አልተጠናቀቀም። ግንኙነትዎን ይመልከቱ።",
-
   "errorCreditsExhausted": "ክሬዲትዎ አልቋል። ለመቀጠል ይሙሉ።",
-
   "errorBankNotDetected": "በዚህ ደረሰኝ ውስጥ ባንኩን ማወቅ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።",
-
   "cameraNotAvailable": "ካሜራ አይገኝም። በምትኩ “ምስል ይስቀሉ” ይጠቀሙ።",
-
   "cameraAccessNeeded": "የካሜራ ፍቃድ ያስፈልጋል",
-
   "cameraAccessBody": "ደረሰኞችን ለማንሳት በስርዓት ቅንብሮችዎ ውስጥ የካሜራ ፍቃድ ይስጡ።",
-
   "photoAccessNeeded": "የፎቶ ፍቃድ ያስፈልጋል",
-
   "photoAccessBody": "የደረሰኝ ምስል ለመምረጥ በስርዓት ቅንብሮችዎ ውስጥ የፎቶ ፍቃድ ይስጡ።",
-
   "openSettings": "ቅንብሮችን ይክፈቱ",
-
   "usePhoto": "ፎቶውን ተጠቀም",
-
   "retakePhoto": "እንደገና አንሳ",
-
   "switchCamera": "ካሜራ ቀይር",
-
   "toggleFlash": "ፍላሽ ቀይር",
-
   "galleryUnavailable": "ማዕከለ-ስዕሎትዎን መክፈት አልቻልንም። በድጋሚ ይሞክሩ።",
-
   "verdictTitle": "የማረጋገጫ ውጤት",
-
   "backToVerify": "ወደ ማረጋገጫ ተመለስ",
-
   "verdictPlaceholderNote": "የደረሰኝ ቅድመ-እይታ፣ ማጋራት እና ድጋሚ ሙከራ በክፍል 2 ይመጣሉ።",
-
   "statusPending": "በሂደት ላይ",
-
   "statusVerified": "ተረጋግጧል",
-
   "statusFake": "ሐሰት",
-
   "statusDuplicate": "ተደጋጋሚ",
-
   "statusNeedsReview": "ግምገማ ይፈልጋል",
-
   "statusError": "ስህተት",
-
   "viewPlans": "እቅዶችን ይመልከቱ",
-
   "verdictVerifiedLabel": "ክፍያ ተረጋግጧል",
   "verdictFakeLabel": "ሐሰተኛ ደረሰኝ",
   "verdictDuplicateLabel": "አስቀድሞ ተረጋግጧል",
   "verdictReviewLabel": "በግምገማ ላይ",
   "verdictErrorLabel": "ማረጋገጫ አልተሳካም",
-
   "verdictVerifiedSubtitle": "በ{name} የተከፈለ",
   "@verdictVerifiedSubtitle": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
-
   "verdictFakeSubtitle": "ይህ ደረሰኝ በባንኩ አገልጋይ ላይ አልተገኘም።",
-
   "verdictDuplicateSubtitle": "ይህ ደረሰኝ ቀድሞ በ{date} ተረጋግጧል።",
   "@verdictDuplicateSubtitle": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
-
   "verdictReviewSubtitle": "የቡድን አባል ይህን ደረሰኝ በ24 ሰዓት ውስጥ ይገመግማል።",
-
   "verdictReviewSupplementarySubtitle": "ይህን ደረሰኝ ለማረጋገጥ የበለጠ ግልጽ ፎቶ ያስፈልገናል።",
-
   "verdictReviewFixTitle": "ደረሰኙን እንደገና ያንሱ",
   "verdictReviewRetakeHint": "ሙሉ ደረሰኙ በፎቶው ውስጥ እንዲገባ፣ ጠፍጣፋ ሆኖ እንዲቆይ እና በበቂ ብርሃን እንዲታይ ያድርጉ።",
-
   "verdictBankLabel": "ባንክ",
   "verdictReferenceLabel": "ማጣቀሻ",
   "verdictSenderLabel": "ላኪ",
@@ -568,21 +342,21 @@
   "verdictDurationLabel": "ቆይታ",
   "verdictFirstVerifiedLabel": "በመጀመሪያ የተረጋገጠበት",
   "verdictFirstVerifiedHint": "ዋናውን ደረሰኝ ለማየት ይንኩ።",
-
   "verdictDurationSeconds": "{seconds} ሰከንድ",
   "@verdictDurationSeconds": {
-    "placeholders": { "seconds": { "type": "String" } }
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
   },
-
   "verdictDoneButton": "ተጠናቀቀ",
   "verdictTryAgainButton": "እንደገና ሞክር",
   "verdictReportButton": "ችግር አሳውቅ",
   "verdictViewOriginalButton": "ዋናውን ይመልከቱ",
   "verdictViewReceiptButton": "ደረሰኙን ይመልከቱ",
-
   "verdictCopySuccess": "ማጣቀሻ ተቀድቷል",
   "verdictStillVerifying": "አሁንም እያረጋገጠ ነው…",
-
   "verdictReportTitle": "ችግር አሳውቅ",
   "verdictReportBody": "በዚህ ማረጋገጫ ላይ ያለውን ችግር ይንገሩን። ቡድናችን ይገመግማል።",
   "verdictReportReasonHint": "ችግሩ ምንድን ነው?",
@@ -590,43 +364,55 @@
   "verdictReportSubmitButton": "ሪፖርት ላክ",
   "verdictReportSubmitted": "ሪፖርቱ ተልኳል። እንመለከተዋለን።",
   "verdictCancelButton": "ሰርዝ",
-
   "verdictReviewNotificationInfo": "ግምገማው ሲጠናቀቅ ማሳወቂያ ይደርስዎታል።",
-
   "verdictReceiptUnavailable": "የደረሰኝ ምስል አይገኝም",
   "verdictReceiptRetry": "ምስሉን እንደገና ጫን",
-
   "verdictOriginalUnavailable": "ይህ ደረሰኝ የሌላ ንግድ ነው።",
-
   "verdictErrorBankNotDetected": "በዚህ ደረሰኝ ላይ ባንኩን ማወቅ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።",
   "verdictErrorBankTimeout": "የባንኩ አገልጋይ አሁን ቀርፋፋ ነው። እንደገና ይሞክሩ።",
   "verdictErrorBankUnavailable": "ባንኩ አሁን አይገኝም። በኋላ ይሞክሩ።",
   "verdictErrorOcrEmpty": "ይህን ደረሰኝ ማንበብ አልቻልንም። ግልጽ ፎቶ ይሞክሩ።",
   "verdictErrorDefault": "ችግር ተፈጥሯል። እንደገና ይሞክሩ።",
-
+  "verdictConfigureAccount": "አሁን ያዘጋጁ",
+  "verdictConfigureAccountTitle": "የባንክ መለያ መረጃዎን ያክሉ",
   "navHome": "መነሻ",
   "navVerify": "አረጋግጥ",
   "navTransactions": "ግብይቶች",
   "navInsights": "ግንዛቤዎች",
   "navProfile": "መገለጫ",
-
   "greetingMorning": "እንደምን አደሩ፣ {name}",
   "@greetingMorning": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "greetingAfternoon": "እንደምን ዋሉ፣ {name}",
   "@greetingAfternoon": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "greetingEvening": "እንደምን አመሹ፣ {name}",
   "@greetingEvening": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "dashboardWelcomeBack": "እንኳን ደህና መጡ",
   "dashboardBusinessFallback": "የእርስዎ ንግድ",
   "dashboardCreditsLeft": "{count} ማረጋገጫዎች ቀርተዋል",
   "@dashboardCreditsLeft": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dashboardUnlimited": "ያልተገደበ ማረጋገጫ",
   "dashboardTopUp": "ክሬዲት ይሙሉ",
@@ -649,28 +435,36 @@
   "dashboardNotifications": "ማሳወቂያዎች",
   "dashboardInboxSoon": "የማሳወቂያ ሳጥንዎ በደረጃ 26 ይመጣል።",
   "dashboardBillingSoon": "የክፍያ አስተዳደር በደረጃ 25 ይመጣል።",
-
   "shellComingSoon": "በቅርቡ ይመጣል",
   "shellHistoryBody": "ሙሉ የግብይት ታሪክ በደረጃ 24 ይመጣል።",
   "shellInsightsBody": "ግንዛቤዎች በደረጃ 26 ይመጣሉ።",
   "shellProfileBody": "መገለጫ እና ቅንብሮች በደረጃ 27 ይመጣሉ።",
-
   "relativeTimeJustNow": "አሁን",
   "relativeTimeMinutes": "ከ{count} ደቂቃ በፊት",
   "@relativeTimeMinutes": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "relativeTimeHours": "ከ{count} ሰዓት በፊት",
   "@relativeTimeHours": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "relativeTimeYesterday": "ትናንት",
   "relativeTimeDays": "ከ{count} ቀን በፊት",
   "@relativeTimeDays": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
-  "transactionsTitle": "ግብይቶች",
   "transactionsSearchHint": "ማጣቀሻ ወይም መጠን ይፈልጉ",
   "transactionsFilterTitle": "ማጣሪያዎች",
   "transactionsFilterBank": "ባንክ",
@@ -690,158 +484,72 @@
   "transactionsNoMore": "ተጨማሪ ውጤት የለም",
   "transactionsRangeYear": "በዚህ ዓመት",
   "transactionsRangeAll": "ሁሉም ጊዜ",
-
   "teamActiveSection": "ንቁ የቡድን አባላት",
-
   "teamPendingSection": "በመጠባበቅ ላይ ያሉ ግብዣዎች",
-
   "teamInviteHeading": "ክፍያዎችን እንዲያረጋግጥ አንድ ሰው ይጋብዙ",
-
   "teamInviteSubtitle": "ለመቀበል አገናኝ ያለው SMS ይደርሳቸዋል።",
-
   "teamPhoneLabel": "የስልክ ቁጥር",
-
   "teamPhoneHint": "+2519XXXXXXXX",
-
   "teamNameLabel": "ስም (አማራጭ) — ስማቸው ማን ነው?",
-
   "teamBranchLabel": "የቅርንጫፍ መግለጫ (አማራጭ)",
-
   "teamBranchHint": "ለምሳሌ፣ ቦሌ ቅርንጫፍ፣ ዋና ቆጣሪ",
-
   "teamSendInvite": "ግብዣ ላክ",
-
   "teamPhoneInvalid": "ትክክለኛ የኢትዮጵያ ስልክ ቁጥር ያስገቡ",
-
   "teamInviteTitle": "የቡድን አባል ይጋብዙ",
-
   "teamInviteSuccessTitle": "ግብዣ ተልኳል",
-
   "teamShareInviteLink": "የግብዣ አገናኝ አጋራ",
-
   "teamInviteAcceptHint": "ከተቀበሉ በኋላ በቡድን ዝርዝርዎ ውስጥ ይታያሉ።",
-
   "teamDone": "ተከናውኗል",
-
   "teamUpgrade": "አሻሽል",
-
   "teamUpgradeBody": "በአሁኑ እቅድዎ ሁሉንም የቡድን ቦታዎች ተጠቅመዋል። ተጨማሪ ሰዎችን ለማከል ያሻሽሉ።",
-
   "teamCapFree": "የFREE እቅድ 1 የቡድን አባል ብቻ ይፈቅዳል። ተጨማሪ ለማከል ያሻሽሉ።",
-
   "teamCapPremium": "የPREMIUM እቅድ 1 የቡድን አባል ብቻ ይፈቅዳል። ተጨማሪ ለማከል ያሻሽሉ።",
-
   "teamCapBusiness": "የBUSINESS እቅድ 10 የቡድን አባላት ይፈቅዳል። ተጨማሪ ለማከል ያሻሽሉ።",
-
   "teamCapGeneric": "የእቅድዎ የቡድን ገደብ ደርሷል። ተጨማሪ ለማከል ያሻሽሉ።",
-
   "teamStatusActive": "ንቁ",
-
   "teamStatusInvited": "ተጋብዟል",
-
   "teamStatusSuspended": "ታግዷል",
-
   "teamStatusRemoved": "ተወግዷል",
-
   "teamResend": "እንደገና ላክ",
-
   "teamRevoke": "ሰርዝ",
-
   "teamRevokeConfirmTitle": "ይህን ግብዣ ይሰረዝ?",
-
   "teamRevokeConfirmBody": "በአሁኑ የግብዣ አገናኝ መቀላቀል አይችሉም።",
-
   "teamResendSuccess": "ግብዣ እንደገና ተልኳል",
-
   "teamResendFailed": "ግብዣውን እንደገና መላክ አልተቻለም። እንደገና ይሞክሩ።",
-
   "teamRemove": "ከቡድን አስወግድ",
-
   "teamRemoveConfirmBody": "ከእንደዚህ በኋላ ክፍያዎችን ማረጋገጥ አይችሉም። ያለፉ ማረጋገጫዎቻቸው በታሪክዎ ውስጥ ይቆያሉ።",
-
   "teamRemoveSuccess": "የቡድን አባል ተወግዷል",
-
   "teamRemoveFailed": "ይህን የቡድን አባል ማስወገድ አልተቻለም። እንደገና ይሞክሩ።",
-
   "teamAlreadyMember": "ይህ ስልክ አስቀድሞ በቡድንዎ ውስጥ ነው",
-
   "teamDetailTitle": "የቡድን አባል",
-
   "teamNotJoined": "ግብዣ በመጠባበቅ ላይ — አልተቀላቀሉም",
-
   "teamJoinedLabel": "የተቀላቀሉበት",
-
   "teamLastActiveLabel": "መጨረሻ ንቁ",
-
   "teamChangeBranch": "የቅርንጫፍ መግለጫ ቀይር",
-
   "teamBranchSaved": "የቅርንጫፍ መግለጫ ተሻሽሏል",
-
   "teamSave": "አስቀምጥ",
-
   "teamCancel": "ተወው",
-
   "teamNoBranch": "የቅርንጫፍ መግለጫ የለም",
-
   "teamUnknown": "የቡድን አባል",
-
   "profileAccountSection": "መለያ",
-
   "profileEditBusiness": "የንግድ መረጃ አስተካክል",
-
   "profileChangePin": "PIN ቀይር",
-
   "profileTeamSection": "ቡድን",
-
   "profileManageTeam": "ቡድን አስተዳድር",
-
   "profileSubscriptionSection": "ደንበኝነት",
-
   "profilePreferencesSection": "ምርጫዎች",
-
   "profileTheme": "ገጽታ",
-
   "profileThemeSystem": "የስርዓቱ",
-
   "profileThemeLight": "ብሩህ",
-
   "profileThemeDark": "ጨለማ",
-
   "profileNotifications": "ማሳወቂያዎች",
-
   "profileSupportSection": "ድጋፍ",
-
   "profileHelpCenter": "የእርዳታ ማዕከል",
-
   "profileContactSupport": "ድጋፍን ያግኙ",
-
   "profileSignOut": "ውጣ",
-
   "profileSignOutConfirmTitle": "ከYene Verify ይውጡ?",
-
   "profileSignOutConfirmBody": "በስልክዎ እና PIN እንደገና መግባት ይኖርብዎታል።",
-
   "profileComingSoon": "በቅርቡ",
-
-  "teamInvitedAgo": "የተጋበዙት {time}",
-
-  "teamInviteSent": "ግብዣ ወደ {phone} ተልኳል",
-
-  "teamSeatsRemaining": "ከ{limit} የቡድን ቦታዎች {remaining} ቀርተዋል",
-
-  "teamActivity": "ባለፉት 30 ቀናት {count} ማረጋገጫዎች",
-
-  "teamRemoveConfirmTitle": "{name}ን ያስወግዱ?",
-
-  "profileTeamCount": "{members} አባላት · {pending} በመጠባበቅ",
-
-  "profilePlanRenews": "{plan} · በ{days} ቀናት ይታደሳል",
-
-  "profilePlanNoRenewal": "{plan}",
-
-  "profileBusiness": "ንግድ: {name}",
-  "verdictConfigureAccount": "አሁን ያዘጋጁ",
-  "verdictConfigureAccountTitle": "የባንክ መለያ መረጃዎን ያክሉ",
   "profileVerificationAccounts": "የማረጋገጫ መለያዎች",
   "profileVerificationAccountsSubtitle": "ክፍያዎችን ለማረጋገጥ የሚያገለግሉ የባንክ መለያዎች",
   "verificationAccountsTitle": "የማረጋገጫ መለያዎች",
@@ -862,5 +570,204 @@
   "verificationAccountsStepUpBody": "የባንክ መለያ መረጃን ለማስቀመጥ PINዎን ያስገቡ።",
   "onboardingAccountsTitle": "የባንክ መለያ መረጃ (አማራጭ)",
   "onboardingAccountsSubtitle": "ባንክዎ ክፍያን ለማረጋገጥ የሚፈልገውን የመለያ ቁጥር ያክሉ።",
-  "onboardingAccountsInvalid": "ለተመረጡት ባንኮች የአሃዝ ብዛት ያረጋግጡ።"
+  "onboardingAccountsInvalid": "ለተመረጡት ባንኮች የአሃዝ ብዛት ያረጋግጡ።",
+  "teamInvitedAgo": "የተጋበዙት {time}",
+  "teamInviteSent": "ግብዣ ወደ {phone} ተልኳል",
+  "teamSeatsRemaining": "ከ{limit} የቡድን ቦታዎች {remaining} ቀርተዋል",
+  "teamActivity": "ባለፉት 30 ቀናት {count} ማረጋገጫዎች",
+  "teamRemoveConfirmTitle": "{name}ን ያስወግዱ?",
+  "profileTeamCount": "{members} አባላት · {pending} በመጠባበቅ",
+  "profilePlanRenews": "{plan} · በ{days} ቀናት ይታደሳል",
+  "profilePlanNoRenewal": "{plan}",
+  "profileBusiness": "ንግድ: {name}",
+  "billingScreenTitle": "ክፍያ",
+  "@billingScreenTitle": {},
+  "billingPlansSection": "ያሉ ፕላኖች",
+  "@billingPlansSection": {},
+  "billingNoPlans": "አሁን ምንም ፕላን አይገኝም።",
+  "@billingNoPlans": {},
+  "billingHistoryTitle": "የክፍያ ታሪክ",
+  "@billingHistoryTitle": {},
+  "billingViewHistory": "ታሪክ ይመልከቱ",
+  "@billingViewHistory": {},
+  "billingNoHistory": "እስካሁን የክፍያ ታሪክ የለም",
+  "@billingNoHistory": {},
+  "billingNoHistoryBody": "የሚፈጽሟቸው ክፍያዎች እዚህ ይታያሉ።",
+  "@billingNoHistoryBody": {},
+  "billingManage": "ያስተዳድሩ",
+  "@billingManage": {},
+  "billingRenew": "አድስ",
+  "@billingRenew": {},
+  "billingChoose": "ምረጥ",
+  "@billingChoose": {},
+  "billingUpgrade": "አሻሽል",
+  "@billingUpgrade": {},
+  "billingCurrentBadge": "የአሁኑ ፕላን",
+  "@billingCurrentBadge": {},
+  "billingExpiresIn": "በ{days} ቀናት ውስጥ ያበቃል",
+  "@billingExpiresIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "billingUnlimited": "ያልተገደበ",
+  "@billingUnlimited": {},
+  "billingCreditsLeft": "{count} ክሬዲቶች ቀርተዋል",
+  "@billingCreditsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingOwnerOnly": "የንግድ ባለቤቱ ብቻ ክፍያን ማስተዳደር ይችላል።",
+  "@billingOwnerOnly": {},
+  "billingBack": "ተመለስ",
+  "@billingBack": {},
+  "billingPayFor": "ለ{name} ይክፈሉ",
+  "@billingPayFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "billingPayAmount": "ፕላንዎን ለማንቃት {amount} ይክፈሉ",
+  "@billingPayAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMethodCbe": "CBE",
+  "@billingMethodCbe": {},
+  "billingMethodTelebirr": "ቴሌብር",
+  "@billingMethodTelebirr": {},
+  "billingAccountNumber": "የአካውንት ቁጥር",
+  "@billingAccountNumber": {},
+  "billingAccountName": "የአካውንት ስም",
+  "@billingAccountName": {},
+  "billingPhoneNumber": "ስልክ ቁጥር",
+  "@billingPhoneNumber": {},
+  "billingCopy": "ቅዳ",
+  "@billingCopy": {},
+  "billingCopied": "ወደ ክሊፕቦርድ ተቀድቷል",
+  "@billingCopied": {},
+  "billingSteps": "1. ትክክለኛውን መጠን በCBE ወይም በቴሌብር ይክፈሉ።\n2. የማረጋገጫ ስክሪንሾት ያንሱ።\n3. ከታች ይስቀሉ።",
+  "@billingSteps": {},
+  "billingIvePaid": "ከፍያለሁ",
+  "@billingIvePaid": {},
+  "billingUploadHeading": "የክፍያ ማረጋገጫዎን ይስቀሉ",
+  "@billingUploadHeading": {},
+  "billingUploadBody": "መጠኑን፣ ቀኑን እና ማጣቀሻውን የሚያሳይ ስክሪንሾት ይስቀሉ።",
+  "@billingUploadBody": {},
+  "billingChange": "ቀይር",
+  "@billingChange": {},
+  "billingRemove": "አስወግድ",
+  "@billingRemove": {},
+  "billingSubmitForVerification": "ለማረጋገጫ አስገባ",
+  "@billingSubmitForVerification": {},
+  "billingSessionExpired": "ይህ የክፍያ ክፍለ ጊዜ አልቋል። ከክፍያ ገጽ እንደገና ይጀምሩ።",
+  "@billingSessionExpired": {},
+  "billingResultApprovedTitle": "ክፍያ ተረጋግጧል",
+  "@billingResultApprovedTitle": {},
+  "billingResultActivated": "{name} ንቁ ሆኗል",
+  "@billingResultActivated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "billingResultActiveUntil": "እስከ {date} ድረስ ንቁ",
+  "@billingResultActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "billingResultCreditsAdded": "+{count} ማረጋገጫዎች",
+  "@billingResultCreditsAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingResultStartUsing": "ክሬዲቶችዎን ይጠቀሙ",
+  "@billingResultStartUsing": {},
+  "billingResultPendingTitle": "ማረጋገጫ በሂደት ላይ",
+  "@billingResultPendingTitle": {},
+  "billingResultPendingBody": "ክፍያዎን ከባንክ ጋር እያረጋገጥን ነው። ይህ በተለምዶ ጥቂት ሰከንዶች ይወስዳል።",
+  "@billingResultPendingBody": {},
+  "billingResultTimeout": "ማረጋገጫው ብዙ ጊዜ እየወሰደ ነው። በኋላ የክፍያ ታሪኩን ይመልከቱ።",
+  "@billingResultTimeout": {},
+  "billingResultCheckHistory": "የክፍያ ታሪክን ይመልከቱ",
+  "@billingResultCheckHistory": {},
+  "billingResultReviewTitle": "ክፍያ በግምገማ ላይ",
+  "@billingResultReviewTitle": {},
+  "billingResultReviewBody": "መጠኑ ከፕላኑ ዋጋ ጋር አይመሳሰልም። ቡድናችን በ24 ሰዓት ውስጥ ይገመግማል።",
+  "@billingResultReviewBody": {},
+  "billingResultRejectedTitle": "ክፍያ አልተረጋገጠም",
+  "@billingResultRejectedTitle": {},
+  "billingResultRejectedBody": "ደረሰኙ ሊረጋገጥ አልቻለም።",
+  "@billingResultRejectedBody": {},
+  "billingResultDuplicateBody": "ይህ ደረሰኝ አስቀድሞ ጥቅም ላይ ውሏል።",
+  "@billingResultDuplicateBody": {},
+  "billingTryAgain": "እንደገና ሞክር",
+  "@billingTryAgain": {},
+  "billingContactSupport": "ድጋፍ ያግኙ",
+  "@billingContactSupport": {},
+  "billingSupportSoon": "ድጋፍ በቅርቡ ይመጣል።",
+  "@billingSupportSoon": {},
+  "billingStatusPending": "በመጠባበቅ ላይ",
+  "@billingStatusPending": {},
+  "billingStatusApproved": "ጸድቋል",
+  "@billingStatusApproved": {},
+  "billingStatusMismatch": "የመጠን ልዩነት",
+  "@billingStatusMismatch": {},
+  "billingStatusReview": "ግምገማ ያስፈልጋል",
+  "@billingStatusReview": {},
+  "billingStatusDuplicate": "ተደጋጋሚ",
+  "@billingStatusDuplicate": {},
+  "billingStatusFake": "የተሳሳተ",
+  "@billingStatusFake": {},
+  "billingStatusRejected": "ተከልክሏል",
+  "@billingStatusRejected": {},
+  "billingExpectedAmount": "የሚጠበቅ መጠን",
+  "@billingExpectedAmount": {},
+  "billingSubmittedAmount": "የተከፈለ መጠን",
+  "@billingSubmittedAmount": {},
+  "billingReference": "ማጣቀሻ",
+  "@billingReference": {},
+  "billingSubmittedOn": "የተላከበት ቀን",
+  "@billingSubmittedOn": {},
+  "billingResultDetailsTitle": "የክፍያ ዝርዝር",
+  "@billingResultDetailsTitle": {},
+  "billingFeatureUnlimited": "ያልተገደቡ ማረጋገጫዎች",
+  "@billingFeatureUnlimited": {},
+  "billingFeatureCredits": "{count} ማረጋገጫዎች/ወር",
+  "@billingFeatureCredits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingFeatureSeatsOne": "1 የቡድን አባል",
+  "@billingFeatureSeatsOne": {},
+  "billingFeatureSeats": "{count} የቡድን አባላት",
+  "@billingFeatureSeats": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingFeatureSeatsUnlimited": "ያልተገደበ የቡድን አባላት",
+  "@billingFeatureSeatsUnlimited": {}
 }

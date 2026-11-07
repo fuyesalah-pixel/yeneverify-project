@@ -301,10 +301,7 @@ class _HeroCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
-                onPressed: () => AppSnackbar.show(
-                  context,
-                  message: l10n.dashboardBillingSoon,
-                ),
+                onPressed: () => context.push(Routes.billing),
                 style: TextButton.styleFrom(
                   foregroundColor: colors.warning,
                   padding: EdgeInsets.zero,

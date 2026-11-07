@@ -1,861 +1,686 @@
 {
   "@@locale": "en",
   "@@last_modified": "2026-09-24",
-
   "appName": "Yene Verify",
-  "@appName": { "description": "Application name" },
-
+  "@appName": {
+    "description": "Application name"
+  },
   "loginTitle": "Yene Verify",
   "@loginTitle": {},
-
   "loginSubtitle": "Enter your phone number to get started",
   "@loginSubtitle": {},
-
   "taglinePrimary": "Verify any Ethiopian bank payment. In seconds.",
-  "@taglinePrimary": { "description": "Primary marketing tagline" },
-
+  "@taglinePrimary": {
+    "description": "Primary marketing tagline"
+  },
   "taglineShort": "Verify. Trust. Grow.",
-  "@taglineShort": { "description": "Short marketing tagline" },
-
+  "@taglineShort": {
+    "description": "Short marketing tagline"
+  },
   "continueLabel": "Continue",
   "@continueLabel": {},
-
   "cancelLabel": "Cancel",
   "@cancelLabel": {},
-
   "confirmLabel": "Confirm",
   "@confirmLabel": {},
-
   "saveLabel": "Save",
   "@saveLabel": {},
-
   "deleteLabel": "Delete",
   "@deleteLabel": {},
-
   "retryLabel": "Try again",
   "@retryLabel": {},
-
   "okLabel": "OK",
   "@okLabel": {},
-
   "closeLabel": "Close",
   "@closeLabel": {},
-
   "backLabel": "Back",
   "@backLabel": {},
-
   "doneLabel": "Done",
   "@doneLabel": {},
-
   "loadingLabel": "Loading…",
   "@loadingLabel": {},
-
   "requiredField": "This field is required",
   "@requiredField": {},
-
   "genericError": "Something went wrong. Please try again.",
   "@genericError": {},
-
   "networkError": "No internet connection. Please check your network.",
   "@networkError": {},
-
   "sessionExpired": "Your session has expired. Please log in again.",
   "@sessionExpired": {},
-
   "phoneNumber": "Phone number",
   "@phoneNumber": {},
-
   "phoneHint": "+251 9XX XXX XXX",
   "@phoneHint": {},
-
   "phoneInvalid": "Enter a valid Ethiopian phone number",
   "@phoneInvalid": {},
-
   "otpTitle": "Enter verification code",
   "@otpTitle": {},
-
   "otpSubtitle": "We sent a 6-digit code to {phone}",
   "@otpSubtitle": {
     "placeholders": {
-      "phone": { "type": "String", "example": "+251912345678" }
+      "phone": {
+        "type": "String",
+        "example": "+251912345678"
+      }
     }
   },
-
   "otpResend": "Resend code",
   "@otpResend": {},
-
   "otpResendIn": "Resend in {seconds}s",
   "@otpResendIn": {
     "placeholders": {
-      "seconds": { "type": "int" }
+      "seconds": {
+        "type": "int"
+      }
     }
   },
-
   "otpInvalid": "Incorrect code. Try again.",
   "@otpInvalid": {},
-
   "otpExpired": "Code has expired. Request a new one.",
   "@otpExpired": {},
-
   "pinIncorrect": "Incorrect PIN. Try again.",
   "@pinIncorrect": {},
-
   "authWeakPin": "PIN is too weak. Use 4 or 6 digits, avoid sequential or repeated numbers.",
   "@authWeakPin": {},
-
   "pinLocked": "Too many attempts. Try again in {minutes} minutes.",
   "@pinLocked": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
-
   "errorDeviceLimit": "Too many devices. Remove one from settings.",
   "@errorDeviceLimit": {},
-
   "errorAccountBanned": "This account has been suspended. Contact support.",
   "@errorAccountBanned": {},
-
   "pinSetupTitle": "Create your PIN",
   "@pinSetupTitle": {},
-
   "pinSetupSubtitle": "You'll use this every time you open Yene Verify",
   "@pinSetupSubtitle": {},
-
   "pinEntryTitle": "Welcome back",
   "@pinEntryTitle": {},
-
   "pinEntryForgot": "Forgot PIN?",
   "@pinEntryForgot": {},
-
   "otpMaxAttempts": "Too many attempts. Please wait before trying again.",
   "@otpMaxAttempts": {},
-
   "pinTitle": "Set your PIN",
   "@pinTitle": {},
-
   "pinSubtitle": "Choose a {length}-digit PIN to secure your account",
   "@pinSubtitle": {
     "placeholders": {
-      "length": { "type": "int" }
+      "length": {
+        "type": "int"
+      }
     }
   },
-
   "pinConfirmTitle": "Confirm your PIN",
   "@pinConfirmTitle": {},
-
   "pinMismatch": "PINs don't match. Try again.",
   "@pinMismatch": {},
-
   "pinWrong": "Incorrect PIN. {attemptsLeft} attempts left.",
   "@pinWrong": {
     "placeholders": {
-      "attemptsLeft": { "type": "int" }
+      "attemptsLeft": {
+        "type": "int"
+      }
     }
   },
-
   "enterPin": "Enter your PIN",
   "@enterPin": {},
-
   "biometricTitle": "Enable biometric unlock",
   "@biometricTitle": {},
-
   "biometricSubtitle": "Use fingerprint or Face ID to unlock quickly and securely.",
   "@biometricSubtitle": {},
-
   "biometricEnable": "Enable biometrics",
   "@biometricEnable": {},
-
   "biometricSkip": "Skip for now",
   "@biometricSkip": {},
-
   "biometricPrompt": "Verify your identity",
   "@biometricPrompt": {},
-
   "biometricFailed": "Biometric authentication failed. Use your PIN.",
   "@biometricFailed": {},
-
   "verifyTitle": "Verify Payment",
   "@verifyTitle": {},
-
   "verifySubtitle": "Take or upload a photo of the customer's payment confirmation.",
   "@verifySubtitle": {},
-
   "takePhoto": "Take Photo",
-  "@takePhoto": { "description": "Camera capture option label" },
-
+  "@takePhoto": {
+    "description": "Camera capture option label"
+  },
   "uploadImage": "Upload Image",
-  "@uploadImage": { "description": "Gallery picker option label" },
-
+  "@uploadImage": {
+    "description": "Gallery picker option label"
+  },
   "choosePhotoSource": "Add receipt photo",
   "@choosePhotoSource": {},
-
   "takePhotoDescription": "Capture the payment confirmation screen",
   "@takePhotoDescription": {},
-
   "uploadImageDescription": "Choose an existing photo from your gallery",
   "@uploadImageDescription": {},
-
   "verificationPending": "Verifying…",
   "@verificationPending": {},
-
   "verificationPendingDetail": "Checking the receipt with {bank}. This usually takes under 10 seconds.",
   "@verificationPendingDetail": {
     "placeholders": {
-      "bank": { "type": "String" }
+      "bank": {
+        "type": "String"
+      }
     }
   },
-
   "verdictVerified": "VERIFIED",
   "@verdictVerified": {},
-
   "verdictFake": "FAKE",
   "@verdictFake": {},
-
   "verdictDuplicate": "DUPLICATE",
   "@verdictDuplicate": {},
-
   "verdictPending": "PENDING",
   "@verdictPending": {},
-
   "verdictNeedsReview": "REVIEW",
   "@verdictNeedsReview": {},
-
   "verdictError": "ERROR",
   "@verdictError": {},
-
   "verdictVerifiedMessage": "This receipt is genuine and verified.",
   "@verdictVerifiedMessage": {},
-
   "verdictFakeMessage": "This receipt could not be verified. It may be fake.",
   "@verdictFakeMessage": {},
-
   "verdictDuplicateMessage": "This receipt has already been verified on {date}.",
   "@verdictDuplicateMessage": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
-
   "verdictErrorMessage": "Could not reach {bank} at this time. Please try again.",
   "@verdictErrorMessage": {
     "placeholders": {
-      "bank": { "type": "String" }
+      "bank": {
+        "type": "String"
+      }
     }
   },
-
   "transactionReference": "Transaction Reference",
   "@transactionReference": {},
-
   "transactionAmount": "Amount",
   "@transactionAmount": {},
-
   "transactionDate": "Date",
   "@transactionDate": {},
-
   "transactionBank": "Bank",
   "@transactionBank": {},
-
   "transactionSender": "Sender",
   "@transactionSender": {},
-
   "transactionReceiver": "Receiver",
   "@transactionReceiver": {},
-
   "transactionsTitle": "Transactions",
   "@transactionsTitle": {},
-
   "noTransactionsTitle": "No verifications yet",
   "@noTransactionsTitle": {},
-
   "noTransactionsBody": "Verified payments will appear here.",
   "@noTransactionsBody": {},
-
   "verifyFirst": "Verify a payment",
   "@verifyFirst": {},
-
   "homeTitle": "Home",
   "@homeTitle": {},
-
   "analyticsTitle": "Analytics",
   "@analyticsTitle": {},
-
   "profileTitle": "Profile",
   "@profileTitle": {},
-
   "settingsTitle": "Settings",
   "@settingsTitle": {},
-
   "historyTitle": "History",
   "@historyTitle": {},
-
   "subMerchantsTitle": "Team",
   "@subMerchantsTitle": {},
-
   "addSubMerchant": "Add team member",
   "@addSubMerchant": {},
-
   "noSubMerchantsTitle": "No team members yet",
   "@noSubMerchantsTitle": {},
-
   "noSubMerchantsBody": "Add cashiers or branch staff to verify payments on your behalf.",
   "@noSubMerchantsBody": {},
-
   "creditsRemaining": "{count} credits remaining",
   "@creditsRemaining": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "creditsLow": "Only {count} credits left. Renew your package.",
   "@creditsLow": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "creditsEmpty": "Please renew your package to continue verifying receipts.",
   "@creditsEmpty": {},
-
   "creditsUnlimited": "Unlimited",
   "@creditsUnlimited": {},
-
   "renewPackage": "Renew package",
   "@renewPackage": {},
-
   "billingTitle": "Subscription",
   "@billingTitle": {},
-
   "billingCurrentPlan": "Current plan",
   "@billingCurrentPlan": {},
-
   "billingPaymentInstructions": "Transfer {amount} to the account below, then upload your payment screenshot.",
   "@billingPaymentInstructions": {
     "placeholders": {
-      "amount": { "type": "String" }
+      "amount": {
+        "type": "String"
+      }
     }
   },
-
   "billingUploadProof": "Upload payment proof",
   "@billingUploadProof": {},
-
   "billingVerifying": "Verifying your payment…",
   "@billingVerifying": {},
-
   "billingSuccess": "Payment verified. Your plan is now active.",
   "@billingSuccess": {},
-
   "billingFailed": "Payment could not be verified. Please contact support.",
   "@billingFailed": {},
-
   "billingNeedsReview": "Your payment is under review. We'll notify you shortly.",
   "@billingNeedsReview": {},
-
   "planFree": "Free",
   "@planFree": {},
-
   "planPremium": "Premium",
   "@planPremium": {},
-
   "planBusiness": "Business",
   "@planBusiness": {},
-
   "planBusinessPro": "Business Pro",
   "@planBusinessPro": {},
-
   "planApiIntegration": "API Integration",
   "@planApiIntegration": {},
-
   "planVerificationsPerMonth": "{count} verifications / month",
   "@planVerificationsPerMonth": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "planUnlimitedVerifications": "Unlimited verifications",
   "@planUnlimitedVerifications": {},
-
   "notificationsTitle": "Notifications",
   "@notificationsTitle": {},
-
   "noNotificationsTitle": "All caught up",
   "@noNotificationsTitle": {},
-
   "noNotificationsBody": "You have no new notifications.",
   "@noNotificationsBody": {},
-
   "logoutLabel": "Log out",
   "@logoutLabel": {},
-
   "logoutConfirmTitle": "Log out?",
   "@logoutConfirmTitle": {},
-
   "logoutConfirmBody": "You will need to verify your identity to log back in.",
   "@logoutConfirmBody": {},
-
   "devicesTitle": "Trusted devices",
   "@devicesTitle": {},
-
   "deviceThisDevice": "This device",
   "@deviceThisDevice": {},
-
   "deviceRevoke": "Remove device",
   "@deviceRevoke": {},
-
   "deviceRevokeConfirm": "Remove this device? You will need to re-authenticate on it.",
   "@deviceRevokeConfirm": {},
-
   "businessName": "Business name",
   "@businessName": {},
-
   "businessType": "Business type",
   "@businessType": {},
-
   "onboardingMerchantTitle": "Let's set up your business",
   "@onboardingMerchantTitle": {},
-
   "onboardingMerchantSubtitle": "We'll use this to personalize your Yene Verify experience",
   "@onboardingMerchantSubtitle": {},
-
   "businessNameHint": "e.g., Selam Coffee, Addis Electronics",
   "@businessNameHint": {},
-
   "businessNameRequired": "Enter your business name",
   "@businessNameRequired": {},
-
   "businessNameTooShort": "Business name must be at least 2 characters",
   "@businessNameTooShort": {},
-
   "businessNameTooLong": "Business name must be 80 characters or less",
   "@businessNameTooLong": {},
-
   "addMoreDetails": "Add more details",
   "@addMoreDetails": {},
-
   "businessTypeCafe": "Cafe",
   "@businessTypeCafe": {},
-
   "businessTypeRestaurant": "Restaurant",
   "@businessTypeRestaurant": {},
-
   "businessTypeRetail": "Retail",
   "@businessTypeRetail": {},
-
   "businessTypeServices": "Services",
   "@businessTypeServices": {},
-
   "businessTypeOther": "Other",
   "@businessTypeOther": {},
-
   "tinLabel": "TIN (Tax ID)",
   "@tinLabel": {},
-
   "addressLabel": "Address",
   "@addressLabel": {},
-
   "cityLabel": "City",
   "@cityLabel": {},
-
   "createBusiness": "Create business",
   "@createBusiness": {},
-
   "onboardingSuccessTitle": "You're all set",
   "@onboardingSuccessTitle": {},
-
   "onboardingSuccessSubtitle": "Your business {businessName} is now on Yene Verify.",
   "@onboardingSuccessSubtitle": {
     "placeholders": {
-      "businessName": { "type": "String" }
+      "businessName": {
+        "type": "String"
+      }
     }
   },
-
   "inviteTitle": "You're invited",
   "@inviteTitle": {},
-
   "inviteBody": "{merchantName} invited you to join their team",
   "@inviteBody": {
     "placeholders": {
-      "merchantName": { "type": "String" }
+      "merchantName": {
+        "type": "String"
+      }
     }
   },
-
   "inviteBranch": "Branch: {branchLabel}",
   "@inviteBranch": {
     "placeholders": {
-      "branchLabel": { "type": "String" }
+      "branchLabel": {
+        "type": "String"
+      }
     }
   },
-
   "inviteAbility": "You'll be able to verify payments for this business.",
   "@inviteAbility": {},
-
   "inviteCodeLabel": "Enter the code from your SMS",
   "@inviteCodeLabel": {},
-
   "inviteCodeHint": "Paste your invite code",
   "@inviteCodeHint": {},
-
   "acceptInvite": "Accept invite",
   "@acceptInvite": {},
-
   "declineInvite": "Decline",
   "@declineInvite": {},
-
   "declineInviteConfirmTitle": "Decline this invite?",
   "@declineInviteConfirmTitle": {},
-
   "declineInviteConfirmBody": "You'll need a new invite to join {merchantName}.",
   "@declineInviteConfirmBody": {
     "placeholders": {
-      "merchantName": { "type": "String" }
+      "merchantName": {
+        "type": "String"
+      }
     }
   },
-
   "inviteExpired": "This invite has expired. Ask {merchantName} for a new one.",
   "@inviteExpired": {
     "placeholders": {
-      "merchantName": { "type": "String" }
+      "merchantName": {
+        "type": "String"
+      }
     }
   },
-
   "inviteConsumed": "This invite was already used.",
   "@inviteConsumed": {},
-
   "inviteInvalid": "That code doesn't match. Check the SMS.",
   "@inviteInvalid": {},
-
   "fullName": "Full name",
   "@fullName": {},
-
   "language": "Language",
   "@language": {},
-
   "languageEnglish": "English",
   "@languageEnglish": {},
-
   "languageAmharic": "አማርኛ",
   "@languageAmharic": {},
-
   "darkMode": "Dark mode",
   "@darkMode": {},
-
   "appVersion": "Version {version}",
   "@appVersion": {
     "placeholders": {
-      "version": { "type": "String" }
+      "version": {
+        "type": "String"
+      }
     }
   },
-
   "copyReference": "Copy reference",
   "@copyReference": {},
-
   "copied": "Copied!",
   "@copied": {},
-
   "shareLabel": "Share",
   "@shareLabel": {},
-
   "exportLabel": "Export",
   "@exportLabel": {},
-
   "filterLabel": "Filter",
   "@filterLabel": {},
-
   "searchLabel": "Search",
   "@searchLabel": {},
-
   "searchHint": "Search transactions…",
   "@searchHint": {},
-
   "noSearchResults": "No results for \"{query}\"",
   "@noSearchResults": {
     "placeholders": {
-      "query": { "type": "String" }
+      "query": {
+        "type": "String"
+      }
     }
   },
-
   "dateRangeLabel": "Date range",
   "@dateRangeLabel": {},
-
   "bankLabel": "Bank",
   "@bankLabel": {},
-
   "allBanks": "All banks",
   "@allBanks": {},
-
   "bankCbe": "Commercial Bank of Ethiopia",
   "@bankCbe": {},
-
   "bankTelebirr": "Telebirr",
   "@bankTelebirr": {},
-
   "bankAwash": "Awash Bank",
   "@bankAwash": {},
-
   "bankDashen": "Dashen Bank",
   "@bankDashen": {},
-
   "bankAbyssinia": "Bank of Abyssinia",
   "@bankAbyssinia": {},
-
   "bankMpesa": "M-Pesa",
   "@bankMpesa": {},
-
   "bankZemen": "Zemen Bank",
   "@bankZemen": {},
-
   "insightsTitle": "Insights",
   "@insightsTitle": {},
-
   "insightBestProducts": "Best selling products",
   "@insightBestProducts": {},
-
   "insightPeakHours": "Peak hours",
   "@insightPeakHours": {},
-
   "insightBestDays": "Best days",
   "@insightBestDays": {},
-
   "insightTrend": "Trend",
   "@insightTrend": {},
-
   "insightRecommendations": "Recommendations",
   "@insightRecommendations": {},
-
   "insightAnomalies": "Anomalies",
   "@insightAnomalies": {},
-
   "noInsightsTitle": "Not enough data yet",
   "@noInsightsTitle": {},
-
   "noInsightsBody": "Complete more verifications to unlock insights.",
   "@noInsightsBody": {},
-
   "trendUp": "+{percent}% vs last {period}",
   "@trendUp": {
     "placeholders": {
-      "percent": { "type": "String" },
-      "period": { "type": "String" }
+      "percent": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
     }
   },
-
   "trendDown": "-{percent}% vs last {period}",
   "@trendDown": {
     "placeholders": {
-      "percent": { "type": "String" },
-      "period": { "type": "String" }
+      "percent": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
     }
   },
-
   "periodWeek": "week",
   "@periodWeek": {},
-
   "periodMonth": "month",
   "@periodMonth": {},
-
   "auditLogTitle": "Audit log",
   "@auditLogTitle": {},
-
   "permissionCameraTitle": "Camera access needed",
   "@permissionCameraTitle": {},
-
   "permissionCameraBody": "Yene Verify needs camera access to capture payment screenshots.",
   "@permissionCameraBody": {},
-
   "permissionGalleryTitle": "Photo library access needed",
   "@permissionGalleryTitle": {},
-
   "permissionGalleryBody": "Yene Verify needs photo library access to upload payment screenshots.",
   "@permissionGalleryBody": {},
-
   "permissionOpenSettings": "Open settings",
   "@permissionOpenSettings": {},
-
   "onboardingStep1Title": "Verify payments instantly",
   "@onboardingStep1Title": {},
-
   "onboardingStep1Body": "Take a photo of any Ethiopian bank receipt and get a verified result in under 10 seconds.",
   "@onboardingStep1Body": {},
-
   "onboardingStep2Title": "Stop payment fraud",
   "@onboardingStep2Title": {},
-
   "onboardingStep2Body": "Duplicate receipt detection protects your business from the same receipt being used twice.",
   "@onboardingStep2Body": {},
-
   "onboardingStep3Title": "Grow with insights",
   "@onboardingStep3Title": {},
-
   "onboardingStep3Body": "Understand your peak hours, best products, and sales trends — all from your verified transactions.",
   "@onboardingStep3Body": {},
-
   "getStarted": "Get started",
   "@getStarted": {},
-
   "learnMoreLabel": "Learn more",
   "@learnMoreLabel": {},
-
   "authComingSoon": "Auth flow — coming Step 21",
-  "@authComingSoon": { "description": "Step 20 placeholder snackbar" },
-
+  "@authComingSoon": {
+    "description": "Step 20 placeholder snackbar"
+  },
   "debugDesignSystem": "Debug: Design System",
-  "@debugDesignSystem": { "description": "Step 20 debug link to the design-system showcase" },
-
+  "@debugDesignSystem": {
+    "description": "Step 20 debug link to the design-system showcase"
+  },
   "verifyHeading": "Verify a payment",
-  "@verifyHeading": { "description": "Verify screen heading" },
-
+  "@verifyHeading": {
+    "description": "Verify screen heading"
+  },
   "verifyHeadingSubtitle": "Upload or photograph the customer's bank confirmation to verify it in seconds.",
   "@verifyHeadingSubtitle": {},
-
   "takePhotoCardSubtitle": "Use your camera to capture the receipt",
   "@takePhotoCardSubtitle": {},
-
   "uploadImageCardSubtitle": "Choose a screenshot from your gallery",
   "@uploadImageCardSubtitle": {},
-
   "verificationsRemaining": "You have {count} verifications remaining.",
   "@verificationsRemaining": {
     "description": "Credits info card on the verify screen",
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "unlimitedVerifications": "Unlimited verifications",
   "@unlimitedVerifications": {},
-
   "preparingImage": "Preparing image…",
   "@preparingImage": {},
-
   "uploadingPercent": "Uploading… {percent}%",
   "@uploadingPercent": {
-    "placeholders": { "percent": { "type": "int" } }
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
-
   "verifyTakesSeconds": "This takes a few seconds…",
   "@verifyTakesSeconds": {},
-
   "verifyStillWorking": "Still verifying…",
   "@verifyStillWorking": {},
-
   "verifyPendingBody": "Still verifying — this can take up to a minute for some banks.",
   "@verifyPendingBody": {},
-
   "refreshNow": "Refresh now",
   "@refreshNow": {},
-
   "checkTransactions": "Check transactions",
   "@checkTransactions": {},
-
   "verifyTooLong": "Verification is taking too long. Check back in a minute.",
   "@verifyTooLong": {},
-
   "errorImageTooLarge": "Image too large. Try a smaller screenshot.",
   "@errorImageTooLarge": {},
-
   "errorInvalidImageType": "Invalid image format. Use JPEG or PNG.",
   "@errorInvalidImageType": {},
-
   "errorUploadMismatch": "Upload verification failed. Try again.",
   "@errorUploadMismatch": {},
-
   "errorUploadIncomplete": "Upload didn't complete. Check your connection.",
   "@errorUploadIncomplete": {},
-
   "errorCreditsExhausted": "You're out of credits. Top up to continue.",
   "@errorCreditsExhausted": {},
-
   "errorBankNotDetected": "We couldn't identify the bank in this receipt. Try a clearer photo.",
   "@errorBankNotDetected": {},
-
   "cameraNotAvailable": "Camera not available. Use Upload image instead.",
   "@cameraNotAvailable": {},
-
   "cameraAccessNeeded": "Camera access needed",
   "@cameraAccessNeeded": {},
-
   "cameraAccessBody": "Allow camera access in your system settings to photograph receipts.",
   "@cameraAccessBody": {},
-
   "photoAccessNeeded": "Photo access needed",
   "@photoAccessNeeded": {},
-
   "photoAccessBody": "Allow photo access in your system settings to pick a receipt image.",
   "@photoAccessBody": {},
-
   "openSettings": "Open settings",
   "@openSettings": {},
-
   "usePhoto": "Use photo",
   "@usePhoto": {},
-
   "retakePhoto": "Retake",
   "@retakePhoto": {},
-
   "switchCamera": "Switch camera",
   "@switchCamera": {},
-
   "toggleFlash": "Toggle flash",
   "@toggleFlash": {},
-
   "galleryUnavailable": "Couldn't open your gallery. Try again.",
   "@galleryUnavailable": {},
-
   "verdictTitle": "Verification result",
   "@verdictTitle": {},
-
   "backToVerify": "Back to verify",
   "@backToVerify": {},
-
   "verdictPlaceholderNote": "Receipt preview, share, and retry arrive in Part 2.",
   "@verdictPlaceholderNote": {},
-
   "statusPending": "Pending",
   "@statusPending": {},
-
   "statusVerified": "Verified",
   "@statusVerified": {},
-
   "statusFake": "Fake",
   "@statusFake": {},
-
   "statusDuplicate": "Duplicate",
   "@statusDuplicate": {},
-
   "statusNeedsReview": "Needs review",
   "@statusNeedsReview": {},
-
   "statusError": "Error",
   "@statusError": {},
-
   "viewPlans": "View plans",
   "@viewPlans": {},
-
   "verdictVerifiedLabel": "Payment verified",
   "verdictFakeLabel": "Fake receipt",
   "verdictDuplicateLabel": "Already verified",
   "verdictReviewLabel": "Under review",
   "verdictErrorLabel": "Verification failed",
-
   "verdictVerifiedSubtitle": "Paid by {name}",
   "@verdictVerifiedSubtitle": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
-
   "verdictFakeSubtitle": "This receipt was not found on the bank's server.",
-
   "verdictDuplicateSubtitle": "This receipt was already verified on {date}.",
   "@verdictDuplicateSubtitle": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
-
   "verdictReviewSubtitle": "A team member will review this receipt within 24 hours.",
-
   "verdictReviewSupplementarySubtitle": "We need a clearer photo of this receipt to finish verifying it.",
-
   "verdictReviewFixTitle": "Retake the receipt",
   "verdictReviewRetakeHint": "Keep the whole receipt in frame, flat and evenly lit.",
-
   "verdictBankLabel": "Bank",
   "verdictReferenceLabel": "Reference",
   "verdictSenderLabel": "Sender",
@@ -865,21 +690,21 @@
   "verdictDurationLabel": "Duration",
   "verdictFirstVerifiedLabel": "First verified",
   "verdictFirstVerifiedHint": "Tap to see the original receipt.",
-
   "verdictDurationSeconds": "{seconds} seconds",
   "@verdictDurationSeconds": {
-    "placeholders": { "seconds": { "type": "String" } }
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
   },
-
   "verdictDoneButton": "Done",
   "verdictTryAgainButton": "Try again",
   "verdictReportButton": "Report a problem",
   "verdictViewOriginalButton": "View original",
   "verdictViewReceiptButton": "View receipt",
-
   "verdictCopySuccess": "Reference copied",
   "verdictStillVerifying": "Still verifying…",
-
   "verdictReportTitle": "Report a problem",
   "verdictReportBody": "Tell us what is wrong with this verification. Our team will review it.",
   "verdictReportReasonHint": "What is wrong?",
@@ -887,43 +712,55 @@
   "verdictReportSubmitButton": "Submit report",
   "verdictReportSubmitted": "Report submitted. We will look into it.",
   "verdictCancelButton": "Cancel",
-
   "verdictReviewNotificationInfo": "You will be notified when the review is complete.",
-
   "verdictReceiptUnavailable": "Receipt image unavailable",
   "verdictReceiptRetry": "Reload image",
-
   "verdictOriginalUnavailable": "This receipt belongs to another business.",
-
   "verdictErrorBankNotDetected": "We could not identify the bank on this receipt. Try a clearer photo.",
   "verdictErrorBankTimeout": "The bank's server is slow right now. Try again.",
   "verdictErrorBankUnavailable": "The bank is unavailable right now. Try again later.",
   "verdictErrorOcrEmpty": "We could not read this receipt. Try a clearer photo.",
   "verdictErrorDefault": "Something went wrong. Try again.",
-
+  "verdictConfigureAccount": "Configure now",
+  "verdictConfigureAccountTitle": "Add your bank account details",
   "navHome": "Home",
   "navVerify": "Verify",
   "navTransactions": "Transactions",
   "navInsights": "Insights",
   "navProfile": "Profile",
-
   "greetingMorning": "Good morning, {name}",
   "@greetingMorning": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "greetingAfternoon": "Good afternoon, {name}",
   "@greetingAfternoon": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "greetingEvening": "Good evening, {name}",
   "@greetingEvening": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "dashboardWelcomeBack": "Welcome back",
   "dashboardBusinessFallback": "Your business",
   "dashboardCreditsLeft": "{count} verifications left",
   "@dashboardCreditsLeft": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "dashboardUnlimited": "Unlimited verifications",
   "dashboardTopUp": "Top up",
@@ -946,28 +783,36 @@
   "dashboardNotifications": "Notifications",
   "dashboardInboxSoon": "Your inbox arrives in Step 26.",
   "dashboardBillingSoon": "Billing arrives in Step 25.",
-
   "shellComingSoon": "Coming soon",
   "shellHistoryBody": "Full transaction history arrives in Step 24.",
   "shellInsightsBody": "Insights arrive in Step 26.",
   "shellProfileBody": "Profile and settings arrive in Step 27.",
-
   "relativeTimeJustNow": "Just now",
   "relativeTimeMinutes": "{count}m ago",
   "@relativeTimeMinutes": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "relativeTimeHours": "{count}h ago",
   "@relativeTimeHours": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "relativeTimeYesterday": "Yesterday",
   "relativeTimeDays": "{count}d ago",
   "@relativeTimeDays": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
-  "transactionsTitle": "Transactions",
   "transactionsSearchHint": "Search reference or amount",
   "transactionsFilterTitle": "Filters",
   "transactionsFilterBank": "Bank",
@@ -987,347 +832,138 @@
   "transactionsNoMore": "No more results",
   "transactionsRangeYear": "This year",
   "transactionsRangeAll": "All time",
-
   "teamActiveSection": "Active team members",
-
   "@teamActiveSection": {},
-
   "teamPendingSection": "Pending invites",
-
   "@teamPendingSection": {},
-
   "teamInviteHeading": "Invite someone to verify payments",
-
   "@teamInviteHeading": {},
-
   "teamInviteSubtitle": "They'll receive an SMS with a link to accept.",
-
   "@teamInviteSubtitle": {},
-
   "teamPhoneLabel": "Phone number",
-
   "@teamPhoneLabel": {},
-
   "teamPhoneHint": "+2519XXXXXXXX",
-
   "@teamPhoneHint": {},
-
   "teamNameLabel": "Name (optional) — what's their name?",
-
   "@teamNameLabel": {},
-
   "teamBranchLabel": "Branch label (optional)",
-
   "@teamBranchLabel": {},
-
   "teamBranchHint": "e.g., Bole Branch, Main Counter",
-
   "@teamBranchHint": {},
-
   "teamSendInvite": "Send invite",
-
   "@teamSendInvite": {},
-
   "teamPhoneInvalid": "Enter a valid Ethiopian phone number",
-
   "@teamPhoneInvalid": {},
-
   "teamInviteTitle": "Invite team member",
-
   "@teamInviteTitle": {},
-
   "teamInviteSuccessTitle": "Invite sent",
-
   "@teamInviteSuccessTitle": {},
-
   "teamShareInviteLink": "Share invite link",
-
   "@teamShareInviteLink": {},
-
   "teamInviteAcceptHint": "They'll appear in your team list once they accept.",
-
   "@teamInviteAcceptHint": {},
-
   "teamDone": "Done",
-
   "@teamDone": {},
-
   "teamUpgrade": "Upgrade",
-
   "@teamUpgrade": {},
-
   "teamUpgradeBody": "You've used every team seat on your current plan. Upgrade to add more people.",
-
   "@teamUpgradeBody": {},
-
   "teamCapFree": "FREE plan allows 1 team member. Upgrade to add more.",
-
   "@teamCapFree": {},
-
   "teamCapPremium": "PREMIUM plan allows 1 team member. Upgrade to add more.",
-
   "@teamCapPremium": {},
-
   "teamCapBusiness": "BUSINESS plan allows 10 team members. Upgrade to add more.",
-
   "@teamCapBusiness": {},
-
   "teamCapGeneric": "Your plan's team limit is reached. Upgrade to add more.",
-
   "@teamCapGeneric": {},
-
   "teamStatusActive": "Active",
-
   "@teamStatusActive": {},
-
   "teamStatusInvited": "Invited",
-
   "@teamStatusInvited": {},
-
   "teamStatusSuspended": "Suspended",
-
   "@teamStatusSuspended": {},
-
   "teamStatusRemoved": "Removed",
-
   "@teamStatusRemoved": {},
-
   "teamResend": "Resend",
-
   "@teamResend": {},
-
   "teamRevoke": "Revoke",
-
   "@teamRevoke": {},
-
   "teamRevokeConfirmTitle": "Revoke this invite?",
-
   "@teamRevokeConfirmTitle": {},
-
   "teamRevokeConfirmBody": "They won't be able to join with the current invite link.",
-
   "@teamRevokeConfirmBody": {},
-
   "teamResendSuccess": "Invite resent",
-
   "@teamResendSuccess": {},
-
   "teamResendFailed": "Couldn't resend the invite. Try again.",
-
   "@teamResendFailed": {},
-
   "teamRemove": "Remove from team",
-
   "@teamRemove": {},
-
   "teamRemoveConfirmBody": "They won't be able to verify payments anymore. Their past verifications will remain in your history.",
-
   "@teamRemoveConfirmBody": {},
-
   "teamRemoveSuccess": "Team member removed",
-
   "@teamRemoveSuccess": {},
-
   "teamRemoveFailed": "Couldn't remove this team member. Try again.",
-
   "@teamRemoveFailed": {},
-
   "teamAlreadyMember": "This phone is already on your team",
-
   "@teamAlreadyMember": {},
-
   "teamDetailTitle": "Team member",
-
   "@teamDetailTitle": {},
-
   "teamNotJoined": "Invite pending — they have not joined yet",
-
   "@teamNotJoined": {},
-
   "teamJoinedLabel": "Joined",
-
   "@teamJoinedLabel": {},
-
   "teamLastActiveLabel": "Last active",
-
   "@teamLastActiveLabel": {},
-
   "teamChangeBranch": "Change branch label",
-
   "@teamChangeBranch": {},
-
   "teamBranchSaved": "Branch label updated",
-
   "@teamBranchSaved": {},
-
   "teamSave": "Save",
-
   "@teamSave": {},
-
   "teamCancel": "Cancel",
-
   "@teamCancel": {},
-
   "teamNoBranch": "No branch label",
-
   "@teamNoBranch": {},
-
   "teamUnknown": "Team member",
-
   "@teamUnknown": {},
-
   "profileAccountSection": "Account",
-
   "@profileAccountSection": {},
-
   "profileEditBusiness": "Edit business info",
-
   "@profileEditBusiness": {},
-
   "profileChangePin": "Change PIN",
-
   "@profileChangePin": {},
-
   "profileTeamSection": "Team",
-
   "@profileTeamSection": {},
-
   "profileManageTeam": "Manage team",
-
   "@profileManageTeam": {},
-
   "profileSubscriptionSection": "Subscription",
-
   "@profileSubscriptionSection": {},
-
   "profilePreferencesSection": "Preferences",
-
   "@profilePreferencesSection": {},
-
   "profileTheme": "Theme",
-
   "@profileTheme": {},
-
   "profileThemeSystem": "System",
-
   "@profileThemeSystem": {},
-
   "profileThemeLight": "Light",
-
   "@profileThemeLight": {},
-
   "profileThemeDark": "Dark",
-
   "@profileThemeDark": {},
-
   "profileNotifications": "Notifications",
-
   "@profileNotifications": {},
-
   "profileSupportSection": "Support",
-
   "@profileSupportSection": {},
-
   "profileHelpCenter": "Help center",
-
   "@profileHelpCenter": {},
-
   "profileContactSupport": "Contact support",
-
   "@profileContactSupport": {},
-
   "profileSignOut": "Sign out",
-
   "@profileSignOut": {},
-
   "profileSignOutConfirmTitle": "Sign out of Yene Verify?",
-
   "@profileSignOutConfirmTitle": {},
-
   "profileSignOutConfirmBody": "You'll need to sign in again with your phone and PIN.",
-
   "@profileSignOutConfirmBody": {},
-
   "profileComingSoon": "Coming soon",
-
   "@profileComingSoon": {},
-
-  "teamInvitedAgo": "Invited {time}",
-
-  "@teamInvitedAgo": {
-    "placeholders": {
-      "time": { "type": "String" }
-    }
-  },
-
-  "teamInviteSent": "Invite sent to {phone}",
-
-  "@teamInviteSent": {
-    "placeholders": {
-      "phone": { "type": "String" }
-    }
-  },
-
-  "teamSeatsRemaining": "{remaining} of {limit} team seats remaining",
-
-  "@teamSeatsRemaining": {
-    "placeholders": {
-      "remaining": { "type": "int" },
-      "limit": { "type": "int" }
-    }
-  },
-
-  "teamActivity": "{count} verifications last 30 days",
-
-  "@teamActivity": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-
-  "teamRemoveConfirmTitle": "Remove {name}?",
-
-  "@teamRemoveConfirmTitle": {
-    "placeholders": {
-      "name": { "type": "String" }
-    }
-  },
-
-  "profileTeamCount": "{members} members · {pending} pending",
-
-  "@profileTeamCount": {
-    "placeholders": {
-      "members": { "type": "int" },
-      "pending": { "type": "int" }
-    }
-  },
-
-  "profilePlanRenews": "{plan} · renews in {days} days",
-
-  "@profilePlanRenews": {
-    "placeholders": {
-      "plan": { "type": "String" },
-      "days": { "type": "int" }
-    }
-  },
-
-  "profilePlanNoRenewal": "{plan}",
-
-  "@profilePlanNoRenewal": {
-    "placeholders": {
-      "plan": { "type": "String" }
-    }
-  },
-
-  "profileBusiness": "Business: {name}",
-
-  "@profileBusiness": {
-    "placeholders": {
-      "name": { "type": "String" }
-    }
-  },
-  "verdictConfigureAccount": "Configure now",
-  "verdictConfigureAccountTitle": "Add your bank account details",
   "profileVerificationAccounts": "Verification accounts",
   "@profileVerificationAccounts": {},
   "profileVerificationAccountsSubtitle": "Bank accounts used to verify payments",
@@ -1369,5 +1005,276 @@
   "onboardingAccountsSubtitle": "Add the account numbers your bank needs to verify payments.",
   "@onboardingAccountsSubtitle": {},
   "onboardingAccountsInvalid": "Check the number of digits for the selected banks.",
-  "@onboardingAccountsInvalid": {}
+  "@onboardingAccountsInvalid": {},
+  "teamInvitedAgo": "Invited {time}",
+  "@teamInvitedAgo": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "teamInviteSent": "Invite sent to {phone}",
+  "@teamInviteSent": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "teamSeatsRemaining": "{remaining} of {limit} team seats remaining",
+  "@teamSeatsRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "teamActivity": "{count} verifications last 30 days",
+  "@teamActivity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamRemoveConfirmTitle": "Remove {name}?",
+  "@teamRemoveConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileTeamCount": "{members} members · {pending} pending",
+  "@profileTeamCount": {
+    "placeholders": {
+      "members": {
+        "type": "int"
+      },
+      "pending": {
+        "type": "int"
+      }
+    }
+  },
+  "profilePlanRenews": "{plan} · renews in {days} days",
+  "@profilePlanRenews": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "profilePlanNoRenewal": "{plan}",
+  "@profilePlanNoRenewal": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      }
+    }
+  },
+  "profileBusiness": "Business: {name}",
+  "@profileBusiness": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "billingScreenTitle": "Billing",
+  "@billingScreenTitle": {},
+  "billingPlansSection": "Available plans",
+  "@billingPlansSection": {},
+  "billingNoPlans": "No plans are available right now.",
+  "@billingNoPlans": {},
+  "billingHistoryTitle": "Payment history",
+  "@billingHistoryTitle": {},
+  "billingViewHistory": "View history",
+  "@billingViewHistory": {},
+  "billingNoHistory": "No billing history yet",
+  "@billingNoHistory": {},
+  "billingNoHistoryBody": "Payments you make will appear here.",
+  "@billingNoHistoryBody": {},
+  "billingManage": "Manage",
+  "@billingManage": {},
+  "billingRenew": "Renew",
+  "@billingRenew": {},
+  "billingChoose": "Choose",
+  "@billingChoose": {},
+  "billingUpgrade": "Upgrade",
+  "@billingUpgrade": {},
+  "billingCurrentBadge": "Current plan",
+  "@billingCurrentBadge": {},
+  "billingExpiresIn": "Expires in {days} days",
+  "@billingExpiresIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "billingUnlimited": "Unlimited",
+  "@billingUnlimited": {},
+  "billingCreditsLeft": "{count} credits left",
+  "@billingCreditsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingOwnerOnly": "Only the business owner can manage billing.",
+  "@billingOwnerOnly": {},
+  "billingBack": "Back",
+  "@billingBack": {},
+  "billingPayFor": "Pay for {name}",
+  "@billingPayFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "billingPayAmount": "Pay {amount} to activate your plan",
+  "@billingPayAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "billingMethodCbe": "CBE",
+  "@billingMethodCbe": {},
+  "billingMethodTelebirr": "Telebirr",
+  "@billingMethodTelebirr": {},
+  "billingAccountNumber": "Account number",
+  "@billingAccountNumber": {},
+  "billingAccountName": "Account name",
+  "@billingAccountName": {},
+  "billingPhoneNumber": "Phone number",
+  "@billingPhoneNumber": {},
+  "billingCopy": "Copy",
+  "@billingCopy": {},
+  "billingCopied": "Copied to clipboard",
+  "@billingCopied": {},
+  "billingSteps": "1. Pay the exact amount using CBE or Telebirr.\n2. Take a screenshot of your confirmation.\n3. Upload it below.",
+  "@billingSteps": {},
+  "billingIvePaid": "I've paid",
+  "@billingIvePaid": {},
+  "billingUploadHeading": "Upload your payment confirmation",
+  "@billingUploadHeading": {},
+  "billingUploadBody": "Upload a screenshot showing the amount, date and reference.",
+  "@billingUploadBody": {},
+  "billingChange": "Change",
+  "@billingChange": {},
+  "billingRemove": "Remove",
+  "@billingRemove": {},
+  "billingSubmitForVerification": "Submit for verification",
+  "@billingSubmitForVerification": {},
+  "billingSessionExpired": "This checkout session has expired. Start again from Billing.",
+  "@billingSessionExpired": {},
+  "billingResultApprovedTitle": "Payment verified",
+  "@billingResultApprovedTitle": {},
+  "billingResultActivated": "{name} activated",
+  "@billingResultActivated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "billingResultActiveUntil": "Active until {date}",
+  "@billingResultActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "billingResultCreditsAdded": "+{count} verifications",
+  "@billingResultCreditsAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingResultStartUsing": "Start using your credits",
+  "@billingResultStartUsing": {},
+  "billingResultPendingTitle": "Verification in progress",
+  "@billingResultPendingTitle": {},
+  "billingResultPendingBody": "We're confirming your payment with the bank. This usually takes a few seconds.",
+  "@billingResultPendingBody": {},
+  "billingResultTimeout": "Verification is taking too long. Check billing history later.",
+  "@billingResultTimeout": {},
+  "billingResultCheckHistory": "Check billing history",
+  "@billingResultCheckHistory": {},
+  "billingResultReviewTitle": "Payment under review",
+  "@billingResultReviewTitle": {},
+  "billingResultReviewBody": "The amount doesn't match the package price. Our team will review this within 24 hours.",
+  "@billingResultReviewBody": {},
+  "billingResultRejectedTitle": "Payment not verified",
+  "@billingResultRejectedTitle": {},
+  "billingResultRejectedBody": "The receipt couldn't be verified.",
+  "@billingResultRejectedBody": {},
+  "billingResultDuplicateBody": "This receipt was already used.",
+  "@billingResultDuplicateBody": {},
+  "billingTryAgain": "Try again",
+  "@billingTryAgain": {},
+  "billingContactSupport": "Contact support",
+  "@billingContactSupport": {},
+  "billingSupportSoon": "Support is coming soon.",
+  "@billingSupportSoon": {},
+  "billingStatusPending": "Pending",
+  "@billingStatusPending": {},
+  "billingStatusApproved": "Approved",
+  "@billingStatusApproved": {},
+  "billingStatusMismatch": "Amount mismatch",
+  "@billingStatusMismatch": {},
+  "billingStatusReview": "Needs review",
+  "@billingStatusReview": {},
+  "billingStatusDuplicate": "Duplicate",
+  "@billingStatusDuplicate": {},
+  "billingStatusFake": "Fake",
+  "@billingStatusFake": {},
+  "billingStatusRejected": "Rejected",
+  "@billingStatusRejected": {},
+  "billingExpectedAmount": "Expected amount",
+  "@billingExpectedAmount": {},
+  "billingSubmittedAmount": "Submitted amount",
+  "@billingSubmittedAmount": {},
+  "billingReference": "Reference",
+  "@billingReference": {},
+  "billingSubmittedOn": "Submitted",
+  "@billingSubmittedOn": {},
+  "billingResultDetailsTitle": "Payment details",
+  "@billingResultDetailsTitle": {},
+  "billingFeatureUnlimited": "Unlimited verifications",
+  "@billingFeatureUnlimited": {},
+  "billingFeatureCredits": "{count} verifications/month",
+  "@billingFeatureCredits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingFeatureSeatsOne": "1 team member",
+  "@billingFeatureSeatsOne": {},
+  "billingFeatureSeats": "{count} team members",
+  "@billingFeatureSeats": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billingFeatureSeatsUnlimited": "Unlimited team members",
+  "@billingFeatureSeatsUnlimited": {}
 }

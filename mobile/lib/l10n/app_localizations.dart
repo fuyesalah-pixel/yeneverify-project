@@ -1844,6 +1844,18 @@ abstract class AppLocalizations {
   /// **'Something went wrong. Try again.'**
   String get verdictErrorDefault;
 
+  /// No description provided for @verdictConfigureAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure now'**
+  String get verdictConfigureAccount;
+
+  /// No description provided for @verdictConfigureAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your bank account details'**
+  String get verdictConfigureAccountTitle;
+
   /// No description provided for @navHome.
   ///
   /// In en, this message translates to:
@@ -2600,72 +2612,6 @@ abstract class AppLocalizations {
   /// **'Coming soon'**
   String get profileComingSoon;
 
-  /// No description provided for @teamInvitedAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'Invited {time}'**
-  String teamInvitedAgo(String time);
-
-  /// No description provided for @teamInviteSent.
-  ///
-  /// In en, this message translates to:
-  /// **'Invite sent to {phone}'**
-  String teamInviteSent(String phone);
-
-  /// No description provided for @teamSeatsRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'{remaining} of {limit} team seats remaining'**
-  String teamSeatsRemaining(int remaining, int limit);
-
-  /// No description provided for @teamActivity.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} verifications last 30 days'**
-  String teamActivity(int count);
-
-  /// No description provided for @teamRemoveConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove {name}?'**
-  String teamRemoveConfirmTitle(String name);
-
-  /// No description provided for @profileTeamCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{members} members · {pending} pending'**
-  String profileTeamCount(int members, int pending);
-
-  /// No description provided for @profilePlanRenews.
-  ///
-  /// In en, this message translates to:
-  /// **'{plan} · renews in {days} days'**
-  String profilePlanRenews(String plan, int days);
-
-  /// No description provided for @profilePlanNoRenewal.
-  ///
-  /// In en, this message translates to:
-  /// **'{plan}'**
-  String profilePlanNoRenewal(String plan);
-
-  /// No description provided for @profileBusiness.
-  ///
-  /// In en, this message translates to:
-  /// **'Business: {name}'**
-  String profileBusiness(String name);
-
-  /// No description provided for @verdictConfigureAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Configure now'**
-  String get verdictConfigureAccount;
-
-  /// No description provided for @verdictConfigureAccountTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Add your bank account details'**
-  String get verdictConfigureAccountTitle;
-
   /// No description provided for @profileVerificationAccounts.
   ///
   /// In en, this message translates to:
@@ -2791,6 +2737,468 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check the number of digits for the selected banks.'**
   String get onboardingAccountsInvalid;
+
+  /// No description provided for @teamInvitedAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited {time}'**
+  String teamInvitedAgo(String time);
+
+  /// No description provided for @teamInviteSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite sent to {phone}'**
+  String teamInviteSent(String phone);
+
+  /// No description provided for @teamSeatsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} of {limit} team seats remaining'**
+  String teamSeatsRemaining(int remaining, int limit);
+
+  /// No description provided for @teamActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} verifications last 30 days'**
+  String teamActivity(int count);
+
+  /// No description provided for @teamRemoveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String teamRemoveConfirmTitle(String name);
+
+  /// No description provided for @profileTeamCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{members} members · {pending} pending'**
+  String profileTeamCount(int members, int pending);
+
+  /// No description provided for @profilePlanRenews.
+  ///
+  /// In en, this message translates to:
+  /// **'{plan} · renews in {days} days'**
+  String profilePlanRenews(String plan, int days);
+
+  /// No description provided for @profilePlanNoRenewal.
+  ///
+  /// In en, this message translates to:
+  /// **'{plan}'**
+  String profilePlanNoRenewal(String plan);
+
+  /// No description provided for @profileBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Business: {name}'**
+  String profileBusiness(String name);
+
+  /// No description provided for @billingScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing'**
+  String get billingScreenTitle;
+
+  /// No description provided for @billingPlansSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Available plans'**
+  String get billingPlansSection;
+
+  /// No description provided for @billingNoPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'No plans are available right now.'**
+  String get billingNoPlans;
+
+  /// No description provided for @billingHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment history'**
+  String get billingHistoryTitle;
+
+  /// No description provided for @billingViewHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'View history'**
+  String get billingViewHistory;
+
+  /// No description provided for @billingNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No billing history yet'**
+  String get billingNoHistory;
+
+  /// No description provided for @billingNoHistoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments you make will appear here.'**
+  String get billingNoHistoryBody;
+
+  /// No description provided for @billingManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get billingManage;
+
+  /// No description provided for @billingRenew.
+  ///
+  /// In en, this message translates to:
+  /// **'Renew'**
+  String get billingRenew;
+
+  /// No description provided for @billingChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get billingChoose;
+
+  /// No description provided for @billingUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get billingUpgrade;
+
+  /// No description provided for @billingCurrentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Current plan'**
+  String get billingCurrentBadge;
+
+  /// No description provided for @billingExpiresIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {days} days'**
+  String billingExpiresIn(int days);
+
+  /// No description provided for @billingUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get billingUnlimited;
+
+  /// No description provided for @billingCreditsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} credits left'**
+  String billingCreditsLeft(int count);
+
+  /// No description provided for @billingOwnerOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the business owner can manage billing.'**
+  String get billingOwnerOnly;
+
+  /// No description provided for @billingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get billingBack;
+
+  /// No description provided for @billingPayFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay for {name}'**
+  String billingPayFor(String name);
+
+  /// No description provided for @billingPayAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} to activate your plan'**
+  String billingPayAmount(String amount);
+
+  /// No description provided for @billingMethodCbe.
+  ///
+  /// In en, this message translates to:
+  /// **'CBE'**
+  String get billingMethodCbe;
+
+  /// No description provided for @billingMethodTelebirr.
+  ///
+  /// In en, this message translates to:
+  /// **'Telebirr'**
+  String get billingMethodTelebirr;
+
+  /// No description provided for @billingAccountNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Account number'**
+  String get billingAccountNumber;
+
+  /// No description provided for @billingAccountName.
+  ///
+  /// In en, this message translates to:
+  /// **'Account name'**
+  String get billingAccountName;
+
+  /// No description provided for @billingPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get billingPhoneNumber;
+
+  /// No description provided for @billingCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get billingCopy;
+
+  /// No description provided for @billingCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get billingCopied;
+
+  /// No description provided for @billingSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Pay the exact amount using CBE or Telebirr.\n2. Take a screenshot of your confirmation.\n3. Upload it below.'**
+  String get billingSteps;
+
+  /// No description provided for @billingIvePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve paid'**
+  String get billingIvePaid;
+
+  /// No description provided for @billingUploadHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload your payment confirmation'**
+  String get billingUploadHeading;
+
+  /// No description provided for @billingUploadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a screenshot showing the amount, date and reference.'**
+  String get billingUploadBody;
+
+  /// No description provided for @billingChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get billingChange;
+
+  /// No description provided for @billingRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get billingRemove;
+
+  /// No description provided for @billingSubmitForVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for verification'**
+  String get billingSubmitForVerification;
+
+  /// No description provided for @billingSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This checkout session has expired. Start again from Billing.'**
+  String get billingSessionExpired;
+
+  /// No description provided for @billingResultApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment verified'**
+  String get billingResultApprovedTitle;
+
+  /// No description provided for @billingResultActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} activated'**
+  String billingResultActivated(String name);
+
+  /// No description provided for @billingResultActiveUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Active until {date}'**
+  String billingResultActiveUntil(String date);
+
+  /// No description provided for @billingResultCreditsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} verifications'**
+  String billingResultCreditsAdded(int count);
+
+  /// No description provided for @billingResultStartUsing.
+  ///
+  /// In en, this message translates to:
+  /// **'Start using your credits'**
+  String get billingResultStartUsing;
+
+  /// No description provided for @billingResultPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification in progress'**
+  String get billingResultPendingTitle;
+
+  /// No description provided for @billingResultPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re confirming your payment with the bank. This usually takes a few seconds.'**
+  String get billingResultPendingBody;
+
+  /// No description provided for @billingResultTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification is taking too long. Check billing history later.'**
+  String get billingResultTimeout;
+
+  /// No description provided for @billingResultCheckHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Check billing history'**
+  String get billingResultCheckHistory;
+
+  /// No description provided for @billingResultReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment under review'**
+  String get billingResultReviewTitle;
+
+  /// No description provided for @billingResultReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount doesn\'t match the package price. Our team will review this within 24 hours.'**
+  String get billingResultReviewBody;
+
+  /// No description provided for @billingResultRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment not verified'**
+  String get billingResultRejectedTitle;
+
+  /// No description provided for @billingResultRejectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt couldn\'t be verified.'**
+  String get billingResultRejectedBody;
+
+  /// No description provided for @billingResultDuplicateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This receipt was already used.'**
+  String get billingResultDuplicateBody;
+
+  /// No description provided for @billingTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get billingTryAgain;
+
+  /// No description provided for @billingContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get billingContactSupport;
+
+  /// No description provided for @billingSupportSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Support is coming soon.'**
+  String get billingSupportSoon;
+
+  /// No description provided for @billingStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get billingStatusPending;
+
+  /// No description provided for @billingStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get billingStatusApproved;
+
+  /// No description provided for @billingStatusMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount mismatch'**
+  String get billingStatusMismatch;
+
+  /// No description provided for @billingStatusReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs review'**
+  String get billingStatusReview;
+
+  /// No description provided for @billingStatusDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get billingStatusDuplicate;
+
+  /// No description provided for @billingStatusFake.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake'**
+  String get billingStatusFake;
+
+  /// No description provided for @billingStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get billingStatusRejected;
+
+  /// No description provided for @billingExpectedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected amount'**
+  String get billingExpectedAmount;
+
+  /// No description provided for @billingSubmittedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted amount'**
+  String get billingSubmittedAmount;
+
+  /// No description provided for @billingReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get billingReference;
+
+  /// No description provided for @billingSubmittedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get billingSubmittedOn;
+
+  /// No description provided for @billingResultDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment details'**
+  String get billingResultDetailsTitle;
+
+  /// No description provided for @billingFeatureUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited verifications'**
+  String get billingFeatureUnlimited;
+
+  /// No description provided for @billingFeatureCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} verifications/month'**
+  String billingFeatureCredits(int count);
+
+  /// No description provided for @billingFeatureSeatsOne.
+  ///
+  /// In en, this message translates to:
+  /// **'1 team member'**
+  String get billingFeatureSeatsOne;
+
+  /// No description provided for @billingFeatureSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} team members'**
+  String billingFeatureSeats(int count);
+
+  /// No description provided for @billingFeatureSeatsUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited team members'**
+  String get billingFeatureSeatsUnlimited;
 }
 
 class _AppLocalizationsDelegate

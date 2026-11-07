@@ -8,6 +8,11 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/pin_entry_screen.dart';
 import '../../features/auth/presentation/screens/pin_setup_screen.dart';
+import '../../features/billing/data/models/billing_session.dart';
+import '../../features/billing/presentation/screens/billing_history_screen.dart';
+import '../../features/billing/presentation/screens/billing_result_screen.dart';
+import '../../features/billing/presentation/screens/billing_screen.dart';
+import '../../features/billing/presentation/screens/checkout_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/design_system/presentation/screens/design_system_showcase_screen.dart';
 import '../../features/onboarding/presentation/screens/merchant_setup_success_screen.dart';
@@ -48,6 +53,14 @@ abstract final class Routes {
       '$transactionDetail/$verificationId';
   static const String insights = '/insights';
   static const String profile = '/profile';
+
+  /// Step 25 — billing flow (root routes, no bottom nav).
+  static const String billing = '/billing';
+  static const String billingHistory = '/billing/history';
+  static String billingCheckoutFor(String sessionId) =>
+      '$billing/checkout/$sessionId';
+  static String billingResultFor(String billingId) =>
+      '$billing/result/$billingId';
 
   /// Step 24 — team management, nested under the Profile tab.
   static const String subMerchants = '/profile/sub-merchants';
@@ -190,6 +203,33 @@ final appRouter = GoRouter(
               ],
             ),
           ],
+        ),
+      ],
+    ),
+    // Billing lives outside the shell: checkout and result are full-screen
+    // flows, and the package list is always opened from Profile or a banner.
+    GoRoute(
+      path: Routes.billing,
+      builder: (_, __) => const BillingScreen(),
+      routes: [
+        GoRoute(
+          path: 'history',
+          builder: (_, __) => const BillingHistoryScreen(),
+        ),
+        GoRoute(
+          path: 'checkout/:sessionId',
+          builder: (_, state) => CheckoutScreen(
+            session: state.extra is BillingSession
+                ? state.extra as BillingSession
+                : null,
+          ),
+        ),
+        GoRoute(
+          path: 'result/:billingId',
+          builder: (_, state) => BillingResultScreen(
+            billingId: state.pathParameters['billingId'] ?? '',
+            readOnly: state.extra == true,
+          ),
         ),
       ],
     ),

@@ -949,6 +949,12 @@ class AppLocalizationsAm extends AppLocalizations {
   String get verdictErrorDefault => 'ችግር ተፈጥሯል። እንደገና ይሞክሩ።';
 
   @override
+  String get verdictConfigureAccount => 'አሁን ያዘጋጁ';
+
+  @override
+  String get verdictConfigureAccountTitle => 'የባንክ መለያ መረጃዎን ያክሉ';
+
+  @override
   String get navHome => 'መነሻ';
 
   @override
@@ -1345,57 +1351,6 @@ class AppLocalizationsAm extends AppLocalizations {
   String get profileComingSoon => 'በቅርቡ';
 
   @override
-  String teamInvitedAgo(String time) {
-    return 'የተጋበዙት $time';
-  }
-
-  @override
-  String teamInviteSent(String phone) {
-    return 'ግብዣ ወደ $phone ተልኳል';
-  }
-
-  @override
-  String teamSeatsRemaining(int remaining, int limit) {
-    return 'ከ$limit የቡድን ቦታዎች $remaining ቀርተዋል';
-  }
-
-  @override
-  String teamActivity(int count) {
-    return 'ባለፉት 30 ቀናት $count ማረጋገጫዎች';
-  }
-
-  @override
-  String teamRemoveConfirmTitle(String name) {
-    return '$nameን ያስወግዱ?';
-  }
-
-  @override
-  String profileTeamCount(int members, int pending) {
-    return '$members አባላት · $pending በመጠባበቅ';
-  }
-
-  @override
-  String profilePlanRenews(String plan, int days) {
-    return '$plan · በ$days ቀናት ይታደሳል';
-  }
-
-  @override
-  String profilePlanNoRenewal(String plan) {
-    return '$plan';
-  }
-
-  @override
-  String profileBusiness(String name) {
-    return 'ንግድ: $name';
-  }
-
-  @override
-  String get verdictConfigureAccount => 'አሁን ያዘጋጁ';
-
-  @override
-  String get verdictConfigureAccountTitle => 'የባንክ መለያ መረጃዎን ያክሉ';
-
-  @override
   String get profileVerificationAccounts => 'የማረጋገጫ መለያዎች';
 
   @override
@@ -1464,4 +1419,276 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get onboardingAccountsInvalid => 'ለተመረጡት ባንኮች የአሃዝ ብዛት ያረጋግጡ።';
+
+  @override
+  String teamInvitedAgo(String time) {
+    return 'የተጋበዙት $time';
+  }
+
+  @override
+  String teamInviteSent(String phone) {
+    return 'ግብዣ ወደ $phone ተልኳል';
+  }
+
+  @override
+  String teamSeatsRemaining(int remaining, int limit) {
+    return 'ከ$limit የቡድን ቦታዎች $remaining ቀርተዋል';
+  }
+
+  @override
+  String teamActivity(int count) {
+    return 'ባለፉት 30 ቀናት $count ማረጋገጫዎች';
+  }
+
+  @override
+  String teamRemoveConfirmTitle(String name) {
+    return '$nameን ያስወግዱ?';
+  }
+
+  @override
+  String profileTeamCount(int members, int pending) {
+    return '$members አባላት · $pending በመጠባበቅ';
+  }
+
+  @override
+  String profilePlanRenews(String plan, int days) {
+    return '$plan · በ$days ቀናት ይታደሳል';
+  }
+
+  @override
+  String profilePlanNoRenewal(String plan) {
+    return '$plan';
+  }
+
+  @override
+  String profileBusiness(String name) {
+    return 'ንግድ: $name';
+  }
+
+  @override
+  String get billingScreenTitle => 'ክፍያ';
+
+  @override
+  String get billingPlansSection => 'ያሉ ፕላኖች';
+
+  @override
+  String get billingNoPlans => 'አሁን ምንም ፕላን አይገኝም።';
+
+  @override
+  String get billingHistoryTitle => 'የክፍያ ታሪክ';
+
+  @override
+  String get billingViewHistory => 'ታሪክ ይመልከቱ';
+
+  @override
+  String get billingNoHistory => 'እስካሁን የክፍያ ታሪክ የለም';
+
+  @override
+  String get billingNoHistoryBody => 'የሚፈጽሟቸው ክፍያዎች እዚህ ይታያሉ።';
+
+  @override
+  String get billingManage => 'ያስተዳድሩ';
+
+  @override
+  String get billingRenew => 'አድስ';
+
+  @override
+  String get billingChoose => 'ምረጥ';
+
+  @override
+  String get billingUpgrade => 'አሻሽል';
+
+  @override
+  String get billingCurrentBadge => 'የአሁኑ ፕላን';
+
+  @override
+  String billingExpiresIn(int days) {
+    return 'በ$days ቀናት ውስጥ ያበቃል';
+  }
+
+  @override
+  String get billingUnlimited => 'ያልተገደበ';
+
+  @override
+  String billingCreditsLeft(int count) {
+    return '$count ክሬዲቶች ቀርተዋል';
+  }
+
+  @override
+  String get billingOwnerOnly => 'የንግድ ባለቤቱ ብቻ ክፍያን ማስተዳደር ይችላል።';
+
+  @override
+  String get billingBack => 'ተመለስ';
+
+  @override
+  String billingPayFor(String name) {
+    return 'ለ$name ይክፈሉ';
+  }
+
+  @override
+  String billingPayAmount(String amount) {
+    return 'ፕላንዎን ለማንቃት $amount ይክፈሉ';
+  }
+
+  @override
+  String get billingMethodCbe => 'CBE';
+
+  @override
+  String get billingMethodTelebirr => 'ቴሌብር';
+
+  @override
+  String get billingAccountNumber => 'የአካውንት ቁጥር';
+
+  @override
+  String get billingAccountName => 'የአካውንት ስም';
+
+  @override
+  String get billingPhoneNumber => 'ስልክ ቁጥር';
+
+  @override
+  String get billingCopy => 'ቅዳ';
+
+  @override
+  String get billingCopied => 'ወደ ክሊፕቦርድ ተቀድቷል';
+
+  @override
+  String get billingSteps =>
+      '1. ትክክለኛውን መጠን በCBE ወይም በቴሌብር ይክፈሉ።\n2. የማረጋገጫ ስክሪንሾት ያንሱ።\n3. ከታች ይስቀሉ።';
+
+  @override
+  String get billingIvePaid => 'ከፍያለሁ';
+
+  @override
+  String get billingUploadHeading => 'የክፍያ ማረጋገጫዎን ይስቀሉ';
+
+  @override
+  String get billingUploadBody => 'መጠኑን፣ ቀኑን እና ማጣቀሻውን የሚያሳይ ስክሪንሾት ይስቀሉ።';
+
+  @override
+  String get billingChange => 'ቀይር';
+
+  @override
+  String get billingRemove => 'አስወግድ';
+
+  @override
+  String get billingSubmitForVerification => 'ለማረጋገጫ አስገባ';
+
+  @override
+  String get billingSessionExpired =>
+      'ይህ የክፍያ ክፍለ ጊዜ አልቋል። ከክፍያ ገጽ እንደገና ይጀምሩ።';
+
+  @override
+  String get billingResultApprovedTitle => 'ክፍያ ተረጋግጧል';
+
+  @override
+  String billingResultActivated(String name) {
+    return '$name ንቁ ሆኗል';
+  }
+
+  @override
+  String billingResultActiveUntil(String date) {
+    return 'እስከ $date ድረስ ንቁ';
+  }
+
+  @override
+  String billingResultCreditsAdded(int count) {
+    return '+$count ማረጋገጫዎች';
+  }
+
+  @override
+  String get billingResultStartUsing => 'ክሬዲቶችዎን ይጠቀሙ';
+
+  @override
+  String get billingResultPendingTitle => 'ማረጋገጫ በሂደት ላይ';
+
+  @override
+  String get billingResultPendingBody =>
+      'ክፍያዎን ከባንክ ጋር እያረጋገጥን ነው። ይህ በተለምዶ ጥቂት ሰከንዶች ይወስዳል።';
+
+  @override
+  String get billingResultTimeout =>
+      'ማረጋገጫው ብዙ ጊዜ እየወሰደ ነው። በኋላ የክፍያ ታሪኩን ይመልከቱ።';
+
+  @override
+  String get billingResultCheckHistory => 'የክፍያ ታሪክን ይመልከቱ';
+
+  @override
+  String get billingResultReviewTitle => 'ክፍያ በግምገማ ላይ';
+
+  @override
+  String get billingResultReviewBody =>
+      'መጠኑ ከፕላኑ ዋጋ ጋር አይመሳሰልም። ቡድናችን በ24 ሰዓት ውስጥ ይገመግማል።';
+
+  @override
+  String get billingResultRejectedTitle => 'ክፍያ አልተረጋገጠም';
+
+  @override
+  String get billingResultRejectedBody => 'ደረሰኙ ሊረጋገጥ አልቻለም።';
+
+  @override
+  String get billingResultDuplicateBody => 'ይህ ደረሰኝ አስቀድሞ ጥቅም ላይ ውሏል።';
+
+  @override
+  String get billingTryAgain => 'እንደገና ሞክር';
+
+  @override
+  String get billingContactSupport => 'ድጋፍ ያግኙ';
+
+  @override
+  String get billingSupportSoon => 'ድጋፍ በቅርቡ ይመጣል።';
+
+  @override
+  String get billingStatusPending => 'በመጠባበቅ ላይ';
+
+  @override
+  String get billingStatusApproved => 'ጸድቋል';
+
+  @override
+  String get billingStatusMismatch => 'የመጠን ልዩነት';
+
+  @override
+  String get billingStatusReview => 'ግምገማ ያስፈልጋል';
+
+  @override
+  String get billingStatusDuplicate => 'ተደጋጋሚ';
+
+  @override
+  String get billingStatusFake => 'የተሳሳተ';
+
+  @override
+  String get billingStatusRejected => 'ተከልክሏል';
+
+  @override
+  String get billingExpectedAmount => 'የሚጠበቅ መጠን';
+
+  @override
+  String get billingSubmittedAmount => 'የተከፈለ መጠን';
+
+  @override
+  String get billingReference => 'ማጣቀሻ';
+
+  @override
+  String get billingSubmittedOn => 'የተላከበት ቀን';
+
+  @override
+  String get billingResultDetailsTitle => 'የክፍያ ዝርዝር';
+
+  @override
+  String get billingFeatureUnlimited => 'ያልተገደቡ ማረጋገጫዎች';
+
+  @override
+  String billingFeatureCredits(int count) {
+    return '$count ማረጋገጫዎች/ወር';
+  }
+
+  @override
+  String get billingFeatureSeatsOne => '1 የቡድን አባል';
+
+  @override
+  String billingFeatureSeats(int count) {
+    return '$count የቡድን አባላት';
+  }
+
+  @override
+  String get billingFeatureSeatsUnlimited => 'ያልተገደበ የቡድን አባላት';
 }

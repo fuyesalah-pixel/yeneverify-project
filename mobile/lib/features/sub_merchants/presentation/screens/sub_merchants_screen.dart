@@ -69,11 +69,7 @@ class SubMerchantsScreen extends ConsumerWidget {
             children: [
               PlanCapWarning(
                 cap: state.cap,
-                onUpgrade: () => AppSnackbar.show(
-                  context,
-                  message: l10n.profileComingSoon,
-                  variant: AppSnackbarVariant.info,
-                ),
+                onUpgrade: () => context.push(Routes.billing),
               ),
               if (state.isEmpty)
                 AppEmptyState(

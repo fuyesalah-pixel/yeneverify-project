@@ -983,6 +983,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verdictErrorDefault => 'Something went wrong. Try again.';
 
   @override
+  String get verdictConfigureAccount => 'Configure now';
+
+  @override
+  String get verdictConfigureAccountTitle => 'Add your bank account details';
+
+  @override
   String get navHome => 'Home';
 
   @override
@@ -1387,57 +1393,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileComingSoon => 'Coming soon';
 
   @override
-  String teamInvitedAgo(String time) {
-    return 'Invited $time';
-  }
-
-  @override
-  String teamInviteSent(String phone) {
-    return 'Invite sent to $phone';
-  }
-
-  @override
-  String teamSeatsRemaining(int remaining, int limit) {
-    return '$remaining of $limit team seats remaining';
-  }
-
-  @override
-  String teamActivity(int count) {
-    return '$count verifications last 30 days';
-  }
-
-  @override
-  String teamRemoveConfirmTitle(String name) {
-    return 'Remove $name?';
-  }
-
-  @override
-  String profileTeamCount(int members, int pending) {
-    return '$members members · $pending pending';
-  }
-
-  @override
-  String profilePlanRenews(String plan, int days) {
-    return '$plan · renews in $days days';
-  }
-
-  @override
-  String profilePlanNoRenewal(String plan) {
-    return '$plan';
-  }
-
-  @override
-  String profileBusiness(String name) {
-    return 'Business: $name';
-  }
-
-  @override
-  String get verdictConfigureAccount => 'Configure now';
-
-  @override
-  String get verdictConfigureAccountTitle => 'Add your bank account details';
-
-  @override
   String get profileVerificationAccounts => 'Verification accounts';
 
   @override
@@ -1508,4 +1463,277 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingAccountsInvalid =>
       'Check the number of digits for the selected banks.';
+
+  @override
+  String teamInvitedAgo(String time) {
+    return 'Invited $time';
+  }
+
+  @override
+  String teamInviteSent(String phone) {
+    return 'Invite sent to $phone';
+  }
+
+  @override
+  String teamSeatsRemaining(int remaining, int limit) {
+    return '$remaining of $limit team seats remaining';
+  }
+
+  @override
+  String teamActivity(int count) {
+    return '$count verifications last 30 days';
+  }
+
+  @override
+  String teamRemoveConfirmTitle(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String profileTeamCount(int members, int pending) {
+    return '$members members · $pending pending';
+  }
+
+  @override
+  String profilePlanRenews(String plan, int days) {
+    return '$plan · renews in $days days';
+  }
+
+  @override
+  String profilePlanNoRenewal(String plan) {
+    return '$plan';
+  }
+
+  @override
+  String profileBusiness(String name) {
+    return 'Business: $name';
+  }
+
+  @override
+  String get billingScreenTitle => 'Billing';
+
+  @override
+  String get billingPlansSection => 'Available plans';
+
+  @override
+  String get billingNoPlans => 'No plans are available right now.';
+
+  @override
+  String get billingHistoryTitle => 'Payment history';
+
+  @override
+  String get billingViewHistory => 'View history';
+
+  @override
+  String get billingNoHistory => 'No billing history yet';
+
+  @override
+  String get billingNoHistoryBody => 'Payments you make will appear here.';
+
+  @override
+  String get billingManage => 'Manage';
+
+  @override
+  String get billingRenew => 'Renew';
+
+  @override
+  String get billingChoose => 'Choose';
+
+  @override
+  String get billingUpgrade => 'Upgrade';
+
+  @override
+  String get billingCurrentBadge => 'Current plan';
+
+  @override
+  String billingExpiresIn(int days) {
+    return 'Expires in $days days';
+  }
+
+  @override
+  String get billingUnlimited => 'Unlimited';
+
+  @override
+  String billingCreditsLeft(int count) {
+    return '$count credits left';
+  }
+
+  @override
+  String get billingOwnerOnly => 'Only the business owner can manage billing.';
+
+  @override
+  String get billingBack => 'Back';
+
+  @override
+  String billingPayFor(String name) {
+    return 'Pay for $name';
+  }
+
+  @override
+  String billingPayAmount(String amount) {
+    return 'Pay $amount to activate your plan';
+  }
+
+  @override
+  String get billingMethodCbe => 'CBE';
+
+  @override
+  String get billingMethodTelebirr => 'Telebirr';
+
+  @override
+  String get billingAccountNumber => 'Account number';
+
+  @override
+  String get billingAccountName => 'Account name';
+
+  @override
+  String get billingPhoneNumber => 'Phone number';
+
+  @override
+  String get billingCopy => 'Copy';
+
+  @override
+  String get billingCopied => 'Copied to clipboard';
+
+  @override
+  String get billingSteps =>
+      '1. Pay the exact amount using CBE or Telebirr.\n2. Take a screenshot of your confirmation.\n3. Upload it below.';
+
+  @override
+  String get billingIvePaid => 'I\'ve paid';
+
+  @override
+  String get billingUploadHeading => 'Upload your payment confirmation';
+
+  @override
+  String get billingUploadBody =>
+      'Upload a screenshot showing the amount, date and reference.';
+
+  @override
+  String get billingChange => 'Change';
+
+  @override
+  String get billingRemove => 'Remove';
+
+  @override
+  String get billingSubmitForVerification => 'Submit for verification';
+
+  @override
+  String get billingSessionExpired =>
+      'This checkout session has expired. Start again from Billing.';
+
+  @override
+  String get billingResultApprovedTitle => 'Payment verified';
+
+  @override
+  String billingResultActivated(String name) {
+    return '$name activated';
+  }
+
+  @override
+  String billingResultActiveUntil(String date) {
+    return 'Active until $date';
+  }
+
+  @override
+  String billingResultCreditsAdded(int count) {
+    return '+$count verifications';
+  }
+
+  @override
+  String get billingResultStartUsing => 'Start using your credits';
+
+  @override
+  String get billingResultPendingTitle => 'Verification in progress';
+
+  @override
+  String get billingResultPendingBody =>
+      'We\'re confirming your payment with the bank. This usually takes a few seconds.';
+
+  @override
+  String get billingResultTimeout =>
+      'Verification is taking too long. Check billing history later.';
+
+  @override
+  String get billingResultCheckHistory => 'Check billing history';
+
+  @override
+  String get billingResultReviewTitle => 'Payment under review';
+
+  @override
+  String get billingResultReviewBody =>
+      'The amount doesn\'t match the package price. Our team will review this within 24 hours.';
+
+  @override
+  String get billingResultRejectedTitle => 'Payment not verified';
+
+  @override
+  String get billingResultRejectedBody => 'The receipt couldn\'t be verified.';
+
+  @override
+  String get billingResultDuplicateBody => 'This receipt was already used.';
+
+  @override
+  String get billingTryAgain => 'Try again';
+
+  @override
+  String get billingContactSupport => 'Contact support';
+
+  @override
+  String get billingSupportSoon => 'Support is coming soon.';
+
+  @override
+  String get billingStatusPending => 'Pending';
+
+  @override
+  String get billingStatusApproved => 'Approved';
+
+  @override
+  String get billingStatusMismatch => 'Amount mismatch';
+
+  @override
+  String get billingStatusReview => 'Needs review';
+
+  @override
+  String get billingStatusDuplicate => 'Duplicate';
+
+  @override
+  String get billingStatusFake => 'Fake';
+
+  @override
+  String get billingStatusRejected => 'Rejected';
+
+  @override
+  String get billingExpectedAmount => 'Expected amount';
+
+  @override
+  String get billingSubmittedAmount => 'Submitted amount';
+
+  @override
+  String get billingReference => 'Reference';
+
+  @override
+  String get billingSubmittedOn => 'Submitted';
+
+  @override
+  String get billingResultDetailsTitle => 'Payment details';
+
+  @override
+  String get billingFeatureUnlimited => 'Unlimited verifications';
+
+  @override
+  String billingFeatureCredits(int count) {
+    return '$count verifications/month';
+  }
+
+  @override
+  String get billingFeatureSeatsOne => '1 team member';
+
+  @override
+  String billingFeatureSeats(int count) {
+    return '$count team members';
+  }
+
+  @override
+  String get billingFeatureSeatsUnlimited => 'Unlimited team members';
 }
