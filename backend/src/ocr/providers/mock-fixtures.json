@@ -1,3 +1,0 @@
-{
-  "_comment": "Development-only fixtures: sha256 of a receipt image -> { text, confidence }. Seed receipt images are generated with random content at seed time, so their hashes cannot be precomputed here; the mock provider falls back to the deterministic MOCK_OCR_UNMATCHED response for anything not listed. Tests inject expected images at runtime instead."
-}

@@ -123,3 +123,15 @@ yene-verifyrr/
 .cache/
 tmp/
 temp/
+
+# ── Test artifacts (not source) ────────────────────────────────
+.diag/
+.cloud-attachments/
+VERIFICATION_TEST_REPORT.md
+trial recipt/
+docs/ops/*.png
+!docs/ops/emulator-setup.md
+
+# Local OCR fixtures are keyed by real receipt hashes and may embed real
+# receipt text (references/names/amounts) — development-only, never committed.
+backend/src/ocr/providers/mock-fixtures.json
