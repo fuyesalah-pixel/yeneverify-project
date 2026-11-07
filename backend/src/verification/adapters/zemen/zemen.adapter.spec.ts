@@ -113,6 +113,27 @@ describe('ZemenAdapter detect/extract (unit)', () => {
     expect(adapter.extractReference('telebirr TBR99001122')).toBeNull();
     expect(adapter.extractReference('plain number 9876543210')).toBeNull();
   });
+
+  // Phase 2: label-anchored extraction (pattern keeps the 108 prefix).
+  it('extracts a labeled Zemen reference', () => {
+    expect(adapter.extractReference('Transaction ID: 108IBET252931385')).toBe('108IBET252931385');
+  });
+
+  it('extracts an unlabeled Zemen reference via the strict regex', () => {
+    expect(adapter.extractReference('Zemen ref 108IBET252931385')).toBe('108IBET252931385');
+  });
+
+  it('returns null for a wrong-bank (non-108) reference', () => {
+    expect(adapter.extractReference('ref FT26201XP8NP')).toBeNull();
+  });
+
+  it('returns null for empty OCR text', () => {
+    expect(adapter.extractReference('')).toBeNull();
+  });
+
+  it('falls through to the regex when the labeled value is invalid', () => {
+    expect(adapter.extractReference('Transaction ID: 9876543210')).toBeNull();
+  });
 });
 
 describe('ZemenAdapter doVerify (unit)', () => {

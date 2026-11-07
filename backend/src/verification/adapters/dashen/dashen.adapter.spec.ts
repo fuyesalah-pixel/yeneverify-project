@@ -115,6 +115,29 @@ describe('DashenAdapter detect/extract (unit)', () => {
     );
     expect(adapter.extractReference('dashen payment to Selam Coffee')).toBeNull();
   });
+
+  // Phase 2: label-anchored extraction (real format F57LTWI2620600WL).
+  it('extracts a labeled Dashen reference', () => {
+    expect(adapter.extractReference('FT Ref: F57LTWI2620600WL')).toBe('F57LTWI2620600WL');
+  });
+
+  it('extracts an unlabeled Dashen reference via the relaxed regex', () => {
+    expect(adapter.extractReference('Dashen transfer F57LTWI2620600WL')).toBe('F57LTWI2620600WL');
+  });
+
+  it('returns null for a wrong-bank reference below the 10-char floor', () => {
+    // The relaxed shape accepts any 10-24 char alnum run, so only a
+    // shorter foreign token is rejected by shape alone.
+    expect(adapter.extractReference('ref TBR9900')).toBeNull();
+  });
+
+  it('returns null for empty OCR text', () => {
+    expect(adapter.extractReference('')).toBeNull();
+  });
+
+  it('falls through to the regex when the labeled value is invalid', () => {
+    expect(adapter.extractReference('FT Ref: @@')).toBeNull();
+  });
 });
 
 describe('DashenAdapter doVerify (unit)', () => {

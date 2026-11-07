@@ -17,6 +17,7 @@ import type { BankAdapter, VerifyInput, VerifyResult } from '../adapter.interfac
 import { AdapterBase } from '../adapter.base';
 import { BrowserPool } from '../../browser/browser-pool';
 import { REFERENCE_PATTERNS, normalizeReference } from '../../regex/reference-patterns';
+import { extractLabeledValue } from '../shared/label-extractor';
 import { parseTelebirrReceipt } from './telebirr.parser';
 import { ERROR_CODES } from '../../../common/constants/error-codes';
 
@@ -39,6 +40,12 @@ export class TelebirrAdapter extends AdapterBase implements BankAdapter {
   }
 
   extractReference(rawOcrText: string): string | null {
+    const labeled = extractLabeledValue(rawOcrText, {
+      labels: ['Transaction Number', 'Transaction ID', 'Reference'],
+      validator: REFERENCE_PATTERNS.TELEBIRR,
+    });
+    if (labeled) return normalizeReference(labeled);
+
     const match = rawOcrText.match(REFERENCE_PATTERNS.TELEBIRR);
     return match ? normalizeReference(match[0]) : null;
   }

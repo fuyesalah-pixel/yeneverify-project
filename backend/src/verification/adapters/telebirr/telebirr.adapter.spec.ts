@@ -113,8 +113,35 @@ describe('TelebirrAdapter detect/extract (unit)', () => {
     expect(adapter.extractReference('telebirr ref TBR98PY7WWQK')).toBe('TBR98PY7WWQK');
   });
 
-  it('extractReference() returns null when neither prefix appears', () => {
-    expect(adapter.extractReference('CBE FT26195DBK5W81465291')).toBeNull();
+  it('extractReference() accepts the relaxed alnum shape (no DEV/TBR prefix)', () => {
+    expect(adapter.extractReference('telebirr ref DFD1U83ETH')).toBe('DFD1U83ETH');
+    expect(adapter.extractReference('telebirr ref CBE26195DBK5')).toBe('CBE26195DBK5');
+  });
+
+  it('extractReference() returns null when no uppercase alnum run exists', () => {
+    expect(adapter.extractReference('telebirr payment')).toBeNull();
+  });
+
+  // Phase 2: label-anchored extraction (real format DFD1U83ETH).
+  it('extracts a labeled Telebirr reference', () => {
+    expect(adapter.extractReference('Transaction Number: DFD1U83ETH')).toBe('DFD1U83ETH');
+  });
+
+  it('extracts an unlabeled Telebirr reference via the relaxed regex', () => {
+    expect(adapter.extractReference('Telebirr transfer DFD1U83ETH')).toBe('DFD1U83ETH');
+  });
+
+  it('returns null for a wrong-bank reference below the 8-char floor', () => {
+    expect(adapter.extractReference('ref TBR9900')).toBeNull();
+  });
+
+  it('returns null for empty OCR text', () => {
+    expect(adapter.extractReference('')).toBeNull();
+  });
+
+  it('falls through to the regex when the labeled value is invalid', () => {
+    // Lowercase text: the fallback shape is uppercase-only, so nothing survives.
+    expect(adapter.extractReference('transaction number: @@@')).toBeNull();
   });
 });
 

@@ -110,6 +110,27 @@ describe('MpesaAdapter detect/extract (unit)', () => {
     expect(adapter.extractReference('telebirr TBR99001122')).toBeNull();
     expect(adapter.extractReference('dashen DSH9021018AB34')).toBeNull();
   });
+
+  // Phase 2: label-anchored extraction (pattern stays strict).
+  it('extracts a labeled M-Pesa reference', () => {
+    expect(adapter.extractReference('Transaction ID: QGH4XW7P2L')).toBe('QGH4XW7P2L');
+  });
+
+  it('extracts an unlabeled M-Pesa reference via the strict regex', () => {
+    expect(adapter.extractReference('M-Pesa payment QGH4XW7P2L')).toBe('QGH4XW7P2L');
+  });
+
+  it('returns null for a wrong-bank 12-char reference', () => {
+    expect(adapter.extractReference('Transaction Reference: FT26201XP8NP')).toBeNull();
+  });
+
+  it('returns null for empty OCR text', () => {
+    expect(adapter.extractReference('')).toBeNull();
+  });
+
+  it('falls through to the regex when the labeled value is invalid', () => {
+    expect(adapter.extractReference('Transaction ID: INVALID')).toBeNull();
+  });
 });
 
 describe('MpesaAdapter doVerify (unit)', () => {

@@ -18,6 +18,7 @@ import { AppConfigService } from '../../../config/config.service';
 import type { BankAdapter, VerifyInput, VerifyResult } from '../adapter.interface';
 import { AdapterBase } from '../adapter.base';
 import { REFERENCE_PATTERNS, normalizeReference } from '../../regex/reference-patterns';
+import { extractLabeledValue } from '../shared/label-extractor';
 import { parseAwashReceipt } from './awash.parser';
 import { ERROR_CODES } from '../../../common/constants/error-codes';
 
@@ -41,6 +42,12 @@ export class AwashAdapter extends AdapterBase implements BankAdapter {
   }
 
   extractReference(rawOcrText: string): string | null {
+    const labeled = extractLabeledValue(rawOcrText, {
+      labels: ['Transaction ID', 'Transaction Number', 'Transaction Ref', 'Reference'],
+      validator: REFERENCE_PATTERNS.AWASH,
+    });
+    if (labeled) return normalizeReference(labeled);
+
     const match = rawOcrText.match(REFERENCE_PATTERNS.AWASH);
     return match ? normalizeReference(match[0]) : null;
   }

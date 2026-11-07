@@ -25,6 +25,7 @@ import { AppConfigService } from '../../../config/config.service';
 import type { BankAdapter, VerifyInput, VerifyResult } from '../adapter.interface';
 import { AdapterBase } from '../adapter.base';
 import { REFERENCE_PATTERNS, normalizeReference } from '../../regex/reference-patterns';
+import { extractLabeledValue } from '../shared/label-extractor';
 import {
   parseAbyssiniaReceipt,
   type AbyssiniaNotFoundReason,
@@ -52,8 +53,14 @@ export class AbyssiniaAdapter extends AdapterBase implements BankAdapter {
   }
 
   extractReference(rawOcrText: string): string | null {
-    const raw = rawOcrText.match(REFERENCE_PATTERNS.ABYSSINIA)?.[0];
-    return raw ? normalizeReference(raw) : null;
+    const labeled = extractLabeledValue(rawOcrText, {
+      labels: ['Transaction Reference', 'Transaction Ref', 'FT Ref', 'Reference'],
+      validator: REFERENCE_PATTERNS.ABYSSINIA,
+    });
+    if (labeled) return normalizeReference(labeled);
+
+    const match = rawOcrText.match(REFERENCE_PATTERNS.ABYSSINIA);
+    return match ? normalizeReference(match[0]) : null;
   }
 
   /** Supplementary validation happens BEFORE any HTTP call. */

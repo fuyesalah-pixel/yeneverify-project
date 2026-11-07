@@ -91,20 +91,41 @@ describe('AwashAdapter detect/extract (unit)', () => {
     expect(adapter.detect('Telebirr payment DEV230123HH')).toBe(false);
   });
 
-  it('extractReference() finds an Awash-style reference', () => {
-    expect(adapter.extractReference('ref 2KEX10DJ7F-575JQI amount 350.00')).toBe(
-      '2KEX10DJ7F575JQI',
-    );
+  it('extractReference() finds the 15-digit Awash reference', () => {
+    expect(adapter.extractReference('ref 260310152465470 amount 350.00')).toBe('260310152465470');
   });
 
-  // 14.3 Part A: [0-9A-Z] on both halves — G-Z letters must survive.
-  it('extractReference() keeps G-Z letters (no hex-only truncation)', () => {
-    expect(adapter.extractReference('ref ZXEX1HJJZ8-575JQI')).toBe('ZXEX1HJJZ8575JQI');
+  // 14.3 Part A: the length window is 10-16 digits — a 16-digit run survives.
+  it('extractReference() keeps a 16-digit reference intact', () => {
+    expect(adapter.extractReference('ref 2603101524654701 amount 350.00')).toBe('2603101524654701');
   });
 
   it('extractReference() returns null when no Awash reference exists', () => {
     expect(adapter.extractReference('telebirr TBR99001122')).toBeNull();
     expect(adapter.extractReference('CBE FT26195DBK5W81465291')).toBeNull();
+  });
+
+  // Phase 2: label-anchored extraction (real format 260310152465470).
+  it('extracts a labeled Awash reference', () => {
+    expect(adapter.extractReference('Transaction ID: 260310152465470')).toBe('260310152465470');
+  });
+
+  it('extracts an unlabeled Awash reference via the relaxed regex', () => {
+    expect(adapter.extractReference('Awash transfer 260310152465470 completed')).toBe(
+      '260310152465470',
+    );
+  });
+
+  it('returns null for a wrong-bank (non-numeric) reference', () => {
+    expect(adapter.extractReference('Transaction Reference: FT26201XP8NP')).toBeNull();
+  });
+
+  it('returns null for empty OCR text', () => {
+    expect(adapter.extractReference('')).toBeNull();
+  });
+
+  it('falls through to the regex when the labeled value is invalid', () => {
+    expect(adapter.extractReference('Transaction ID: INVALID')).toBeNull();
   });
 });
 

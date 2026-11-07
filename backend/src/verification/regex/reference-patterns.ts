@@ -12,10 +12,12 @@ import type { BankCode } from '@prisma/client';
 
 export const REFERENCE_PATTERNS: Record<BankCode, RegExp> = {
   CBE: /\bFT[0-9A-Z]{10,20}\b/i,
-  TELEBIRR: /\b(?:DEV|TBR)[0-9A-Z]{8,16}\b/i,
-  AWASH: /\b[0-9A-Z]{10,12}-[0-9A-Z]{5,8}\b/i,
-  DASHEN: /\bDSH[0-9A-Z]{6,20}\b/i,
-  ABYSSINIA: /\bFT[0-9A-Z]{12,22}\b/i,
+  // Relaxed to the real formats from the 7-receipt report. Shape checks
+  // over-match on purpose; adapters try their receipt labels first.
+  TELEBIRR: /[A-Z0-9]{8,20}/,
+  AWASH: /\b\d{10,16}\b/,
+  DASHEN: /[A-Z0-9]{10,24}/i,
+  ABYSSINIA: /FT[0-9A-Z]{8,22}/i,
   MPESA: /\b[A-Z0-9]{10}\b/,
   ZEMEN: /\b108[0-9A-Z]{9,20}\b/i,
 };

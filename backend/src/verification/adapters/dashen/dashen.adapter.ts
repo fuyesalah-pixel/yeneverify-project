@@ -21,11 +21,9 @@ import { AppConfigService } from '../../../config/config.service';
 import type { BankAdapter, VerifyInput, VerifyResult } from '../adapter.interface';
 import { AdapterBase } from '../adapter.base';
 import { REFERENCE_PATTERNS, normalizeReference } from '../../regex/reference-patterns';
+import { extractLabeledValue } from '../shared/label-extractor';
 import { parseDashenReceipt, type DashenParsedReceipt } from './dashen.parser';
 import { ERROR_CODES } from '../../../common/constants/error-codes';
-
-/** Some transfer types carry a bare numeric reference (10–14 digits). */
-const NUMERIC_REFERENCE_RE = /\b\d{10,14}\b/;
 
 @Injectable()
 export class DashenAdapter extends AdapterBase implements BankAdapter {
@@ -44,9 +42,14 @@ export class DashenAdapter extends AdapterBase implements BankAdapter {
   }
 
   extractReference(rawOcrText: string): string | null {
-    const dshMatch = rawOcrText.match(REFERENCE_PATTERNS.DASHEN);
-    const raw = dshMatch ? dshMatch[0] : rawOcrText.match(NUMERIC_REFERENCE_RE)?.[0];
-    return raw ? normalizeReference(raw) : null;
+    const labeled = extractLabeledValue(rawOcrText, {
+      labels: ['FT Ref', 'Transaction Ref', 'Transaction Reference', 'Reference'],
+      validator: REFERENCE_PATTERNS.DASHEN,
+    });
+    if (labeled) return normalizeReference(labeled);
+
+    const match = rawOcrText.match(REFERENCE_PATTERNS.DASHEN);
+    return match ? normalizeReference(match[0]) : null;
   }
 
   protected async doVerify(input: VerifyInput): Promise<VerifyResult> {

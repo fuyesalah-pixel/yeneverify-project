@@ -18,6 +18,7 @@ import { AppConfigService } from '../../../config/config.service';
 import type { BankAdapter, VerifyInput, VerifyResult } from '../adapter.interface';
 import { AdapterBase } from '../adapter.base';
 import { REFERENCE_PATTERNS, normalizeReference } from '../../regex/reference-patterns';
+import { extractLabeledValue } from '../shared/label-extractor';
 import { fetchPdf, extractPdfText } from '../shared/pdf-fetcher';
 import { parseMpesaReceipt, type MpesaParsedReceipt } from './mpesa.parser';
 // (zemen.adapter.ts shares this endpoint-loop shape)
@@ -40,8 +41,14 @@ export class MpesaAdapter extends AdapterBase implements BankAdapter {
   }
 
   extractReference(rawOcrText: string): string | null {
-    const raw = rawOcrText.match(REFERENCE_PATTERNS.MPESA)?.[0];
-    return raw ? normalizeReference(raw) : null;
+    const labeled = extractLabeledValue(rawOcrText, {
+      labels: ['Transaction ID', 'M-Pesa Code', 'Reference'],
+      validator: REFERENCE_PATTERNS.MPESA,
+    });
+    if (labeled) return normalizeReference(labeled);
+
+    const match = rawOcrText.match(REFERENCE_PATTERNS.MPESA);
+    return match ? normalizeReference(match[0]) : null;
   }
 
   protected pdfOutcome(text: string, reference: string): MpesaParsedReceipt {

@@ -108,8 +108,8 @@ describe('AbyssiniaAdapter detect/extract (unit)', () => {
     );
     // A CBE FT shape matches the Abyssinia pattern too — the banks are
     // separated by detect(), not by reference shape. Reject a too-short FT
-    // (below the shared pattern's 12-char minimum after FT).
-    expect(adapter.extractReference('FT26201XYZ123')).toBeNull();
+    // (below the relaxed pattern's 8-char minimum after FT).
+    expect(adapter.extractReference('FT26201XY')).toBeNull();
     // Separator-heavy OCR is refined later (13E); the first-pass contract
     // is shape-checked on separator-free text, like CBE/Awash.
     expect(adapter.extractReference('Abyssinia FT26201-XYZ1234')).toBeNull();
@@ -122,6 +122,27 @@ describe('AbyssiniaAdapter detect/extract (unit)', () => {
   // 14.3 Part A: FT suffix is [0-9A-Z] — G-Z letters must survive.
   it('extractReference() keeps G-Z letters (no hex-only truncation)', () => {
     expect(adapter.extractReference('BoA transfer FT26201WQQ7XZYM')).toBe('FT26201WQQ7XZYM');
+  });
+
+  // Phase 2: label-anchored extraction (real format FT26201XP8NP).
+  it('extracts a labeled Abyssinia reference', () => {
+    expect(adapter.extractReference('Transaction Reference: FT26201XP8NP')).toBe('FT26201XP8NP');
+  });
+
+  it('extracts an unlabeled Abyssinia reference via the relaxed regex', () => {
+    expect(adapter.extractReference('BoA transfer FT26201XP8NP')).toBe('FT26201XP8NP');
+  });
+
+  it('returns null for a wrong-bank (non-FT) reference', () => {
+    expect(adapter.extractReference('Transaction Number: DFD1U83ETH')).toBeNull();
+  });
+
+  it('returns null for empty OCR text', () => {
+    expect(adapter.extractReference('')).toBeNull();
+  });
+
+  it('falls through to the regex when the labeled value is invalid', () => {
+    expect(adapter.extractReference('Transaction Reference: INVALID')).toBeNull();
   });
 });
 
