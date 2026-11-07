@@ -9,7 +9,7 @@
 // bumps a generation counter so an in-flight pipeline can never write state
 // on top of a newer run.
 import 'dart:io';
-
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -178,19 +178,27 @@ class VerifyController extends AsyncNotifier<VerifyState> {
     await submitImage(file, InputMethod.upload);
   }
 
-  /// Camera path entrypoint: the user confirmed a captured frame.
-  Future<void> submitCaptured(File file) => submitImage(file, InputMethod.photo);
+  /// Camera path entrypoint: the user confirmed a captured frame. The frame
+  /// arrives as bytes because its temp file may be trimmed from the cache.
+  Future<void> submitCaptured(Uint8List bytes) =>
+      _run(() => _repo.prepareBytes(bytes), InputMethod.photo);
 
   // ── pipeline ───────────────────────────────────────────────────────────
 
-  Future<void> submitImage(File image, InputMethod inputMethod) async {
+  Future<void> submitImage(File image, InputMethod inputMethod) =>
+      _run(() => _repo.prepare(image), inputMethod);
+
+  Future<void> _run(
+    Future<PreparedImage> Function() prepare,
+    InputMethod inputMethod,
+  ) async {
     final gen = ++_generation;
 
     _emit(const CompressingState());
 
     PreparedImage prepared;
     try {
-      prepared = await _repo.prepare(image);
+      prepared = await prepare();
     } on ImagePrepException catch (e) {
       if (gen != _generation) return;
       _emit(ErrorState(

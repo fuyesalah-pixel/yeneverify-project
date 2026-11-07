@@ -93,8 +93,13 @@ class ImagePrep {
   /// The fallback re-compresses the ORIGINAL bytes at q60 rather than
   /// double-compressing the q80 output: one lossy pass is enough, and a
   /// second pass mostly destroys detail without buying much size.
-  Future<PreparedImage> prepare(File file) async {
-    final original = await file.readAsBytes();
+  Future<PreparedImage> prepare(File file) async =>
+      prepareBytes(await file.readAsBytes());
+
+  /// Camera captures arrive as bytes: their temp file lives in the app cache,
+  /// which Android trims without warning on a nearly-full device, so the
+  /// pipeline never depends on that path staying alive.
+  Future<PreparedImage> prepareBytes(Uint8List original) async {
     if (original.isEmpty) {
       throw const ImagePrepException('RECEIPT_INVALID_TYPE');
     }

@@ -1,7 +1,10 @@
 // Full-screen camera capture (Step 22B Part 1).
 //
-// Returns the captured [File] via Navigator.pop; the verify screen feeds it
-// straight into the pipeline.
+// Returns the captured JPEG bytes via Navigator.pop; the verify screen feeds
+// them straight into the pipeline. The pixels are read and the plugin's temp
+// file deleted immediately: that file lives in the app cache, which Android
+// trims without warning when storage is nearly full (observed on a device at
+// 1% free), so the review screen and the upload must not depend on it.
 //
 // EMULATOR NOTE: the Android emulator exposes a synthetic camera (moving
 // checkerboard) or no camera at all, depending on AVD config. This screen
@@ -12,6 +15,7 @@
 // PERMISSIONS: camera permission is requested here, on first open, not at
 // app start — a prompt without context is the main reason users deny it.
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +44,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
   int _cameraIndex = 0;
   bool _initializing = true;
   _CameraProblem? _problem;
-  XFile? _captured;
+  Uint8List? _captured;
   FlashMode _flashMode = FlashMode.off;
   bool _capturing = false;
 
@@ -130,12 +134,21 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
     setState(() => _capturing = true);
     try {
       final shot = await controller.takePicture();
+      final bytes = await shot.readAsBytes();
+      // The plugin wrote the frame to the app cache; once the bytes are in
+      // memory the file is dead weight (and may be purged mid-review).
+      try {
+        await File(shot.path).delete();
+      } catch (_) {
+        // Best-effort cleanup only.
+      }
       if (!mounted) return;
       setState(() {
-        _captured = shot;
+        _captured = bytes;
         _capturing = false;
       });
-    } on CameraException {
+    } catch (_) {
+      // Camera failure or an unreadable capture — let the user retry.
       if (!mounted) return;
       setState(() => _capturing = false);
     }
@@ -166,7 +179,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
   void _usePhoto() {
     final shot = _captured;
     if (shot == null) return;
-    Navigator.of(context).pop(File(shot.path));
+    Navigator.of(context).pop(shot);
   }
 
   @override
@@ -214,7 +227,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
     final captured = _captured;
     if (captured != null) {
       // Frozen frame: the user reviews exactly what will be uploaded.
-      return Image.file(File(captured.path), fit: BoxFit.contain);
+      return Image.memory(captured, fit: BoxFit.contain);
     }
 
     final controller = _controller;

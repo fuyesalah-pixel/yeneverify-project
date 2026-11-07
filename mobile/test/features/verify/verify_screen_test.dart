@@ -3,6 +3,8 @@
 // The controller is replaced by a fake so no network, camera, or picker
 // plugin is touched; navigation goes through a real GoRouter so the
 // verdict push is exercised, not stubbed.
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,12 +26,26 @@ class _FakeVerifyController extends VerifyController {
   int galleryCalls = 0;
   int retryCalls = 0;
   int refreshPendingCalls = 0;
+  int submitCalls = 0;
+  Uint8List? lastSubmitted;
 
   @override
   Future<VerifyState> build() async => initial;
 
   @override
-  void startCamera() => cameraCalls++;
+  void startCamera() {
+    cameraCalls++;
+    // Mirrors the real controller: the idle card is replaced while the
+    // camera route is open.
+    emit(const CapturingState(CaptureMode.camera));
+  }
+
+  @override
+  Future<void> submitCaptured(Uint8List bytes) async {
+    submitCalls++;
+    lastSubmitted = bytes;
+    emit(const CompressingState());
+  }
 
   @override
   Future<void> startGallery() async => galleryCalls++;
@@ -75,7 +91,18 @@ Widget _app(_FakeVerifyController fake) {
         routes: [
           GoRoute(
             path: 'camera',
-            builder: (_, __) => const Scaffold(body: Text('CAMERA_ROUTE')),
+            builder: (context, __) => Scaffold(
+              body: Column(
+                children: [
+                  const Text('CAMERA_ROUTE'),
+                  TextButton(
+                    onPressed: () => Navigator.of(context)
+                        .pop<Uint8List>(Uint8List.fromList([1, 2, 3])),
+                    child: const Text('USE_PHOTO'),
+                  ),
+                ],
+              ),
+            ),
           ),
           GoRoute(
             path: 'result/:id',
@@ -141,6 +168,25 @@ void main() {
 
     expect(fake.cameraCalls, 1);
     expect(find.text('CAMERA_ROUTE'), findsOneWidget);
+  });
+
+  testWidgets('photo returned by the camera is submitted to the controller',
+      (tester) async {
+    final fake = _FakeVerifyController(const IdleState());
+    await tester.pumpWidget(_app(fake));
+    await tester.pump();
+
+    await tester.tap(find.text('Take Photo'));
+    await tester.pumpAndSettle();
+
+    // "Use photo": the camera route pops with the frame bytes after the idle
+    // card (and its context) has already been replaced by the progress view.
+    await tester.tap(find.text('USE_PHOTO'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(fake.submitCalls, 1);
+    expect(fake.lastSubmitted, [1, 2, 3]);
   });
 
   testWidgets('tapping Upload Image starts the gallery flow', (tester) async {

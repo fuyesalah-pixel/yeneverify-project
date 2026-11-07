@@ -46,6 +46,10 @@ class VerifyRepository {
   /// [ImagePrepException] (RECEIPT_TOO_LARGE / RECEIPT_INVALID_TYPE).
   Future<PreparedImage> prepare(File image) => _imagePrep.prepare(image);
 
+  /// Same as [prepare], for an image already held in memory (camera capture).
+  Future<PreparedImage> prepareBytes(Uint8List bytes) =>
+      _imagePrep.prepareBytes(bytes);
+
   /// Uploads a prepared image and enqueues the verification.
   ///
   /// Returns the submit response, which carries both the verification id to

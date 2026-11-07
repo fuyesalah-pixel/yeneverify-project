@@ -6,7 +6,7 @@
 // The screen is a tab root, so there is no back button. Every state after a
 // pick happens in place — the two cards are replaced by progress, then by
 // the verdict route once a terminal status arrives.
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -147,11 +147,13 @@ class _IdleBody extends ConsumerWidget {
 
   Future<void> _openCamera(BuildContext context, WidgetRef ref) async {
     final controller = ref.read(verifyControllerProvider.notifier);
+    // startCamera() replaces this card with the progress view, which
+    // unmounts this context. Resolve the router first so the continuation
+    // never depends on a dead widget.
+    final router = GoRouter.of(context);
     controller.startCamera();
 
-    final captured = await context.push<File>(Routes.cameraCapture);
-    if (!context.mounted) return;
-
+    final captured = await router.push<Uint8List>(Routes.cameraCapture);
     if (captured == null) {
       // User closed the camera without shooting — go back to the cards.
       controller.cancel();
