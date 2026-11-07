@@ -234,8 +234,13 @@ export class VerificationsService {
     const adapterInput: VerifyInput = {
       reference,
       referenceNormalized,
-      // Merchant-configured accounts win over OCR-derived guesses.
-      supplementary: { ...ocrSupplementary, ...configuredSupplementary },
+      // Merchant-configured accounts win over OCR-derived guesses;
+      // the QR receipt URL is adapter-routing data, never a guess.
+      supplementary: {
+        ...ocrSupplementary,
+        ...configuredSupplementary,
+        ...(qr?.url ? { qrUrl: qr.url } : {}),
+      },
       rawOcrText: ocrText ?? '',
       merchantId: input.merchantId,
       requestId,

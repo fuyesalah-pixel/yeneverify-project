@@ -365,7 +365,7 @@ describe('ZemenAdapter registry integration (unit)', () => {
     const poolStub = {} as BrowserPool;
 
     const registry = new AdapterRegistry(
-      new CbeAdapter(httpStub, cfg()),
+      new CbeAdapter(httpStub, cfg(), {} as never),
       new TelebirrAdapter(poolStub, cfg()),
       new AwashAdapter(httpStub, cfg()),
       new DashenAdapter(httpStub, cfg()),

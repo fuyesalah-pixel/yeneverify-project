@@ -74,6 +74,12 @@ const List<String> _jsonReferenceKeys = [
   'txnRef',
 ];
 
+/// CBE's new receipt system. The QR carries an opaque short ID —
+/// https://mbreciept.cbe.com.et/{SHORT_ID} — which the backend
+/// resolves through CBE's JSON API. Mirrors backend cbe-receipt-url.
+const String _cbeNewReceiptHost = 'mbreciept.cbe.com.et';
+final RegExp _cbeShortIdRe = RegExp(r'^[A-Za-z0-9_-]{6,64}$');
+
 /// True when [text] contains a reference shape the bank adapters
 /// understand. Shared with the on-device OCR confidence heuristic.
 bool containsReference(String text) => _referenceRe.hasMatch(text);
@@ -120,6 +126,20 @@ QrScanResult? _fromUrl(String raw) {
   final uri = Uri.tryParse(raw);
   if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) {
     return null;
+  }
+
+  // CBE new-system receipt: the short ID is not reference-shaped, so
+  // the generic rules below cannot recover it.
+  if (uri.host.toLowerCase() == _cbeNewReceiptHost) {
+    final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+    final shortId = segments.isEmpty ? null : segments.last;
+    if (shortId != null && _cbeShortIdRe.hasMatch(shortId)) {
+      return QrScanResult(
+        rawValue: raw,
+        type: QrContentType.url,
+        reference: shortId,
+      );
+    }
   }
 
   String? reference;

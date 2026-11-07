@@ -11,6 +11,12 @@
 // The endpoint answers with a viewable HTML page or a PDF, so the
 // adapter sniffs the content type and parses either.
 //
+// Newer receipts carry a QR code pointing at
+// https://mbreciept.cbe.com.et/{SHORT_ID}, which resolves through a
+// public JSON API (no account digits, no PDF). When the scan handed
+// us that URL, the JSON system is tried first and the old endpoint
+// is only a fallback.
+//
 // Contract with 13E: this adapter's job is ONLY "reference
 // resolves → here is the real receipt". Whether the receipt
 // matches what the merchant expected (amount, receiver, date) is
@@ -25,8 +31,11 @@ import { AppConfigService } from '../../../config/config.service';
 import type { BankAdapter, VerifyInput, VerifyResult } from '../adapter.interface';
 import { AdapterBase } from '../adapter.base';
 import { REFERENCE_PATTERNS, normalizeReference } from '../../regex/reference-patterns';
+import { extractCbeNewShortId } from '../../qr/cbe-receipt-url';
 import { extractPdfText } from '../../parsers/pdf.parser';
 import { parseCbeReceipt, type CbeParsedReceipt } from './cbe.parser';
+import { CbeNewClient, type CbeNewReceipt } from './cbe-new.client';
+import { parseCbeNewReceipt } from './cbe-new.parser';
 import { ERROR_CODES } from '../../../common/constants/error-codes';
 
 const CBE_BASE_URL = 'https://apps.cbe.com.et:100';
@@ -62,6 +71,13 @@ function looksLikeHtml(body: Buffer): boolean {
   return head.startsWith('<!doctype html') || head.startsWith('<html') || head.includes('<html');
 }
 
+/** HTTP status carried by an axios error, or null for transport failures. */
+function httpStatusOf(err: unknown): number | null {
+  return err && typeof err === 'object' && 'response' in err
+    ? ((err as { response?: { status?: number } }).response?.status ?? null)
+    : null;
+}
+
 /**
  * Content-Type is advisory: CBE has served receipts as
  * `application/octet-stream` and with no header at all. Magic bytes
@@ -85,6 +101,7 @@ export class CbeAdapter extends AdapterBase implements BankAdapter {
   constructor(
     private readonly httpClient: HttpService,
     private readonly config: AppConfigService,
+    private readonly newClient: CbeNewClient,
   ) {
     super(config);
   }
@@ -144,6 +161,27 @@ export class CbeAdapter extends AdapterBase implements BankAdapter {
   }
 
   protected async doVerify(input: VerifyInput): Promise<VerifyResult> {
+    // New-system QR wins: it needs neither account digits nor the PDF.
+    const qrUrl = input.supplementary?.qrUrl?.trim();
+    if (qrUrl) {
+      const shortId = extractCbeNewShortId(qrUrl);
+      if (shortId) {
+        const newSystem = await this.verifyNewReceipt(shortId);
+        if (newSystem) return newSystem;
+        // Transient failure on the new system. Only a legacy FT
+        // reference can still be resolved by the old endpoint.
+        if (!REFERENCE_PATTERNS.CBE.test(input.referenceNormalized)) {
+          return {
+            status: 'ERROR',
+            errorCode: ERROR_CODES.BANK_ADAPTER_ERROR,
+            errorMessage: 'CBE new receipt system request failed',
+            retryable: true,
+            metadata: { source: 'cbe-new-json' },
+          };
+        }
+      }
+    }
+
     const validated = this.last8Of(input);
     if ('error' in validated) {
       return validated.error;
@@ -171,16 +209,12 @@ export class CbeAdapter extends AdapterBase implements BankAdapter {
         }),
       );
     } catch (err) {
-      const status =
-        err && typeof err === 'object' && 'response' in err
-          ? ((err as { response?: { status?: number } }).response?.status ?? null)
-          : null;
       return {
         status: 'ERROR',
         errorCode: ERROR_CODES.BANK_ADAPTER_ERROR,
         errorMessage: 'CBE endpoint request failed',
         retryable: true,
-        metadata: { httpStatus: status },
+        metadata: { httpStatus: httpStatusOf(err) },
       };
     }
 
@@ -269,6 +303,51 @@ export class CbeAdapter extends AdapterBase implements BankAdapter {
       receiverName: parsed.receiverName,
       paidAt: parsed.paidAt!,
       metadata: { source: parsed.format === 'pdf' ? 'cbe-pdf' : 'cbe-html' },
+    };
+  }
+
+  /**
+   * JSON system: a verified answer or a definitive "not found".
+   * Returns null when the call failed transiently so doVerify can
+   * fall back to the old endpoint (or report a retryable error).
+   */
+  private async verifyNewReceipt(shortId: string): Promise<VerifyResult | null> {
+    let receipt: CbeNewReceipt;
+    try {
+      receipt = await this.newClient.fetchReceipt(shortId);
+    } catch (err) {
+      if (httpStatusOf(err) === 404) {
+        return {
+          status: 'FAKE',
+          errorCode: ERROR_CODES.BANK_REFERENCE_NOT_FOUND,
+          errorMessage: 'Receipt not found on CBE server',
+          retryable: false,
+          metadata: { reason: 'not-found', source: 'cbe-new-json' },
+        };
+      }
+      return null;
+    }
+
+    const parsed = parseCbeNewReceipt(receipt);
+    if (parsed.missing.length > 0) {
+      return {
+        status: 'ERROR',
+        errorCode: ERROR_CODES.BANK_ADAPTER_ERROR,
+        errorMessage: 'CBE receipt parsed but required fields missing',
+        retryable: false,
+        metadata: { missing: parsed.missing, source: 'cbe-new-json' },
+      };
+    }
+
+    return {
+      status: 'VERIFIED',
+      bankReference: parsed.reference,
+      amountMinor: parsed.amountMinor!,
+      currency: 'ETB',
+      senderName: parsed.senderName,
+      receiverName: parsed.receiverName,
+      paidAt: parsed.paidAt!,
+      metadata: { source: 'cbe-new-json' },
     };
   }
 

@@ -59,6 +59,7 @@ const makeAdapter = (
   new CbeAdapter(
     http as unknown as never,
     { bankAdapters: { ...configSource.bankAdapters, ...overrides } } as never,
+    { fetchReceipt: jest.fn() } as never,
   );
 
 const htmlResponse = (html: string): AxiosResponse<string> =>

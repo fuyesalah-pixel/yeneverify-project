@@ -34,6 +34,7 @@ import { AdapterRegistry } from './adapters/adapter.registry';
 import { BankAdapterMetrics } from './adapters/adapter.metrics';
 import { BrowserPool } from './browser/browser-pool';
 import { CbeAdapter } from './adapters/cbe/cbe.adapter';
+import { CbeNewClient } from './adapters/cbe/cbe-new.client';
 import { TelebirrAdapter } from './adapters/telebirr/telebirr.adapter';
 import { AwashAdapter } from './adapters/awash/awash.adapter';
 import { DashenAdapter } from './adapters/dashen/dashen.adapter';
@@ -65,6 +66,7 @@ import { VerificationsController } from './verifications/verifications.controlle
   providers: [
     VerificationSubmitRateGuard,
     BrowserPool,
+    CbeNewClient,
     CbeAdapter,
     TelebirrAdapter,
     AwashAdapter,

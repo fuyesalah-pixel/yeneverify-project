@@ -17,6 +17,7 @@ describe('resolveQrHints', () => {
       bankCode: 'CBE',
       reference: 'FT26195DBK5W81465291',
       referenceNormalized: 'FT26195DBK5W81465291',
+      url: null,
     });
   });
 
@@ -36,6 +37,7 @@ describe('resolveQrHints', () => {
       bankCode: 'CBE',
       reference: 'FT26195DBK5W81465291',
       referenceNormalized: 'FT26195DBK5W81465291',
+      url: 'https://apps.cbe.com.et:100/?id=FT26195DBK5W81465291',
     });
   });
 
@@ -45,6 +47,40 @@ describe('resolveQrHints', () => {
     expect(hints?.contentType).toBe('url');
     expect(hints?.bankCode).toBe('ABYSSINIA');
     expect(hints?.referenceNormalized).toBe('FT26195DBK5W81465291');
+  });
+
+  it('CBE new-system receipt URL: opaque short ID becomes the reference', () => {
+    const hints = resolveQrHints('https://mbreciept.cbe.com.et/AbC123XyZ', 'url');
+
+    expect(hints).toEqual({
+      contentType: 'url',
+      bankCode: 'CBE',
+      reference: 'AbC123XyZ',
+      referenceNormalized: 'ABC123XYZ',
+      url: 'https://mbreciept.cbe.com.et/AbC123XyZ',
+    });
+  });
+
+  it('CBE new-system URL is recognized even when mislabelled as a reference', () => {
+    const hints = resolveQrHints('https://mbreciept.cbe.com.et/AbC123XyZ', 'reference');
+
+    expect(hints?.contentType).toBe('url');
+    expect(hints?.bankCode).toBe('CBE');
+    expect(hints?.url).toBe('https://mbreciept.cbe.com.et/AbC123XyZ');
+  });
+
+  it('SECURITY: a lookalike host never yields a CBE receipt URL', () => {
+    const hints = resolveQrHints('https://mbreciept.cbe.com.et.evil.test/AbC123XyZ', 'url');
+
+    expect(hints?.url).toBeNull();
+    expect(hints?.reference).toBeNull();
+  });
+
+  it('CBE new-system URL without a short ID yields no receipt URL', () => {
+    const hints = resolveQrHints('https://mbreciept.cbe.com.et/', 'url');
+
+    expect(hints?.url).toBeNull();
+    expect(hints?.reference).toBeNull();
   });
 
   it('JSON payload: reference and bank from named fields', () => {
@@ -61,6 +97,7 @@ describe('resolveQrHints', () => {
       bankCode: 'TELEBIRR',
       reference: 'DEV12345678AB',
       referenceNormalized: 'DEV12345678AB',
+      url: null,
     });
   });
 
@@ -85,6 +122,7 @@ describe('resolveQrHints', () => {
     expect(hints?.contentType).toBe('json');
     expect(hints?.bankCode).toBe('CBE');
     expect(hints?.referenceNormalized).toBe('FT26195DBK5W81465291');
+    expect(hints?.url).toBe('https://apps.cbe.com.et/?id=FT26195DBK5W81465291');
   });
 
   it('SECURITY: a JSON payload claiming a verdict yields no verdict path', () => {
@@ -113,6 +151,7 @@ describe('resolveQrHints', () => {
       bankCode: 'CBE',
       reference: null,
       referenceNormalized: null,
+      url: null,
     });
   });
 

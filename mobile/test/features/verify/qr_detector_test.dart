@@ -138,6 +138,16 @@ void main() {
       expect(result?.reference, 'FT26195DBK5W81465291');
     });
 
+    test('decodes a CBE new-system receipt QR code', () {
+      final result = detector.detect(
+        qrPng('https://mbreciept.cbe.com.et/AbC123XyZ'),
+      );
+
+      expect(result?.type, QrContentType.url);
+      expect(result?.reference, 'AbC123XyZ');
+      expect(result?.rawValue, 'https://mbreciept.cbe.com.et/AbC123XyZ');
+    });
+
     test('returns null for an image without a QR code', () {
       final blank = img.Image(width: 120, height: 120);
       img.fill(blank, color: img.ColorRgb8(255, 255, 255));

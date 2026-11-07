@@ -30,7 +30,7 @@ const config = {
 
 const abyssinia = new AbyssiniaAdapter(http as never, config);
 const awash = new AwashAdapter(http as never, config);
-const cbe = new CbeAdapter(http as never, config);
+const cbe = new CbeAdapter(http as never, config, {} as never);
 const dashen = new DashenAdapter(http as never, config);
 const mpesa = new MpesaAdapter(http as never, config);
 const telebirr = new TelebirrAdapter(pool as never, config);

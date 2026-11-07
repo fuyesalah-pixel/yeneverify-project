@@ -14,6 +14,7 @@
 
 import type { BankCode } from '@prisma/client';
 import { normalizeReference } from '../regex/reference-patterns';
+import { extractCbeNewShortId } from './cbe-receipt-url';
 
 export const QR_CONTENT_TYPES = ['reference', 'url', 'json', 'unknown'] as const;
 export type QrContentType = (typeof QR_CONTENT_TYPES)[number];
@@ -26,6 +27,12 @@ export type QrHints = {
   reference: string | null;
   /** Uppercased, separator-free reference. */
   referenceNormalized: string | null;
+  /**
+   * Receipt URL carried by the payload (bank-specific lookup links).
+   * Only set when the payload IS a URL or wraps one. Raw QR content
+   * is never persisted; this is passed to the adapter, not audited.
+   */
+  url: string | null;
 };
 
 /**
@@ -121,6 +128,7 @@ function fromReferencePayload(raw: string): QrHints | null {
     bankCode: bankFromText(raw),
     reference: candidate,
     referenceNormalized: normalizeReference(candidate),
+    url: null,
   };
 }
 
@@ -132,6 +140,20 @@ function fromUrlPayload(raw: string): QrHints | null {
     return null;
   }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+
+  // CBE's new receipt QR: /{SHORT_ID}. The locator is opaque, so it
+  // cannot be recovered by the generic reference-shape rules below;
+  // the adapter resolves it through CBE's JSON API instead.
+  const cbeShortId = extractCbeNewShortId(raw);
+  if (cbeShortId) {
+    return {
+      contentType: 'url',
+      bankCode: 'CBE',
+      reference: cbeShortId,
+      referenceNormalized: normalizeReference(cbeShortId),
+      url: raw,
+    };
+  }
 
   let candidate: string | null = null;
   for (const key of URL_REFERENCE_PARAMS) {
@@ -156,6 +178,7 @@ function fromUrlPayload(raw: string): QrHints | null {
     bankCode: bankFromHost(url.hostname) ?? bankFromText(raw),
     reference: candidate,
     referenceNormalized: normalizeReference(candidate),
+    url: raw,
   };
 }
 
@@ -185,6 +208,7 @@ function fromJsonPayload(raw: string): QrHints | null {
         bankCode: bankFromText(bankText) ?? bankFromText(raw),
         reference: candidate,
         referenceNormalized: normalizeReference(candidate),
+        url: null,
       };
     }
   }
@@ -257,6 +281,7 @@ export function resolveQrHints(
       bankCode: bankFromText(raw),
       reference: null,
       referenceNormalized: null,
+      url: null,
     };
   }
   return hints;
