@@ -421,3 +421,20 @@ Ethiopian endpoints take 40 s+), move completion to an async channel: a push
 notification (or web socket event) when the verification reaches a terminal
 verdict, even if the user has left the screen. Defer until a live bank
 routinely exceeds the polling window.
+
+## 48. Gate the camera shutter until the first preview frame is live
+
+One capture right after camera open came back black (before the first
+preview frame). The shutter is enabled as soon as
+`CameraController.initialize()` resolves, which can precede the first
+delivered frame. Likely fix: track a preview-frame-seen flag (or require a
+short warm-up after `isInitialized`) before enabling the shutter button.
+Test: rapid tap on a cold camera open.
+
+## 49. Warn on low storage before camera capture
+
+The temp-file purge bug (Android `installd` deleting CameraX's cache file)
+was caused by the device being at ~1% free. The in-memory capture fix
+prevents the pipeline failure, but a merchant at 1% storage will still fail
+to save the app's own state. Show a low-storage banner before opening the
+camera when free storage is below 100 MB.
