@@ -1,0 +1,140 @@
+[
+  {
+    "_comment": "Free tier — no payment required, 10 verifications per month",
+    "code": "FREE",
+    "name": "Free",
+    "nameAm": "ነፃ",
+    "priceMinor": 0,
+    "currency": "ETB",
+    "creditsPerMonth": 10,
+    "unlimited": false,
+    "custom": false,
+    "maxSubMerchants": 1,
+    "features": [
+      "10 verifications per month",
+      "CBE + Telebirr support",
+      "Basic transaction history"
+    ],
+    "featuresAm": [
+      "በወር 10 ማረጋገጫዎች",
+      "ንግድ ባንክ + ቴሌብር ድጋፍ",
+      "መሰረታዊ የግብይት ታሪክ"
+    ],
+    "paymentRequired": false,
+    "isDefault": true
+  },
+  {
+    "_comment": "Premium — 199 ETB/month, unlimited for individuals/freelancers",
+    "code": "PREMIUM",
+    "name": "Premium",
+    "nameAm": "ፕሪሚየም",
+    "priceMinor": 19900,
+    "currency": "ETB",
+    "creditsPerMonth": null,
+    "unlimited": true,
+    "custom": false,
+    "maxSubMerchants": 1,
+    "features": [
+      "Unlimited verifications",
+      "All 7 banks supported",
+      "Full transaction history",
+      "PDF export"
+    ],
+    "featuresAm": [
+      "ያልተገደቡ ማረጋገጫዎች",
+      "ሁሉም 7 ባንኮች ድጋፍ",
+      "ሙሉ የግብይት ታሪክ",
+      "PDF ወደ ውጭ ላክ"
+    ],
+    "paymentRequired": true,
+    "isDefault": false
+  },
+  {
+    "_comment": "Business — 999 ETB/month, 400 verifications, for SMBs",
+    "code": "BUSINESS",
+    "name": "Business",
+    "nameAm": "ቢዝነስ",
+    "priceMinor": 99900,
+    "currency": "ETB",
+    "creditsPerMonth": 400,
+    "unlimited": false,
+    "custom": false,
+    "maxSubMerchants": 10,
+    "features": [
+      "400 verifications per month",
+      "All 7 banks supported",
+      "Multi-branch (sub-merchants)",
+      "Analytics & insights",
+      "PDF + CSV export",
+      "Priority support"
+    ],
+    "featuresAm": [
+      "በወር 400 ማረጋገጫዎች",
+      "ሁሉም 7 ባንኮች ድጋፍ",
+      "ብዙ ቅርንጫፎች",
+      "ትንታኔ እና ግንዛቤዎች",
+      "PDF + CSV ወደ ውጭ ላክ",
+      "ቅድሚያ ድጋፍ"
+    ],
+    "paymentRequired": true,
+    "isDefault": false
+  },
+  {
+    "_comment": "Business Pro — 1999 ETB/month, unlimited, for larger businesses",
+    "code": "BUSINESS_PRO",
+    "name": "Business Pro",
+    "nameAm": "ቢዝነስ ፕሮ",
+    "priceMinor": 199900,
+    "currency": "ETB",
+    "creditsPerMonth": null,
+    "unlimited": true,
+    "custom": false,
+    "maxSubMerchants": null,
+    "features": [
+      "Unlimited verifications",
+      "All 7 banks supported",
+      "Unlimited sub-merchants",
+      "Advanced analytics",
+      "PDF + CSV export",
+      "Dedicated support"
+    ],
+    "featuresAm": [
+      "ያልተገደቡ ማረጋገጫዎች",
+      "ሁሉም 7 ባንኮች ድጋፍ",
+      "ያልተገደቡ ቅርንጫፎች",
+      "የላቀ ትንታኔ",
+      "PDF + CSV ወደ ውጭ ላክ",
+      "ልዩ ድጋፍ"
+    ],
+    "paymentRequired": true,
+    "isDefault": false
+  },
+  {
+    "_comment": "API Integration — custom pricing for banks and fintechs",
+    "code": "API",
+    "name": "API Integration",
+    "nameAm": "API ውህደት",
+    "priceMinor": null,
+    "currency": "ETB",
+    "creditsPerMonth": null,
+    "unlimited": true,
+    "custom": true,
+    "maxSubMerchants": null,
+    "features": [
+      "Custom volume pricing",
+      "REST API access",
+      "Webhook support",
+      "SLA guarantee",
+      "Dedicated account manager"
+    ],
+    "featuresAm": [
+      "ብጁ ዋጋ",
+      "REST API ተደራሽነት",
+      "Webhook ድጋፍ",
+      "SLA ዋስትና",
+      "ያተኮረ አካውንት ሥራ አስኪያጅ"
+    ],
+    "paymentRequired": false,
+    "isDefault": false
+  }
+]
