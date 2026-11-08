@@ -3,11 +3,13 @@
 // Thin Prisma access layer for waitlist_emails.
 // ============================================================
 
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { WaitlistEmail } from '@prisma/client';
 
 export type WaitlistEmailRow = WaitlistEmail;
 
+@Injectable()
 export class WaitlistRepository {
   constructor(private readonly prisma: PrismaService) {}
 
