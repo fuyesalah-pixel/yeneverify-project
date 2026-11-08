@@ -107,7 +107,7 @@ docker/volumes/
 # ── Local tooling scratch ──────────────────────────────────────
 # Portable Postgres/Redis dropped outside docker/ during setup.
 _pg/
-redis/
+/redis/
 .redis/
 pg/
 *.local/
