@@ -135,3 +135,6 @@ docs/ops/*.png
 # Local OCR fixtures are keyed by real receipt hashes and may embed real
 # receipt text (references/names/amounts) — development-only, never committed.
 backend/src/ocr/providers/mock-fixtures.json
+
+# Phone test screenshots (artifacts)
+.phone-shot*.png

@@ -3,26 +3,23 @@
 # Base: node:20-alpine
 # ============================================================
 
-# Stage 1: production deps
-FROM node:20-alpine AS deps
+# Stage 1: build + dependencies. Runtime copies node_modules from here,
+# so native modules (bcrypt) must compile and prisma generate must run
+# in this stage — scripts enabled, build tools installed.
+FROM node:20-alpine AS builder
 RUN apk add --no-cache libc6-compat openssl python3 make g++
 WORKDIR /app
 COPY package.json package-lock.json* ./
-ENV PUPPETEER_SKIP_DOWNLOAD=true
-RUN npm ci --omit=dev --build-from-source \
- && npm cache clean --force
-
-# Stage 2: build
-FROM node:20-alpine AS builder
-RUN apk add --no-cache libc6-compat openssl
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci --ignore-scripts
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+    npm_config_fetch_retries=5 \
+    npm_config_fetch_retry_mintimeout=20000 \
+    npm_config_fetch_retry_maxtimeout=120000
+RUN npm ci --build-from-source
 COPY . .
 RUN npx prisma generate
 RUN npm run build
 
-# Stage 3: runtime
+# Stage 2: runtime
 FROM node:20-alpine AS runtime
 RUN apk add --no-cache libc6-compat openssl dumb-init
 WORKDIR /app
@@ -30,7 +27,7 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs \
  && adduser  --system --uid 1001 nestjs
 
-COPY --from=deps    --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/dist         ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/prisma       ./prisma
 COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
