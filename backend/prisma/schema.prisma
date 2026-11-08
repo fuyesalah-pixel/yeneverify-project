@@ -264,6 +264,12 @@ model User {
   biometricEnabled      Boolean    @default(false) @map("biometric_enabled")
   biometricEnabledAt    DateTime?  @map("biometric_enabled_at") @db.Timestamptz(6)
 
+  // Google Sign-In linking (web dashboard + mobile accelerator)
+  // Phone remains the primary identity; Google is a linked login method only.
+  googleUid       String?   @unique @map("google_uid")
+  googleEmail     String?   @map("google_email")
+  googleLinkedAt  DateTime? @map("google_linked_at") @db.Timestamptz(6)
+
   // Relations
   devices                 Device[]
   sessions                Session[]
@@ -846,7 +852,21 @@ model FeatureFlag {
   enabled     Boolean  @default(false)
   description String?
   metadata    Json?
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("feature_flags")
+}
+
+/// Email capture for the public waitlist (mekatanker.shop).
+/// One row per email; duplicates are treated idempotently (200 on re-submit).
+model WaitlistEmail {
+  id        String   @id @db.Uuid
+  email     String   @unique
+  source    String?
+  ip        String?  @db.Inet
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([email])
+  @@index([createdAt(sort: Desc)])
+  @@map("waitlist_emails")
 }

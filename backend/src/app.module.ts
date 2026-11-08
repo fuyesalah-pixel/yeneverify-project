@@ -13,6 +13,8 @@ import { StorageModule } from './storage/storage.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { AuditModule } from './audit/audit.module';
+import { WaitlistModule } from './waitlist/waitlist.module';
+import { GoogleAuthModule } from './google-auth/google-auth.module';
 import { TenantModule } from './tenant/tenant.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
@@ -88,6 +90,8 @@ import { buildLoggerOptions } from './common/logger/logger.config';
     // ── Feature ───────────────────────────────────────────────────────
     HealthModule,
     AuthModule,
+    WaitlistModule,
+    GoogleAuthModule,
     AuditModule,
     TenantModule,
     OnboardingModule,
