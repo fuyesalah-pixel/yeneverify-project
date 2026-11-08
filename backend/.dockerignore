@@ -8,6 +8,6 @@ coverage
 .gitignore
 *.md
 test
-prisma/migrations
 prisma/fixtures
 prisma/seed
+prisma/seed.ts

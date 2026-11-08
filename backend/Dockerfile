@@ -5,10 +5,12 @@
 
 # Stage 1: production deps
 FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl python3 make g++
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev --ignore-scripts
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+RUN npm ci --omit=dev --build-from-source \
+ && npm cache clean --force
 
 # Stage 2: build
 FROM node:20-alpine AS builder
