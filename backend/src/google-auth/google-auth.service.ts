@@ -112,6 +112,7 @@ export class GoogleAuthService {
     try {
       decoded = await this.verifyIdToken(idToken);
     } catch (e) {
+      process.stderr.write('GOOGLE_AUTH_LOGIN_CATCH: ' + String(e) + '\n');
       this.logger.error('Google ID token verification failed:', e);
       throw new GoogleTokenInvalidError();
     }
@@ -218,6 +219,7 @@ export class GoogleAuthService {
     try {
       decoded = await this.verifyIdToken(idToken);
     } catch (e) {
+      process.stderr.write('GOOGLE_AUTH_LOGIN_CATCH: ' + String(e) + '\n');
       this.logger.error('Google ID token verification failed:', e);
       throw new GoogleTokenInvalidError();
     }
@@ -433,6 +435,7 @@ export class GoogleAuthService {
     try {
       decoded = await this.verifyIdToken(idToken);
     } catch (e) {
+      process.stderr.write('GOOGLE_AUTH_LOGIN_CATCH: ' + String(e) + '\n');
       this.logger.error('Google ID token verification failed:', e);
       throw new GoogleTokenInvalidError();
     }
@@ -601,6 +604,7 @@ export class GoogleAuthService {
     try {
       decoded = await this.verifyIdToken(idToken);
     } catch (e) {
+      process.stderr.write('GOOGLE_AUTH_LOGIN_CATCH: ' + String(e) + '\n');
       this.logger.error('Google ID token verification failed:', e);
       throw new GoogleTokenInvalidError();
     }
@@ -770,7 +774,7 @@ export class GoogleAuthService {
         email_verified: !!decoded.email_verified,
       };
     } catch (e) {
-      console.error('FIREBASE_VERIFY_ID_TOKEN_ERROR:', e);
+      process.stderr.write('FIREBASE_VERIFY_ID_TOKEN_ERROR: ' + String(e) + '\n');
       throw e;
     }
   }
