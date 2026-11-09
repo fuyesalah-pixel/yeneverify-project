@@ -185,8 +185,8 @@ export const envSchema = z
     JWT_REFRESH_SECRET: z.string().min(64, 'must be at least 64 characters.'),
     JWT_REFRESH_TTL: z
       .string()
-      .regex(/^\d+[smhd]$/, 'must use a duration such as 15m, 1h, or 30d.')
-      .default('30d'),
+      .regex(/^\d+[smhd]$/, 'must use a duration such as 15m, 1h, or 180d.')
+      .default('180d'),
     JWT_ISSUER: z.string().min(1, 'must not be empty.').default('yene-verify'),
     JWT_AUDIENCE: z.string().min(1, 'must not be empty.').default('yene-verify-mobile'),
     // During a rotation the previous key remains valid for verification only.

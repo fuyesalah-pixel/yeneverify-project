@@ -90,6 +90,20 @@ class SessionStore {
   Future<int?> readLastUnlockAt() =>
       _storage.readInt(SecureStorageKeys.lastUnlockAt);
 
+  Future<void> touchRefresh() => _storage.writeInt(
+        SecureStorageKeys.lastRefreshAt,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+
+  Future<int?> readLastRefreshAt() =>
+      _storage.readInt(SecureStorageKeys.lastRefreshAt);
+
+  Future<bool> readPinSkipped() =>
+      _storage.readBool(SecureStorageKeys.pinSkipped);
+
+  Future<void> setPinSkipped(bool value) =>
+      _storage.writeBool(SecureStorageKeys.pinSkipped, value);
+
   // ── Destructive ops ────────────────────────────────────────────────────
 
   /// Clears session values but keeps per-device values (logout).

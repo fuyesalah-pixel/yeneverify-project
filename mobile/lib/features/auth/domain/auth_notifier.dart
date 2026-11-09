@@ -143,25 +143,49 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       );
     }
 
-    final storedPhone = await repo.readStoredPhone() ?? await repo.readStoredUserId();
-    final biometric = await repo.biometricEnabled();
-    final hasPin = await repo.hasPin();
-
-    if (!hasPin) {
-      return AuthState(
-        status: AuthStatus.pinSetup,
-        deviceFingerprint: fingerprint,
-        biometricEnabled: biometric,
-        lastLoginPhone: storedPhone,
-      );
+    // Attempt silent refresh before deciding the auth state. If the refresh
+    // token is still valid (180-day TTL), we restore the session without
+    // re-prompting Google or phone.
+    final refreshResult = await _silentRefresh();
+    switch (refreshResult) {
+      case Failure<AuthStateResult>(:final error):
+        // Refresh failed — session is dead. Clear and send to login.
+        await repo.clearAuthData();
+        return AuthState(
+          status: AuthStatus.unauthenticated,
+          deviceFingerprint: fingerprint,
+          errorMessage: error.message,
+        );
+      case Success<AuthStateResult>(:final data):
+        // Session restored via silent refresh. Determine PIN routing below.
+        final pinSkipped = await repo.readPinSkipped();
+        final hasPin = await repo.hasPin();
+        final common = AuthState(
+          deviceFingerprint: fingerprint,
+          user: data.user,
+          accessToken: data.tokens.accessToken,
+          biometricEnabled: await repo.biometricEnabled(),
+          lastLoginPhone: data.user.phone,
+        );
+        if (pinSkipped) {
+          return common.copyWith(status: AuthStatus.unlocked);
+        }
+        if (!hasPin) {
+          return common.copyWith(status: AuthStatus.pinSetup);
+        }
+        return common.copyWith(status: AuthStatus.locked);
     }
+  }
 
-    return AuthState(
-      status: AuthStatus.locked,
-      deviceFingerprint: fingerprint,
-      biometricEnabled: biometric,
-      lastLoginPhone: storedPhone,
-    );
+  /// Attempts a silent refresh via POST /auth/refresh. Returns the raw
+  /// [ApiResult] so the caller can decide how to rebuild the auth state. On
+  /// success, the refresh timestamp is touched locally.
+  Future<ApiResult<AuthStateResult>> _silentRefresh() async {
+    final result = await repo.refresh();
+    if (result is Success<AuthStateResult>) {
+      await repo.touchRefresh();
+    }
+    return result;
   }
 
   /// Safe landing when the startup check times out or throws. Tries to keep
@@ -366,6 +390,39 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     final current = state.valueOrNull;
     if (current == null) return;
     state = AsyncValue.data(current.copyWith(clearError: true));
+  }
+
+  /// Sets the auth state to unlocked with a Google-auth session (tokens +
+  /// user from POST /auth/google/onboard or /auth/google/signin). Skips the
+  /// OTP/PIN flow entirely — Google identity is the source of truth.
+  /// If the user needs PIN setup, status is `pinSetup` so the router sends
+  /// them to the PIN setup screen; otherwise `unlocked` → dashboard.
+  void setGoogleSession({required User user, required AuthTokens tokens}) {
+    final current = state.valueOrNull;
+    final needsPin = user.needsPinSetup;
+    state = AsyncValue.data(
+      AuthState(
+        status: needsPin ? AuthStatus.pinSetup : AuthStatus.unlocked,
+        user: user,
+        accessToken: tokens.accessToken,
+        deviceFingerprint: current?.deviceFingerprint,
+        biometricEnabled: current?.biometricEnabled ?? false,
+        lastLoginPhone: user.phone,
+      ),
+    );
+  }
+
+  /// Skips PIN setup — marks the PIN as skipped in storage and transitions to
+  /// `unlocked` so the user goes straight to the dashboard. PIN can be added
+  /// later from Settings.
+  Future<void> skipPinSetup() async {
+    await repo.setPinSkipped(true);
+    final current = state.valueOrNull;
+    if (current != null) {
+      state = AsyncValue.data(
+        current.copyWith(status: AuthStatus.unlocked, clearError: true),
+      );
+    }
   }
 
   /// Debug-only shortcut used by the login screen's "Dev: skip auth" button so

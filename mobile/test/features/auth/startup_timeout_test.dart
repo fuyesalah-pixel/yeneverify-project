@@ -13,11 +13,14 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:yene_verify/core/network/api_result.dart';
 import 'package:yene_verify/core/network/token_store.dart';
 import 'package:yene_verify/core/storage/secure_storage.dart';
 import 'package:yene_verify/core/storage/session_store.dart';
 import 'package:yene_verify/features/auth/data/auth_api.dart';
 import 'package:yene_verify/features/auth/data/auth_repository.dart';
+import 'package:yene_verify/features/auth/data/google_auth_api.dart';
+import 'package:yene_verify/features/auth/data/models/auth_models.dart';
 import 'package:yene_verify/features/auth/domain/auth_notifier.dart';
 
 class _StubRepo extends AuthRepository {
@@ -25,11 +28,34 @@ class _StubRepo extends AuthRepository {
       : super(
           sessionStore: SessionStore(SecureStorage(), InMemoryTokenStore()),
           api: AuthApi(Dio()),
+          googleApi: GoogleAuthApi(Dio()),
         );
 
   Future<String> Function() getOrCreateFingerprintImpl = () async => 'fp-1';
   Future<bool> Function() hasStoredSessionImpl = () async => false;
   Future<bool> Function() hasPinImpl = () async => false;
+  Future<ApiResult<AuthStateResult>> Function() refreshImpl = () async =>
+      const Success(
+        AuthStateResult(
+          user: User(
+            id: 'user-1',
+            phone: '+251911000000',
+            fullName: 'Test User',
+            role: 'MERCHANT',
+            status: 'ACTIVE',
+            needsPinSetup: false,
+            needsOnboarding: false,
+          ),
+          tokens: AuthTokens(
+            accessToken: 'access-token',
+            refreshToken: 'refresh-token',
+            expiresIn: 3600,
+          ),
+        ),
+      );
+
+  Future<bool> Function() readPinSkippedImpl = () async => false;
+  Future<void> Function() touchRefreshImpl = () async {};
 
   @override
   Future<String> getOrCreateFingerprint() => getOrCreateFingerprintImpl();
@@ -42,6 +68,15 @@ class _StubRepo extends AuthRepository {
 
   @override
   Future<bool> hasPin() => hasPinImpl();
+
+  @override
+  Future<ApiResult<AuthStateResult>> refresh() => refreshImpl();
+
+  @override
+  Future<bool> readPinSkipped() => readPinSkippedImpl();
+
+  @override
+  Future<void> touchRefresh() => touchRefreshImpl();
 
   @override
   Future<String?> readStoredPhone() async => '+251911000000';

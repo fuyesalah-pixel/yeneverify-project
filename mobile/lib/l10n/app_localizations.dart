@@ -3361,6 +3361,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'or continue with'**
   String get orContinueWith;
+
+  /// No description provided for @orSignInWithPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'or sign in with phone number instead'**
+  String get orSignInWithPhone;
+
+  /// No description provided for @pinSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get pinSkip;
+
+  /// No description provided for @profileSetUpPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up PIN'**
+  String get profileSetUpPin;
+
+  /// No description provided for @profileSetUpPinSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a PIN to secure your account'**
+  String get profileSetUpPinSubtitle;
 }
 
 class _AppLocalizationsDelegate

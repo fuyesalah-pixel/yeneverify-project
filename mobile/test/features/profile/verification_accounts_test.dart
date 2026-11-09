@@ -9,6 +9,7 @@ import 'package:yene_verify/core/storage/session_store.dart';
 import 'package:yene_verify/core/widgets/buttons/app_button.dart';
 import 'package:yene_verify/features/auth/data/auth_api.dart';
 import 'package:yene_verify/features/auth/data/auth_repository.dart';
+import 'package:yene_verify/features/auth/data/google_auth_api.dart';
 import 'package:yene_verify/features/auth/data/models/auth_models.dart';
 import 'package:yene_verify/features/profile/data/models/verification_accounts.dart';
 import 'package:yene_verify/features/profile/data/verification_accounts_api.dart';
@@ -22,6 +23,7 @@ class _FakeAuthRepository extends AuthRepository {
       : super(
           sessionStore: SessionStore(SecureStorage(), InMemoryTokenStore()),
           api: AuthApi(Dio()),
+          googleApi: GoogleAuthApi(Dio()),
         );
 
   String? lastPin;

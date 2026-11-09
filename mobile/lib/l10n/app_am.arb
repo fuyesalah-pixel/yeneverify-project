@@ -834,5 +834,13 @@
   "profileUnknownUser": "ተጠቃሚ",
   "@profileUnknownUser": {},
   "orContinueWith": "ወይም እንደገና ይግቡ",
-  "@orContinueWith": {}
+  "@orContinueWith": {},
+  "orSignInWithPhone": "ወይም በስልክ ቁጥሩ ይግቡ",
+  "@orSignInWithPhone": {},
+  "pinSkip": "አሁን ዝለል",
+  "@pinSkip": {},
+  "profileSetUpPin": "PIN ያቀናብሩ",
+  "@profileSetUpPin": {},
+  "profileSetUpPinSubtitle": "መለያዎን ለመጠበቅ PIN ይምረጡ",
+  "@profileSetUpPinSubtitle": {}
 }

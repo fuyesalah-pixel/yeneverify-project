@@ -1830,4 +1830,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orContinueWith => 'or continue with';
+
+  @override
+  String get orSignInWithPhone => 'or sign in with phone number instead';
+
+  @override
+  String get pinSkip => 'Skip for now';
+
+  @override
+  String get profileSetUpPin => 'Set up PIN';
+
+  @override
+  String get profileSetUpPinSubtitle => 'Create a PIN to secure your account';
 }

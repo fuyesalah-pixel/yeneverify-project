@@ -29,6 +29,12 @@ String? authRedirect(AuthState auth, String location) {
           ? null
           : '/unlock';
     case AuthStatus.unlocked:
+      // Authenticated user without a paired phone must pair before dashboard.
+      if (auth.user != null && auth.user!.phone.isEmpty) {
+        return const {'/', '/phone-pairing', '/design-system'}.contains(location)
+            ? null
+            : '/phone-pairing';
+      }
       if (auth.needsOnboarding) {
         // Onboarding owns the session until the merchant profile (or invite
         // acceptance) exists. Dev tooling and the brief success celebration

@@ -1354,5 +1354,13 @@
   "profileUnknownUser": "User",
   "@profileUnknownUser": {},
   "orContinueWith": "or continue with",
-  "@orContinueWith": {}
+  "@orContinueWith": {},
+  "orSignInWithPhone": "or sign in with phone number instead",
+  "@orSignInWithPhone": {},
+  "pinSkip": "Skip for now",
+  "@pinSkip": {},
+  "profileSetUpPin": "Set up PIN",
+  "@profileSetUpPin": {},
+  "profileSetUpPinSubtitle": "Create a PIN to secure your account",
+  "@profileSetUpPinSubtitle": {}
 }

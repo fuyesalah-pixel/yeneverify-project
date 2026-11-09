@@ -9,7 +9,9 @@ import '../../../../core/security/secure_screen.dart';
 import '../../../../core/theme/app_colors_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/inputs/app_pin_field.dart';
+import '../../domain/auth_notifier.dart';
 import '../providers/auth_flow_providers.dart';
 
 /// PIN setup — first entry, then confirm within this screen. Step 21.
@@ -88,10 +90,24 @@ class PinSetupScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
               const Spacer(),
+              // ── Skip PIN option ────────────────────────────────────────
+              AppButton(
+                label: l10n.pinSkip,
+                onPressed: flow.isLoading ? null : () => _skipPin(context, ref),
+                variant: AppButtonVariant.ghost,
+              ),
+              const SizedBox(height: AppSpacing.xl),
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// Skips PIN setup without saving a PIN and navigates straight to the
+  /// dashboard. The user can set a PIN later from Settings.
+  void _skipPin(BuildContext context, WidgetRef ref) async {
+    await ref.read(authProvider.notifier).skipPinSetup();
+    context.go(Routes.dashboard);
   }
 }

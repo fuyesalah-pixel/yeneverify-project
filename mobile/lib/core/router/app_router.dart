@@ -6,6 +6,7 @@ import '../../features/auth/domain/auth_notifier.dart';
 import '../../features/auth/presentation/screens/biometric_enroll_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
+import '../../features/auth/presentation/screens/phone_pairing_screen.dart';
 import '../../features/auth/presentation/screens/pin_entry_screen.dart';
 import '../../features/auth/presentation/screens/pin_setup_screen.dart';
 import '../../features/billing/data/models/billing_session.dart';
@@ -18,6 +19,7 @@ import '../../features/design_system/presentation/screens/design_system_showcase
 import '../../features/onboarding/presentation/screens/merchant_setup_success_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_flow_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/profile/presentation/screens/settings_screen.dart';
 import '../../features/profile/presentation/screens/verification_accounts_screen.dart';
 import '../../features/shell/presentation/screens/shell_placeholder_screen.dart';
 import '../../features/sub_merchants/presentation/screens/invite_sub_merchant_screen.dart';
@@ -53,6 +55,8 @@ abstract final class Routes {
       '$transactionDetail/$verificationId';
   static const String insights = '/insights';
   static const String profile = '/profile';
+  static const String settings = '/profile/settings';
+  static const String phonePairing = '/phone-pairing';
 
   /// Step 25 — billing flow (root routes, no bottom nav).
   static const String billing = '/billing';
@@ -101,6 +105,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: Routes.login,
       builder: (_, __) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: Routes.phonePairing,
+      builder: (_, __) => const PhonePairingScreen(),
     ),
     GoRoute(
       path: Routes.otp,
@@ -175,16 +183,20 @@ final appRouter = GoRouter(
         ),
         StatefulShellBranch(
           routes: [
-            GoRoute(
-              path: Routes.profile,
-              builder: (_, __) => const ProfileScreen(),
-              routes: [
-                GoRoute(
-                  path: 'verification-accounts',
-                  builder: (_, __) => const VerificationAccountsScreen(),
-                ),
-                GoRoute(
-                  path: 'sub-merchants',
+              GoRoute(
+                  path: Routes.profile,
+                  builder: (_, __) => const ProfileScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'verification-accounts',
+                      builder: (_, __) => const VerificationAccountsScreen(),
+                    ),
+                    GoRoute(
+                      path: 'settings',
+                      builder: (_, __) => const SettingsScreen(),
+                    ),
+                    GoRoute(
+                      path: 'sub-merchants',
                   builder: (_, __) => const SubMerchantsScreen(),
                   routes: [
                     // Literal before ':id' so /invite never parses as an id.

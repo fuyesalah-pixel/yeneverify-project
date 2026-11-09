@@ -9,19 +9,24 @@ import '../../../core/storage/secure_storage.dart';
 import '../../../core/storage/session_store.dart';
 import 'auth_api.dart';
 import 'device_info.dart';
+import 'google_auth_api.dart';
 import 'models/auth_models.dart';
+import 'models/device_account.dart';
 
 class AuthRepository {
   AuthRepository({
     required SessionStore sessionStore,
     required AuthApi api,
+    required GoogleAuthApi googleApi,
   })  : _sessionStore = sessionStore,
-        _api = api;
+        _api = api,
+        _googleApi = googleApi;
 
   static const pinLength = 4;
 
   final SessionStore _sessionStore;
   final AuthApi _api;
+  final GoogleAuthApi _googleApi;
 
   // -- device ----------------------------------------------------------------
   Future<DeviceIdentity> deviceIdentity() async {
@@ -75,6 +80,26 @@ class AuthRepository {
       device: device.toJson(),
       method: method,
     );
+    return switch (result) {
+      Failure<FlatTokensResponse>() => Failure<AuthStateResult>(result.error),
+      Success<FlatTokensResponse>() =>
+        await _persistTokensThenFetchUser(result.data.tokens),
+    };
+  }
+
+  /// Silent refresh via POST /auth/refresh. Used on cold start to restore a
+  /// valid session without re-prompting the user. Returns the combined
+  /// session result (tokens + user) on success.
+  Future<ApiResult<AuthStateResult>> refresh() async {
+    final refreshToken = await _sessionStore.readRefreshToken();
+    if (refreshToken == null) {
+      return const Failure(ApiError(
+        code: 'AUTH_NO_SESSION',
+        message: 'No session on device',
+        kind: ApiErrorKind.auth,
+      ));
+    }
+    final result = await _api.refresh(refreshToken);
     return switch (result) {
       Failure<FlatTokensResponse>() => Failure<AuthStateResult>(result.error),
       Success<FlatTokensResponse>() =>
@@ -153,6 +178,50 @@ class AuthRepository {
   Future<ApiResult<void>> logoutApi({required String refreshToken}) =>
       _api.logout(refreshToken: refreshToken);
 
+  // -- Google auth -----------------------------------------------------------
+
+  /// Persists a Google-auth session directly (tokens + user from
+  /// POST /auth/google/onboard or /auth/google/signin). Mirrors _persistSession
+  /// but skips the OTP flow entirely.
+  Future<ApiResult<AuthStateResult>> verifyOtpGoogle({
+    required AuthTokens tokens,
+    required User user,
+  }) async {
+    try {
+      _sessionStore.setAccessToken(tokens.accessToken);
+      await _sessionStore.setRefreshToken(tokens.refreshToken);
+      final deviceId = user.id;
+      if (deviceId.isNotEmpty) {
+        await _sessionStore.setDeviceId(deviceId);
+      }
+      await _sessionStore.touchUnlock();
+      await _sessionStore.setUserId(user.id);
+      await _sessionStore.setUserPhone(user.phone);
+      await _sessionStore.setHasPin(!user.needsPinSetup);
+      return Success(AuthStateResult(user: user, tokens: tokens));
+    } catch (e) {
+      return Failure(ApiError(message: 'Storage write failed: $e'));
+    }
+  }
+
+  /// GET-equivalent (POST with body): list accounts paired to this device.
+  Future<ApiResult<List<DeviceAccount>>> googleDeviceAccounts({
+    required String deviceFingerprint,
+  }) async {
+    return _googleApi.deviceAccounts(deviceFingerprint: deviceFingerprint);
+  }
+
+  /// POST /auth/device-accounts/:phoneLast4/signout.
+  Future<ApiResult<void>> googleSignoutDeviceAccount({
+    required String phoneLast4,
+    required String deviceFingerprint,
+  }) async {
+    return _googleApi.signoutDeviceAccount(
+      phoneLast4: phoneLast4,
+      deviceFingerprint: deviceFingerprint,
+    );
+  }
+
   // -- startup / storage ------------------------------------------------------
   Future<bool> hasStoredSession() async =>
       await _sessionStore.readRefreshToken() != null;
@@ -160,6 +229,12 @@ class AuthRepository {
   Future<bool> biometricEnabled() => _sessionStore.readBiometricEnabled();
 
   Future<bool> hasPin() => _sessionStore.readHasPin();
+
+  Future<bool> readPinSkipped() => _sessionStore.readPinSkipped();
+
+  Future<void> touchRefresh() => _sessionStore.touchRefresh();
+
+  Future<void> setPinSkipped(bool value) => _sessionStore.setPinSkipped(value);
 
   Future<String?> getRefreshToken() => _sessionStore.readRefreshToken();
 
@@ -291,5 +366,6 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(
     sessionStore: ref.watch(sessionStoreProvider),
     api: ref.watch(authApiProvider),
+    googleApi: ref.watch(googleAuthApiProvider),
   );
 });

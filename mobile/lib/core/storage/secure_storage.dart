@@ -18,6 +18,8 @@ abstract final class SecureStorageKeys {
   static const userId = 'yv_user_id';
   static const userPhone = 'yv_user_phone';
   static const lastUnlockAt = 'yv_last_unlock_at';
+  static const lastRefreshAt = 'yv_last_refresh_at';
+  static const pinSkipped = 'yv_pin_skipped';
 }
 
 class SecureStorage {
@@ -58,6 +60,8 @@ class SecureStorage {
         SecureStorageKeys.userId,
         SecureStorageKeys.userPhone,
         SecureStorageKeys.lastUnlockAt,
+        SecureStorageKeys.lastRefreshAt,
+        SecureStorageKeys.pinSkipped,
       ].map(delete),
     );
   }

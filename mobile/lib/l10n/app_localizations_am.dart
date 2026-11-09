@@ -1784,4 +1784,16 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get orContinueWith => 'ወይም እንደገና ይግቡ';
+
+  @override
+  String get orSignInWithPhone => 'ወይም በስልክ ቁጥሩ ይግቡ';
+
+  @override
+  String get pinSkip => 'አሁን ዝለል';
+
+  @override
+  String get profileSetUpPin => 'PIN ያቀናብሩ';
+
+  @override
+  String get profileSetUpPinSubtitle => 'መለያዎን ለመጠበቅ PIN ይምረጡ';
 }
