@@ -227,6 +227,11 @@ export class AppConfigService {
     } as const;
   }
 
+  // ── Firebase Admin (Google ID token verification) ─────────────────────
+  get firebaseProjectId() {
+    return this.value('FIREBASE_PROJECT_ID');
+  }
+
   // ── Payment destinations (Step 16 billing flow) ─────────────────────────
   get payment() {
     return {

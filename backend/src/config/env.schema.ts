@@ -311,6 +311,12 @@ export const envSchema = z
     // Explicit FCM provider selection; empty defers to FCM_MOCK.
     FCM_PROVIDER: z.union([z.literal('mock'), z.literal('firebase'), z.literal('')]).default(''),
 
+    // ── Firebase Admin (Google ID token verification) ─────────────────────
+    // Path to service-account JSON used by firebase-admin.default app.
+    GOOGLE_APPLICATION_CREDENTIALS: z.string().optional().default(''),
+    // Firebase project ID for verifyIdToken audience check.
+    FIREBASE_PROJECT_ID: z.string().min(1, 'must not be empty').default('yeneverify'),
+
     // ── Payment destinations (Step 16 billing flow) ───────────────────────
     // Shown to merchants by POST /billing/initiate. MVP: hardcoded env
     // values (the real CBE/Telebirr accounts are business decisions,

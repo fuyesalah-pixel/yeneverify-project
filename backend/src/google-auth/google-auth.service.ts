@@ -4,7 +4,8 @@
 // the same session tokens as OTP login. Phone remains the primary identity.
 // ============================================================
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import * as admin from 'firebase-admin';
 import { AppConfigService } from '../config/config.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TokenService } from '../auth/tokens/token.service';
@@ -13,6 +14,7 @@ import { DeviceService } from '../auth/device/device.service';
 import { AuditService } from '../audit/audit.service';
 import { RedisService } from '../redis/redis.service';
 import { DevicePlatform } from '@prisma/client';
+import { FIREBASE_ADMIN } from '../common/firebase/firebase-admin.provider';
 import {
   GoogleAlreadyLinkedError,
   GoogleAlreadyPairedError,
@@ -79,6 +81,7 @@ export class GoogleAuthService {
     private readonly deviceService: DeviceService,
     private readonly audit: AuditService,
     private readonly redis: RedisService,
+    @Inject(FIREBASE_ADMIN) private readonly firebaseAdmin: admin.app.App,
   ) {}
 
   /**
@@ -751,11 +754,10 @@ export class GoogleAuthService {
     email: string;
     email_verified: boolean;
   }> {
-    // Production: firebase-admin.auth().verifyIdToken(idToken).
-    // Imported lazily so the module loads in environments without the SDK
-    // configured (unit tests stub this method).
+    // Production: firebase-admin.auth(app).verifyIdToken(idToken).
+    // Injected default app initialized from GOOGLE_APPLICATION_CREDENTIALS.
     const { getAuth } = await import('firebase-admin/auth');
-    const decoded = await getAuth().verifyIdToken(idToken);
+    const decoded = await getAuth(this.firebaseAdmin).verifyIdToken(idToken);
     return {
       sub: decoded.uid,
       email: decoded.email ?? '',

@@ -13,6 +13,7 @@ services:
       - yene-internal
     volumes:
       - ../.storage/receipts:/app/.storage/receipts
+      - ../backend/secrets:/app/secrets:ro
     ports:
       - "127.0.0.1:3100:3000"
     depends_on:
