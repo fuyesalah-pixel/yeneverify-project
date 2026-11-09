@@ -270,8 +270,13 @@ model User {
   googleEmail     String?   @map("google_email")
   googleLinkedAt  DateTime? @map("google_linked_at") @db.Timestamptz(6)
 
+  // Phone pairing (Google-first signup). Set when a phone is first paired
+  // to this user during onboarding. Null until paired.
+  phonePairedAt   DateTime? @map("phone_paired_at") @db.Timestamptz(6)
+
   // Relations
   devices                 Device[]
+  userDevices             UserDevice[]
   sessions                Session[]
   ownedMerchant           Merchant?             @relation("MerchantOwner")
   subMerchantProfile      SubMerchant?          @relation("SubMerchantUser")
@@ -335,6 +340,24 @@ model Device {
   @@index([pushToken])
   @@unique([userId, deviceFingerprint])
   @@map("devices")
+}
+
+/// Device-account pairings. Tracks which Google accounts (users) are
+/// paired to which device fingerprints. Max 2 accounts per device
+/// (enforced in service layer). Phone remains the business identity.
+model UserDevice {
+  id                String     @id @db.Uuid
+  userId            String     @map("user_id") @db.Uuid
+  deviceFingerprint String     @map("device_fingerprint")
+  pairedAt          DateTime   @default(now()) @map("paired_at") @db.Timestamptz(6)
+  lastActiveAt      DateTime?  @map("last_active_at") @db.Timestamptz(6)
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceFingerprint])
+  @@unique([userId, deviceFingerprint])
+  @@map("user_devices")
 }
 
 /// Refresh-token sessions. One row per login. Rotated on every refresh.
