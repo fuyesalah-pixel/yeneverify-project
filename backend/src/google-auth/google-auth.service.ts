@@ -762,12 +762,17 @@ export class GoogleAuthService {
     // Production: firebase-admin.auth(app).verifyIdToken(idToken).
     // Injected default app initialized from GOOGLE_APPLICATION_CREDENTIALS.
     const { getAuth } = await import('firebase-admin/auth');
-    const decoded = await getAuth(this.firebaseAdmin).verifyIdToken(idToken);
-    return {
-      sub: decoded.uid,
-      email: decoded.email ?? '',
-      email_verified: !!decoded.email_verified,
-    };
+    try {
+      const decoded = await getAuth(this.firebaseAdmin).verifyIdToken(idToken);
+      return {
+        sub: decoded.uid,
+        email: decoded.email ?? '',
+        email_verified: !!decoded.email_verified,
+      };
+    } catch (e) {
+      console.error('FIREBASE_VERIFY_ID_TOKEN_ERROR:', e);
+      throw e;
+    }
   }
 
   private parseTtl(ttl: string): number {
