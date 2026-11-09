@@ -4,7 +4,7 @@
 // the same session tokens as OTP login. Phone remains the primary identity.
 // ============================================================
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { AppConfigService } from '../config/config.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -82,6 +82,7 @@ export class GoogleAuthService {
     private readonly audit: AuditService,
     private readonly redis: RedisService,
     @Inject(FIREBASE_ADMIN) private readonly firebaseAdmin: admin.app.App,
+    private readonly logger = new Logger(GoogleAuthService.name),
   ) {}
 
   /**
@@ -110,7 +111,8 @@ export class GoogleAuthService {
     let decoded;
     try {
       decoded = await this.verifyIdToken(idToken);
-    } catch {
+    } catch (e) {
+      this.logger.error('Google ID token verification failed:', e);
       throw new GoogleTokenInvalidError();
     }
 
@@ -215,7 +217,8 @@ export class GoogleAuthService {
     let decoded;
     try {
       decoded = await this.verifyIdToken(idToken);
-    } catch {
+    } catch (e) {
+      this.logger.error('Google ID token verification failed:', e);
       throw new GoogleTokenInvalidError();
     }
 
@@ -429,7 +432,8 @@ export class GoogleAuthService {
     let decoded;
     try {
       decoded = await this.verifyIdToken(idToken);
-    } catch {
+    } catch (e) {
+      this.logger.error('Google ID token verification failed:', e);
       throw new GoogleTokenInvalidError();
     }
 
@@ -596,7 +600,8 @@ export class GoogleAuthService {
     let decoded;
     try {
       decoded = await this.verifyIdToken(idToken);
-    } catch {
+    } catch (e) {
+      this.logger.error('Google ID token verification failed:', e);
       throw new GoogleTokenInvalidError();
     }
 

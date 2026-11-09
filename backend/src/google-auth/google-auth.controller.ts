@@ -171,7 +171,7 @@ export class GoogleAuthController {
   @Public()
   @SkipOnboarding()
   @SkipTenant()
-  @Get('device-accounts')
+  @Post('device-accounts')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'List accounts paired to a device fingerprint' })
   @ApiResponse({ status: 200, description: 'Paired accounts on this device' })
