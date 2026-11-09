@@ -67,6 +67,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'No internet connection. Please check your network.';
 
   @override
+  String networkCantReachServer(String host) {
+    return 'Can\'t reach $host. Check your internet or try again.';
+  }
+
+  @override
+  String get networkServerNotResponding =>
+      'The server is not responding. Please try again in a moment.';
+
+  @override
+  String get networkTimeoutServer =>
+      'The server is taking too long. Please try again.';
+
+  @override
+  String get networkNoRoute => 'Can\'t reach the server. Check your internet.';
+
+  @override
+  String get networkGeneric => 'Network problem. Please try again.';
+
+  @override
   String get sessionExpired => 'Your session has expired. Please log in again.';
 
   @override
@@ -393,7 +412,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'You will need to verify your identity to log back in.';
 
   @override
-  String get devicesTitle => 'Trusted devices';
+  String get devicesTitle => 'Google accounts on this device';
 
   @override
   String get deviceThisDevice => 'This device';
@@ -1736,4 +1755,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get billingFeatureSeatsUnlimited => 'Unlimited team members';
+
+  @override
+  String get googleSignInTitle => 'Sign in with Google';
+
+  @override
+  String get googleSignInSubtitle =>
+      'Use your Google account to sign in quickly and securely.';
+
+  @override
+  String get googleSignInButton => 'Continue with Google';
+
+  @override
+  String get googlePairPhoneTitle => 'Pair your phone';
+
+  @override
+  String get googlePairPhoneSubtitle =>
+      'Link your Ethiopian phone number to your Google account';
+
+  @override
+  String get googlePairPhoneBody =>
+      'Enter your phone number and full name to complete signup.';
+
+  @override
+  String get googlePairPhoneButton => 'Continue';
+
+  @override
+  String get fullNameHint => 'e.g., Selam Ayele';
+
+  @override
+  String devicePhoneSuffix(String last4) {
+    return '...$last4';
+  }
+
+  @override
+  String get deviceRemove => 'Remove';
+
+  @override
+  String deviceRemoveConfirmTitle(String email) {
+    return 'Remove $email?';
+  }
+
+  @override
+  String get deviceRemoveConfirmBody =>
+      'You will need to re-authenticate with Google on this device.';
+
+  @override
+  String get settingsSignInMethods => 'Sign-in methods';
+
+  @override
+  String get settingsSignInPhone => 'Phone';
+
+  @override
+  String get settingsSignInPhoneSubtitle =>
+      'Sign in with your phone number and PIN';
+
+  @override
+  String get settingsSignInGoogle => 'Google';
+
+  @override
+  String get settingsSignInGoogleSubtitle => 'Sign in with your Google account';
+
+  @override
+  String get settingsSignInGoogleNotLinked => 'Not linked to this device';
+
+  @override
+  String get settingsDevicesTitle => 'Paired devices';
+
+  @override
+  String get settingsPhone => 'Phone number';
+
+  @override
+  String get profileUnknownUser => 'User';
+
+  @override
+  String get orContinueWith => 'or continue with';
 }

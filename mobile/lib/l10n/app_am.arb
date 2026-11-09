@@ -20,6 +20,11 @@
   "requiredField": "ይህ መስክ ያስፈልጋል",
   "genericError": "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
   "networkError": "የኢንተርኔት ግንኙነት የለም። ኔትወርክዎን ያረጋግጡ።",
+  "networkCantReachServer": "ወደ {host} ማዳረስ አልተቻለም። ኢንተርኔትዎን ያረጋግጡ ወይም እንደገና ይሞክሩ።",
+  "networkServerNotResponding": "አገልጋዩ ምላሽ እየሰጠ አይደለም። ከጥቂት ጊዜ በኋላ እንደገና ይሞክሩ።",
+  "networkTimeoutServer": "አገልጋዩ በጣም ረጅም ጊዜ እየወሰደ ነው። እባክዎ እንደገና ይሞክሩ።",
+  "networkNoRoute": "ወደ አገልጋዩ ማዳረስ አልተቻለም። ኢንተርኔትዎን ያረጋግጡ።",
+  "networkGeneric": "የኔትወርክ ችግር። እባክዎ እንደገና ይሞክሩ።",
   "sessionExpired": "ክፍለ ጊዜዎ ጊዜው አልፏል። እንደገና ይግቡ።",
   "phoneNumber": "ስልክ ቁጥር",
   "phoneHint": "+251 9XX XXX XXX",
@@ -769,5 +774,65 @@
     }
   },
   "billingFeatureSeatsUnlimited": "ያልተገደበ የቡድን አባላት",
-  "@billingFeatureSeatsUnlimited": {}
+  "@billingFeatureSeatsUnlimited": {},
+  "googleSignInTitle": "በGoogle ይግቡ",
+  "@googleSignInTitle": {},
+  "googleSignInSubtitle": "የGoogle መለያዎን ይጠቀሙ እና በጥቂት ሰከንዶች ውስጥ ይግቡ።",
+  "@googleSignInSubtitle": {},
+  "googleSignInButton": "በGoogle ይግቡ",
+  "@googleSignInButton": {},
+  "googlePairPhoneTitle": "ስልክዎን ያገናኙ",
+  "@googlePairPhoneTitle": {},
+  "googlePairPhoneSubtitle": "የGoogle መለያዎን ከየተማ የኢትዮጵያ ስልክ ቁጥሩን ያገናኙ",
+  "@googlePairPhoneSubtitle": {},
+  "googlePairPhoneBody": "ስልክ ቁጥሩን እና ሙሉ ስምዎን ያስገቡ እና መመዝገብዎን ያደረግቡ።",
+  "@googlePairPhoneBody": {},
+  "googlePairPhoneButton": "ቀጥል",
+  "@googlePairPhoneButton": {},
+  "fullNameHint": "ለምሳሌ፦ ሰላም አየሌ",
+  "@fullNameHint": {},
+  "devicesTitle": "በዚህ መሳሪያ ውስጥ የGoogle መለያዎች",
+  "@devicesTitle": {},
+  "devicePhoneSuffix": "...{last4}",
+  "@devicePhoneSuffix": {
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceRemove": "አስወግድ",
+  "@deviceRemove": {},
+  "deviceRemoveConfirmTitle": "{email}ን አስወግድ ይላሉ?",
+  "@deviceRemoveConfirmTitle": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceRemoveConfirmBody": "ዳግም በዚህ መሳሪያ ውስጥ ከGoogle ጋር መግባት ይሞክራል።",
+  "@deviceRemoveConfirmBody": {},
+  "settingsTitle": "ቅንብሮች",
+  "@settingsTitle": {},
+  "settingsSignInMethods": "የመግባት ዘዴዎች",
+  "@settingsSignInMethods": {},
+  "settingsSignInPhone": "ስልክ",
+  "@settingsSignInPhone": {},
+  "settingsSignInPhoneSubtitle": "በስልክ ቁጥሩ እና PIN ይግቡ",
+  "@settingsSignInPhoneSubtitle": {},
+  "settingsSignInGoogle": "Google",
+  "@settingsSignInGoogle": {},
+  "settingsSignInGoogleSubtitle": "በGoogle መለያ ይግቡ",
+  "@settingsSignInGoogleSubtitle": {},
+  "settingsSignInGoogleNotLinked": "በዚህ መሳሪያ አልተገናኙም",
+  "@settingsSignInGoogleNotLinked": {},
+  "settingsDevicesTitle": "የገብተው መሳሪያዎች",
+  "@settingsDevicesTitle": {},
+  "settingsPhone": "የስልክ ቁጥር",
+  "@settingsPhone": {},
+  "profileUnknownUser": "ተጠቃሚ",
+  "@profileUnknownUser": {},
+  "orContinueWith": "ወይም እንደገና ይግቡ",
+  "@orContinueWith": {}
 }

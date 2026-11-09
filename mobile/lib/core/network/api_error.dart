@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:yene_verify/l10n/app_localizations.dart';
 
+import '../env/app_env.dart';
+
 /// # ApiError
 ///
 /// Typed error surfaced from every network call. Carries the backend's
@@ -15,6 +17,7 @@ class ApiError implements Exception {
     this.httpStatus,
     this.retryAfterSeconds,
     this.kind = ApiErrorKind.server,
+    this.networkCause,
   });
 
   /// Backend error code, e.g. `AUTH_INVALID_OTP`. Null when the failure
@@ -31,8 +34,18 @@ class ApiError implements Exception {
 
   final ApiErrorKind kind;
 
-  static const ApiError network = ApiError(kind: ApiErrorKind.network);
-  static const ApiError timeout = ApiError(kind: ApiErrorKind.timeout);
+  /// Socket-level reason a network call failed, when the platform exposed one.
+  /// Distinguishes "our server is unreachable" from "the device is offline".
+  final NetworkFailureCause? networkCause;
+
+  static const ApiError network = ApiError(
+    kind: ApiErrorKind.network,
+    networkCause: NetworkFailureCause.other,
+  );
+  static const ApiError timeout = ApiError(
+    kind: ApiErrorKind.timeout,
+    networkCause: NetworkFailureCause.timeout,
+  );
   static const ApiError serverError = ApiError(kind: ApiErrorKind.server);
   static const ApiError unauthorized = ApiError(
     kind: ApiErrorKind.auth,
@@ -50,6 +63,10 @@ class ApiError implements Exception {
 }
 
 enum ApiErrorKind { network, timeout, auth, validation, server }
+
+/// The socket-level cause of a failed connection. `other` means the call did
+/// fail but the platform did not name a reason we can explain to the user.
+enum NetworkFailureCause { dns, refused, timeout, noRoute, other }
 
 /// # Error-code mapping
 ///
@@ -140,6 +157,10 @@ ApiError apiErrorFromDio(Object error) {
     if (error.type == DioExceptionType.connectionError ||
         error.type == DioExceptionType.connectionTimeout ||
         error.type == DioExceptionType.sendTimeout) {
+      // A dead host, a refused port and an offline device all land here, so
+      // read the underlying socket error before falling back to "timed out".
+      final socketCause = networkCauseOf(error.error);
+      if (socketCause != null) return _networkError(socketCause);
       return error.type == DioExceptionType.connectionTimeout
           ? ApiError.timeout
           : ApiError.network;
@@ -149,15 +170,59 @@ ApiError apiErrorFromDio(Object error) {
     }
 
     // Socket exceptions escape Dio's wrapper on some platforms.
-    if (error.error is SocketException) return ApiError.network;
+    final socketCause = networkCauseOf(error.error);
+    if (socketCause != null) return _networkError(socketCause);
 
     return const ApiError(
       code: 'NETWORK_ERROR',
       kind: ApiErrorKind.network,
+      networkCause: NetworkFailureCause.other,
     );
   }
 
   return const ApiError(kind: ApiErrorKind.server);
+}
+
+ApiError _networkError(NetworkFailureCause cause) => ApiError(
+      kind: cause == NetworkFailureCause.timeout
+          ? ApiErrorKind.timeout
+          : ApiErrorKind.network,
+      networkCause: cause,
+    );
+
+/// Android/Linux `errno` values and Windows WSA codes for the connect-time
+/// failures we can name. `getaddrinfo` returns negative EAI_* codes on Android,
+/// so DNS failures are matched on both code and message.
+const _dnsCodes = {-2, -3, -4, -5, 11001, 11002, 11004};
+const _refusedCodes = {111, 10061};
+const _timedOutCodes = {110, 10060};
+const _noRouteCodes = {101, 113, 10051, 10065};
+
+/// Classifies a socket failure so the UI can say what actually went wrong.
+/// Returns null when [error] is not a socket failure we can inspect.
+NetworkFailureCause? networkCauseOf(Object? error) {
+  if (error is! SocketException) return null;
+
+  final code = error.osError?.errorCode;
+  final text = '${error.message} ${error.osError?.message ?? ''}'.toLowerCase();
+
+  if (text.contains('failed host lookup') || _dnsCodes.contains(code)) {
+    return NetworkFailureCause.dns;
+  }
+  if (text.contains('connection refused') || _refusedCodes.contains(code)) {
+    return NetworkFailureCause.refused;
+  }
+  if (text.contains('timed out') ||
+      text.contains('timeout') ||
+      _timedOutCodes.contains(code)) {
+    return NetworkFailureCause.timeout;
+  }
+  if (text.contains('unreachable') ||
+      text.contains('no route to host') ||
+      _noRouteCodes.contains(code)) {
+    return NetworkFailureCause.noRoute;
+  }
+  return NetworkFailureCause.other;
 }
 
 ApiErrorKind _kindFromStatus(int? status) {
@@ -231,15 +296,46 @@ extension ApiErrorX on ApiError {
           'This account has been suspended. Contact support.';
     }
     if (code != null && ApiErrorCodes.sessionInvalid.contains(code)) {
-      return l10n?.sessionExpired ?? 'Your session has expired. Please log in again.';
+      return l10n?.sessionExpired ??
+          'Your session has expired. Please log in again.';
     }
     if (code != null && ApiErrorCodes.biometricNotEnabled.contains(code)) {
       return l10n?.biometricFailed ??
           'Biometric authentication failed. Use your PIN.';
     }
     if (kind == ApiErrorKind.network || kind == ApiErrorKind.timeout) {
-      return l10n?.networkError ?? 'Check your connection and try again.';
+      return _networkMessage(l10n);
     }
     return l10n?.genericError ?? 'Something went wrong. Please try again.';
+  }
+
+  /// A network failure is not necessarily "no internet": the merchant's link
+  /// can be fine while our server is down. Report the socket-level cause.
+  String _networkMessage(AppLocalizations? l10n) {
+    switch (networkCause) {
+      case NetworkFailureCause.dns:
+        final host = _apiHost;
+        return l10n?.networkCantReachServer(host) ??
+            "Can't reach $host. Check your internet or try again.";
+      case NetworkFailureCause.refused:
+        return l10n?.networkServerNotResponding ??
+            'The server is not responding. Please try again in a moment.';
+      case NetworkFailureCause.timeout:
+        return l10n?.networkTimeoutServer ??
+            'The server is taking too long. Please try again.';
+      case NetworkFailureCause.noRoute:
+        return l10n?.networkNoRoute ??
+            "Can't reach the server. Check your internet.";
+      case NetworkFailureCause.other:
+      case null:
+        return l10n?.networkGeneric ?? 'Network problem. Please try again.';
+    }
+  }
+
+  /// Host shown to the user, taken from the build's API URL so the copy stays
+  /// truthful when the base URL changes.
+  String get _apiHost {
+    final host = Uri.tryParse(AppEnv.apiBaseUrl)?.host ?? '';
+    return host.isEmpty ? AppEnv.apiBaseUrl : host;
   }
 }

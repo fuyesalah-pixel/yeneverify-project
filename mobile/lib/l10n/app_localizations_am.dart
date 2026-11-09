@@ -66,6 +66,25 @@ class AppLocalizationsAm extends AppLocalizations {
   String get networkError => 'የኢንተርኔት ግንኙነት የለም። ኔትወርክዎን ያረጋግጡ።';
 
   @override
+  String networkCantReachServer(String host) {
+    return 'ወደ $host ማዳረስ አልተቻለም። ኢንተርኔትዎን ያረጋግጡ ወይም እንደገና ይሞክሩ።';
+  }
+
+  @override
+  String get networkServerNotResponding =>
+      'አገልጋዩ ምላሽ እየሰጠ አይደለም። ከጥቂት ጊዜ በኋላ እንደገና ይሞክሩ።';
+
+  @override
+  String get networkTimeoutServer =>
+      'አገልጋዩ በጣም ረጅም ጊዜ እየወሰደ ነው። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get networkNoRoute => 'ወደ አገልጋዩ ማዳረስ አልተቻለም። ኢንተርኔትዎን ያረጋግጡ።';
+
+  @override
+  String get networkGeneric => 'የኔትወርክ ችግር። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
   String get sessionExpired => 'ክፍለ ጊዜዎ ጊዜው አልፏል። እንደገና ይግቡ።';
 
   @override
@@ -380,7 +399,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get logoutConfirmBody => 'ለመግባት ማንነትዎን ማረጋገጥ ያስፈልግዎታል።';
 
   @override
-  String get devicesTitle => 'የታመኑ መሳሪያዎች';
+  String get devicesTitle => 'በዚህ መሳሪያ ውስጥ የGoogle መለያዎች';
 
   @override
   String get deviceThisDevice => 'ይህ መሳሪያ';
@@ -1691,4 +1710,78 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get billingFeatureSeatsUnlimited => 'ያልተገደበ የቡድን አባላት';
+
+  @override
+  String get googleSignInTitle => 'በGoogle ይግቡ';
+
+  @override
+  String get googleSignInSubtitle =>
+      'የGoogle መለያዎን ይጠቀሙ እና በጥቂት ሰከንዶች ውስጥ ይግቡ።';
+
+  @override
+  String get googleSignInButton => 'በGoogle ይግቡ';
+
+  @override
+  String get googlePairPhoneTitle => 'ስልክዎን ያገናኙ';
+
+  @override
+  String get googlePairPhoneSubtitle =>
+      'የGoogle መለያዎን ከየተማ የኢትዮጵያ ስልክ ቁጥሩን ያገናኙ';
+
+  @override
+  String get googlePairPhoneBody =>
+      'ስልክ ቁጥሩን እና ሙሉ ስምዎን ያስገቡ እና መመዝገብዎን ያደረግቡ።';
+
+  @override
+  String get googlePairPhoneButton => 'ቀጥል';
+
+  @override
+  String get fullNameHint => 'ለምሳሌ፦ ሰላም አየሌ';
+
+  @override
+  String devicePhoneSuffix(String last4) {
+    return '...$last4';
+  }
+
+  @override
+  String get deviceRemove => 'አስወግድ';
+
+  @override
+  String deviceRemoveConfirmTitle(String email) {
+    return '$emailን አስወግድ ይላሉ?';
+  }
+
+  @override
+  String get deviceRemoveConfirmBody =>
+      'ዳግም በዚህ መሳሪያ ውስጥ ከGoogle ጋር መግባት ይሞክራል።';
+
+  @override
+  String get settingsSignInMethods => 'የመግባት ዘዴዎች';
+
+  @override
+  String get settingsSignInPhone => 'ስልክ';
+
+  @override
+  String get settingsSignInPhoneSubtitle => 'በስልክ ቁጥሩ እና PIN ይግቡ';
+
+  @override
+  String get settingsSignInGoogle => 'Google';
+
+  @override
+  String get settingsSignInGoogleSubtitle => 'በGoogle መለያ ይግቡ';
+
+  @override
+  String get settingsSignInGoogleNotLinked => 'በዚህ መሳሪያ አልተገናኙም';
+
+  @override
+  String get settingsDevicesTitle => 'የገብተው መሳሪያዎች';
+
+  @override
+  String get settingsPhone => 'የስልክ ቁጥር';
+
+  @override
+  String get profileUnknownUser => 'ተጠቃሚ';
+
+  @override
+  String get orContinueWith => 'ወይም እንደገና ይግቡ';
 }

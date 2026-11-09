@@ -212,6 +212,36 @@ abstract class AppLocalizations {
   /// **'No internet connection. Please check your network.'**
   String get networkError;
 
+  /// Shown when the API host cannot be reached at all (DNS lookup or host failure).
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach {host}. Check your internet or try again.'**
+  String networkCantReachServer(String host);
+
+  /// No description provided for @networkServerNotResponding.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is not responding. Please try again in a moment.'**
+  String get networkServerNotResponding;
+
+  /// No description provided for @networkTimeoutServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is taking too long. Please try again.'**
+  String get networkTimeoutServer;
+
+  /// No description provided for @networkNoRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach the server. Check your internet.'**
+  String get networkNoRoute;
+
+  /// No description provided for @networkGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Network problem. Please try again.'**
+  String get networkGeneric;
+
   /// No description provided for @sessionExpired.
   ///
   /// In en, this message translates to:
@@ -791,7 +821,7 @@ abstract class AppLocalizations {
   /// No description provided for @devicesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Trusted devices'**
+  /// **'Google accounts on this device'**
   String get devicesTitle;
 
   /// No description provided for @deviceThisDevice.
@@ -3199,6 +3229,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unlimited team members'**
   String get billingFeatureSeatsUnlimited;
+
+  /// No description provided for @googleSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get googleSignInTitle;
+
+  /// No description provided for @googleSignInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your Google account to sign in quickly and securely.'**
+  String get googleSignInSubtitle;
+
+  /// No description provided for @googleSignInButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get googleSignInButton;
+
+  /// No description provided for @googlePairPhoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pair your phone'**
+  String get googlePairPhoneTitle;
+
+  /// No description provided for @googlePairPhoneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link your Ethiopian phone number to your Google account'**
+  String get googlePairPhoneSubtitle;
+
+  /// No description provided for @googlePairPhoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number and full name to complete signup.'**
+  String get googlePairPhoneBody;
+
+  /// No description provided for @googlePairPhoneButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get googlePairPhoneButton;
+
+  /// No description provided for @fullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Selam Ayele'**
+  String get fullNameHint;
+
+  /// No description provided for @devicePhoneSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'...{last4}'**
+  String devicePhoneSuffix(String last4);
+
+  /// No description provided for @deviceRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get deviceRemove;
+
+  /// No description provided for @deviceRemoveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {email}?'**
+  String deviceRemoveConfirmTitle(String email);
+
+  /// No description provided for @deviceRemoveConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You will need to re-authenticate with Google on this device.'**
+  String get deviceRemoveConfirmBody;
+
+  /// No description provided for @settingsSignInMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in methods'**
+  String get settingsSignInMethods;
+
+  /// No description provided for @settingsSignInPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get settingsSignInPhone;
+
+  /// No description provided for @settingsSignInPhoneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your phone number and PIN'**
+  String get settingsSignInPhoneSubtitle;
+
+  /// No description provided for @settingsSignInGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google'**
+  String get settingsSignInGoogle;
+
+  /// No description provided for @settingsSignInGoogleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your Google account'**
+  String get settingsSignInGoogleSubtitle;
+
+  /// No description provided for @settingsSignInGoogleNotLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not linked to this device'**
+  String get settingsSignInGoogleNotLinked;
+
+  /// No description provided for @settingsDevicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paired devices'**
+  String get settingsDevicesTitle;
+
+  /// No description provided for @settingsPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get settingsPhone;
+
+  /// No description provided for @profileUnknownUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get profileUnknownUser;
+
+  /// No description provided for @orContinueWith.
+  ///
+  /// In en, this message translates to:
+  /// **'or continue with'**
+  String get orContinueWith;
 }
 
 class _AppLocalizationsDelegate

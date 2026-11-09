@@ -45,6 +45,24 @@
   "@genericError": {},
   "networkError": "No internet connection. Please check your network.",
   "@networkError": {},
+  "networkCantReachServer": "Can't reach {host}. Check your internet or try again.",
+  "@networkCantReachServer": {
+    "description": "Shown when the API host cannot be reached at all (DNS lookup or host failure).",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "example": "api.mekatanker.shop"
+      }
+    }
+  },
+  "networkServerNotResponding": "The server is not responding. Please try again in a moment.",
+  "@networkServerNotResponding": {},
+  "networkTimeoutServer": "The server is taking too long. Please try again.",
+  "@networkTimeoutServer": {},
+  "networkNoRoute": "Can't reach the server. Check your internet.",
+  "@networkNoRoute": {},
+  "networkGeneric": "Network problem. Please try again.",
+  "@networkGeneric": {},
   "sessionExpired": "Your session has expired. Please log in again.",
   "@sessionExpired": {},
   "phoneNumber": "Phone number",
@@ -1276,5 +1294,65 @@
     }
   },
   "billingFeatureSeatsUnlimited": "Unlimited team members",
-  "@billingFeatureSeatsUnlimited": {}
+  "@billingFeatureSeatsUnlimited": {},
+  "googleSignInTitle": "Sign in with Google",
+  "@googleSignInTitle": {},
+  "googleSignInSubtitle": "Use your Google account to sign in quickly and securely.",
+  "@googleSignInSubtitle": {},
+  "googleSignInButton": "Continue with Google",
+  "@googleSignInButton": {},
+  "googlePairPhoneTitle": "Pair your phone",
+  "@googlePairPhoneTitle": {},
+  "googlePairPhoneSubtitle": "Link your Ethiopian phone number to your Google account",
+  "@googlePairPhoneSubtitle": {},
+  "googlePairPhoneBody": "Enter your phone number and full name to complete signup.",
+  "@googlePairPhoneBody": {},
+  "googlePairPhoneButton": "Continue",
+  "@googlePairPhoneButton": {},
+  "fullNameHint": "e.g., Selam Ayele",
+  "@fullNameHint": {},
+  "devicesTitle": "Google accounts on this device",
+  "@devicesTitle": {},
+  "devicePhoneSuffix": "...{last4}",
+  "@devicePhoneSuffix": {
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceRemove": "Remove",
+  "@deviceRemove": {},
+  "deviceRemoveConfirmTitle": "Remove {email}?",
+  "@deviceRemoveConfirmTitle": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceRemoveConfirmBody": "You will need to re-authenticate with Google on this device.",
+  "@deviceRemoveConfirmBody": {},
+  "settingsTitle": "Settings",
+  "@settingsTitle": {},
+  "settingsSignInMethods": "Sign-in methods",
+  "@settingsSignInMethods": {},
+  "settingsSignInPhone": "Phone",
+  "@settingsSignInPhone": {},
+  "settingsSignInPhoneSubtitle": "Sign in with your phone number and PIN",
+  "@settingsSignInPhoneSubtitle": {},
+  "settingsSignInGoogle": "Google",
+  "@settingsSignInGoogle": {},
+  "settingsSignInGoogleSubtitle": "Sign in with your Google account",
+  "@settingsSignInGoogleSubtitle": {},
+  "settingsSignInGoogleNotLinked": "Not linked to this device",
+  "@settingsSignInGoogleNotLinked": {},
+  "settingsDevicesTitle": "Paired devices",
+  "@settingsDevicesTitle": {},
+  "settingsPhone": "Phone number",
+  "@settingsPhone": {},
+  "profileUnknownUser": "User",
+  "@profileUnknownUser": {},
+  "orContinueWith": "or continue with",
+  "@orContinueWith": {}
 }
