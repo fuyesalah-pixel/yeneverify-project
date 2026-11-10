@@ -48,69 +48,7 @@ AuthApi _api(_FakeAdapter adapter) {
   return AuthApi(dio);
 }
 
-const _verifyBody = {
-  'tokens': {
-    'accessToken': 'access-1',
-    'refreshToken': 'refresh-1',
-    'expiresIn': 900,
-  },
-  'user': {
-    'id': 'user-1',
-    'phone': '+251911555001',
-    'fullName': '',
-    'role': 'MERCHANT',
-    'status': 'ACTIVE',
-    'needsPinSetup': true,
-    'needsOnboarding': true,
-  },
-  'device': {
-    'id': 'device-1',
-    'fingerprint': 'fp-1',
-    'platform': 'ANDROID',
-  },
-};
-
 void main() {
-  test('verifyOtp posts phone/code/device and parses the enveloped payload',
-      () async {
-    final adapter = _FakeAdapter(
-      (_) => _json({'success': true, 'data': _verifyBody}),
-    );
-
-    final result = await _api(adapter).verifyOtp(
-      phone: '+251911555001',
-      code: '123456',
-      device: {'fingerprint': 'fp-1', 'platform': 'ANDROID'},
-    );
-
-    expect(result, isA<Success<AuthResponse>>());
-    final response = (result as Success<AuthResponse>).data;
-    expect(response.tokens.accessToken, 'access-1');
-    expect(response.tokens.refreshToken, 'refresh-1');
-    expect(response.device.id, 'device-1');
-    expect(response.user.needsPinSetup, isTrue);
-
-    final request = adapter.requests.single;
-    expect(request.path, '/auth/verify-otp');
-    expect(request.method, 'POST');
-    expect(request.data, {
-      'phone': '+251911555001',
-      'code': '123456',
-      'device': {'fingerprint': 'fp-1', 'platform': 'ANDROID'},
-    });
-  });
-
-  test('requestOtp tolerates a flat (unenveloped) response', () async {
-    final adapter = _FakeAdapter(
-      (_) => _json({'ok': true, 'expiresInSeconds': 300}),
-    );
-
-    final result = await _api(adapter).requestOtp('+251911555001');
-
-    expect(result, isA<Success<OtpRequestResponse>>());
-    expect(adapter.requests.single.path, '/auth/request-otp');
-  });
-
   test('setPin posts the PIN to /auth/pin/set with no body parsing', () async {
     final adapter = _FakeAdapter((_) => _json({'success': true}));
 
@@ -188,10 +126,10 @@ void main() {
   test('maps a connection failure to a network ApiError', () async {
     final dio = Dio(BaseOptions(baseUrl: 'http://test.local/api/v1'));
     dio.httpClientAdapter = _ThrowingAdapter();
-    final result = await AuthApi(dio).requestOtp('+251911555001');
+    final result = await AuthApi(dio).setPin(pin: '1234');
 
-    expect(result, isA<Failure<OtpRequestResponse>>());
-    expect((result as Failure<OtpRequestResponse>).error.isNetwork, isTrue);
+    expect(result, isA<Failure<void>>());
+    expect((result as Failure<void>).error.isNetwork, isTrue);
   });
 }
 

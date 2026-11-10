@@ -32,6 +32,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.primaryActionPressed,
     required this.primaryActionDisabled,
     required this.brandAccent,
+    required this.brandDeep,
     required this.success,
     required this.warning,
     required this.error,
@@ -69,7 +70,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color onPrimary;
 
   /// Primary CTA: buttons, active links, filled primary elements.
-  /// Light: #16A34A (green-700). Dark: #39FF14 (neon green).
+  /// Light: #16A34A. Dark: #22C55E.
   final Color primaryAction;
 
   /// Pressed / tap state of [primaryAction].
@@ -78,10 +79,13 @@ class AppColors extends ThemeExtension<AppColors> {
   /// Disabled state of [primaryAction].
   final Color primaryActionDisabled;
 
-  /// Brand accent: logo checkmark stroke, active tab indicators,
-  /// progress rings, small highlights.
+  /// Brand accent: checkmark, active tab indicators, progress rings,
+  /// small highlights.
   /// ⚠️  NEVER use as a text background — fails WCAG with white text.
   final Color brandAccent;
+
+  /// Deep brand green for gradients and high-emphasis brand surfaces.
+  final Color brandDeep;
 
   /// VERIFIED state, positive outcomes, success toasts.
   final Color success;
@@ -120,24 +124,25 @@ class AppColors extends ThemeExtension<AppColors> {
   /// The official Yene Verify **light** palette.
   static const AppColors light = AppColors(
     background: Color(0xFFFFFFFF),
-    surface: Color(0xFFF7F8FA),
-    surfaceAlt: Color(0xFFF1F3F5),
-    textPrimary: Color(0xFF0A0A0A),
-    textSecondary: Color(0xFF5A5A5A),
+    surface: Color(0xFFF3F4F6),
+    surfaceAlt: Color(0xFFE9EDEA),
+    textPrimary: Color(0xFF14231A),
+    textSecondary: Color(0xFF4B5563),
     textDisabled: Color(0xFF9CA3AF),
-    onPrimary: Color(0xFFFFFFFF),            // white text on green button
-    primaryAction: Color(0xFF16A34A),        // green-700 — WCAG AA on white (large text/buttons)
-    primaryActionPressed: Color(0xFF15803D), // green-800
+    onPrimary: Color(0xFFFFFFFF), // white text on green button
+    primaryAction: Color(0xFF16A34A), // brand primary — WCAG AA on white
+    primaryActionPressed: Color(0xFF0A5F2A), // deep brand green
     primaryActionDisabled: Color(0xFFA7D9B8),
-    brandAccent: Color(0xFF00D54B),          // Cash App green — icons/progress only, never text background
+    brandAccent: Color(0xFF44C624), // lime highlight — never text background
+    brandDeep: Color(0xFF0A5F2A),
     success: Color(0xFF16A34A),
     warning: Color(0xFFF59E0B),
     error: Color(0xFFDC2626),
     info: Color(0xFF2563EB),
     border: Color(0xFFE5E7EB),
-    divider: Color(0xFFF0F1F3),
-    overlay: Color(0x73000000),              // rgba(0,0,0,0.45)
-    snackbarBackground: Color(0xFF1C1C1C),   // always near-black for contrast
+    divider: Color(0xFFF0F2F0),
+    overlay: Color(0x73000000), // rgba(0,0,0,0.45)
+    snackbarBackground: Color(0xFF0A0F0C),
     shimmerBase: Color(0xFFEDEFF2),
     shimmerHighlight: Color(0xFFF7F8FA),
   );
@@ -146,27 +151,28 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// The official Yene Verify **dark** palette.
   static const AppColors dark = AppColors(
-    background: Color(0xFF0A0A0A),
-    surface: Color(0xFF141414),
-    surfaceAlt: Color(0xFF1C1C1C),
-    textPrimary: Color(0xFFFFFFFF),
-    textSecondary: Color(0xFFA1A1A1),
-    textDisabled: Color(0xFF525252),
-    onPrimary: Color(0xFF0A0A0A),            // near-black text on green button
-    primaryAction: Color(0xFF00D54B),        // Cash App green — 9.6:1 on #0A0A0A
-    primaryActionPressed: Color(0xFF00B33F),
-    primaryActionDisabled: Color(0xFF1F5A0F),
-    brandAccent: Color(0xFF00D54B),
-    success: Color(0xFF00D54B),
+    background: Color(0xFF000000),
+    surface: Color(0xFF0A0F0C),
+    surfaceAlt: Color(0xFF132019),
+    textPrimary: Color(0xFFF3F4F6),
+    textSecondary: Color(0xFF9CA3AF),
+    textDisabled: Color(0xFF4B5A51),
+    onPrimary: Color(0xFF04150C), // near-black text on green button
+    primaryAction: Color(0xFF22C55E),
+    primaryActionPressed: Color(0xFF16A34A),
+    primaryActionDisabled: Color(0xFF14532D),
+    brandAccent: Color(0xFF44C624),
+    brandDeep: Color(0xFF0B2A17),
+    success: Color(0xFF22C55E),
     warning: Color(0xFFFBBF24),
     error: Color(0xFFF87171),
     info: Color(0xFF60A5FA),
-    border: Color(0xFF262626),
-    divider: Color(0xFF1A1A1A),
-    overlay: Color(0xA6000000),              // rgba(0,0,0,0.65)
-    snackbarBackground: Color(0xFF1C1C1C),   // same as light — always near-black
-    shimmerBase: Color(0xFF1A1A1A),
-    shimmerHighlight: Color(0xFF262626),
+    border: Color(0xFF1F2A23),
+    divider: Color(0xFF151C18),
+    overlay: Color(0xA6000000), // rgba(0,0,0,0.65)
+    snackbarBackground: Color(0xFF121814),
+    shimmerBase: Color(0xFF141B17),
+    shimmerHighlight: Color(0xFF1F2A23),
   );
 
   // ─── ThemeExtension overrides ─────────────────────────────────────────────
@@ -184,6 +190,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? primaryActionPressed,
     Color? primaryActionDisabled,
     Color? brandAccent,
+    Color? brandDeep,
     Color? success,
     Color? warning,
     Color? error,
@@ -205,8 +212,10 @@ class AppColors extends ThemeExtension<AppColors> {
       onPrimary: onPrimary ?? this.onPrimary,
       primaryAction: primaryAction ?? this.primaryAction,
       primaryActionPressed: primaryActionPressed ?? this.primaryActionPressed,
-      primaryActionDisabled: primaryActionDisabled ?? this.primaryActionDisabled,
+      primaryActionDisabled:
+          primaryActionDisabled ?? this.primaryActionDisabled,
       brandAccent: brandAccent ?? this.brandAccent,
+      brandDeep: brandDeep ?? this.brandDeep,
       success: success ?? this.success,
       warning: warning ?? this.warning,
       error: error ?? this.error,
@@ -232,9 +241,12 @@ class AppColors extends ThemeExtension<AppColors> {
       textDisabled: Color.lerp(textDisabled, other.textDisabled, t)!,
       onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
       primaryAction: Color.lerp(primaryAction, other.primaryAction, t)!,
-      primaryActionPressed: Color.lerp(primaryActionPressed, other.primaryActionPressed, t)!,
-      primaryActionDisabled: Color.lerp(primaryActionDisabled, other.primaryActionDisabled, t)!,
+      primaryActionPressed:
+          Color.lerp(primaryActionPressed, other.primaryActionPressed, t)!,
+      primaryActionDisabled:
+          Color.lerp(primaryActionDisabled, other.primaryActionDisabled, t)!,
       brandAccent: Color.lerp(brandAccent, other.brandAccent, t)!,
+      brandDeep: Color.lerp(brandDeep, other.brandDeep, t)!,
       success: Color.lerp(success, other.success, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
       error: Color.lerp(error, other.error, t)!,
@@ -242,9 +254,11 @@ class AppColors extends ThemeExtension<AppColors> {
       border: Color.lerp(border, other.border, t)!,
       divider: Color.lerp(divider, other.divider, t)!,
       overlay: Color.lerp(overlay, other.overlay, t)!,
-      snackbarBackground: Color.lerp(snackbarBackground, other.snackbarBackground, t)!,
+      snackbarBackground:
+          Color.lerp(snackbarBackground, other.snackbarBackground, t)!,
       shimmerBase: Color.lerp(shimmerBase, other.shimmerBase, t)!,
-      shimmerHighlight: Color.lerp(shimmerHighlight, other.shimmerHighlight, t)!,
+      shimmerHighlight:
+          Color.lerp(shimmerHighlight, other.shimmerHighlight, t)!,
     );
   }
 }

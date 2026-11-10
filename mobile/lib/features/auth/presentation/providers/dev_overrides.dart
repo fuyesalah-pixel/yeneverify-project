@@ -15,7 +15,8 @@ Future<void> devResetAuth(WidgetRef ref) async {
 }
 
 /// Sets the auth state to unlocked with a fake user so Steps 22-27 can be
-/// developed without going through OTP each time. Debug + in-memory only.
+/// developed without going through Google sign-in each time. Debug +
+/// in-memory only.
 void devSkipAuth(WidgetRef ref) {
   if (!kDebugMode) return;
   const fakeUser = User(

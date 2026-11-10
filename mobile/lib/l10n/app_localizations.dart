@@ -113,7 +113,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enter your phone number to get started'**
+  /// **'Sign in with Google to get started'**
   String get loginSubtitle;
 
   /// Primary marketing tagline
@@ -266,42 +266,6 @@ abstract class AppLocalizations {
   /// **'Enter a valid Ethiopian phone number'**
   String get phoneInvalid;
 
-  /// No description provided for @otpTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter verification code'**
-  String get otpTitle;
-
-  /// No description provided for @otpSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'We sent a 6-digit code to {phone}'**
-  String otpSubtitle(String phone);
-
-  /// No description provided for @otpResend.
-  ///
-  /// In en, this message translates to:
-  /// **'Resend code'**
-  String get otpResend;
-
-  /// No description provided for @otpResendIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Resend in {seconds}s'**
-  String otpResendIn(int seconds);
-
-  /// No description provided for @otpInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Incorrect code. Try again.'**
-  String get otpInvalid;
-
-  /// No description provided for @otpExpired.
-  ///
-  /// In en, this message translates to:
-  /// **'Code has expired. Request a new one.'**
-  String get otpExpired;
-
   /// No description provided for @pinIncorrect.
   ///
   /// In en, this message translates to:
@@ -356,11 +320,11 @@ abstract class AppLocalizations {
   /// **'Forgot PIN?'**
   String get pinEntryForgot;
 
-  /// No description provided for @otpMaxAttempts.
+  /// No description provided for @authTooManyAttempts.
   ///
   /// In en, this message translates to:
   /// **'Too many attempts. Please wait before trying again.'**
-  String get otpMaxAttempts;
+  String get authTooManyAttempts;
 
   /// No description provided for @pinTitle.
   ///
@@ -817,12 +781,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You will need to verify your identity to log back in.'**
   String get logoutConfirmBody;
-
-  /// No description provided for @devicesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Google accounts on this device'**
-  String get devicesTitle;
 
   /// No description provided for @deviceThisDevice.
   ///
@@ -2633,7 +2591,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileSignOutConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'You\'ll need to sign in again with your phone and PIN.'**
+  /// **'You\'ll need to sign in again with Google.'**
   String get profileSignOutConfirmBody;
 
   /// No description provided for @profileComingSoon.
@@ -3278,6 +3236,12 @@ abstract class AppLocalizations {
   /// **'e.g., Selam Ayele'**
   String get fullNameHint;
 
+  /// No description provided for @devicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google accounts on this device'**
+  String get devicesTitle;
+
   /// No description provided for @devicePhoneSuffix.
   ///
   /// In en, this message translates to:
@@ -3307,18 +3271,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign-in methods'**
   String get settingsSignInMethods;
-
-  /// No description provided for @settingsSignInPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone'**
-  String get settingsSignInPhone;
-
-  /// No description provided for @settingsSignInPhoneSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in with your phone number and PIN'**
-  String get settingsSignInPhoneSubtitle;
 
   /// No description provided for @settingsSignInGoogle.
   ///
@@ -3355,18 +3307,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User'**
   String get profileUnknownUser;
-
-  /// No description provided for @orContinueWith.
-  ///
-  /// In en, this message translates to:
-  /// **'or continue with'**
-  String get orContinueWith;
-
-  /// No description provided for @orSignInWithPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'or sign in with phone number instead'**
-  String get orSignInWithPhone;
 
   /// No description provided for @pinSkip.
   ///

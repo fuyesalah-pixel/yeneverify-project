@@ -209,36 +209,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     );
   }
 
-  // -- login / OTP -----------------------------------------------------------
-
-  Future<ApiResult<OtpRequestResponse>> requestOtp(String phone) =>
-      repo.requestOtp(phone);
-
-  /// Verifies the OTP, persists the session and moves the state machine to
-  /// either `pinSetup` (first login) or `locked` (returning user). Returns the
-  /// typed error on failure so the OTP screen can localize it.
-  Future<ApiError?> verifyOtp({required String phone, required String code}) async {
-    final result = await repo.verifyOtp(phone: phone, code: code);
-    switch (result) {
-      case Failure<AuthStateResult>(:final error):
-        return error;
-      case Success<AuthStateResult>(:final data):
-        final fingerprint =
-            state.valueOrNull?.deviceFingerprint ?? await repo.getOrCreateFingerprint();
-        state = AsyncValue.data(
-          AuthState(
-            status: data.user.needsPinSetup ? AuthStatus.pinSetup : AuthStatus.locked,
-            user: data.user,
-            accessToken: data.tokens.accessToken,
-            deviceFingerprint: fingerprint,
-            biometricEnabled: await repo.biometricEnabled(),
-            lastLoginPhone: data.user.phone,
-          ),
-        );
-        return null;
-    }
-  }
-
   // -- PIN -------------------------------------------------------------------
 
   /// Persists the PIN server-side and locally. State deliberately stays in
@@ -393,8 +363,8 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   /// Sets the auth state to unlocked with a Google-auth session (tokens +
-  /// user from POST /auth/google/onboard or /auth/google/signin). Skips the
-  /// OTP/PIN flow entirely — Google identity is the source of truth.
+  /// user from POST /auth/google/onboard or /auth/google/signin). Google
+  /// identity is the source of truth — there is no phone verification step.
   /// If the user needs PIN setup, status is `pinSetup` so the router sends
   /// them to the PIN setup screen; otherwise `unlocked` → dashboard.
   Future<void> setGoogleSession({
@@ -431,7 +401,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   /// Debug-only shortcut used by the login screen's "Dev: skip auth" button so
-  /// Steps 22+ can be built without replaying OTP. No-op in release builds.
+  /// Steps 22+ can be built without signing in. No-op in release builds.
   void devUnlock({required User user}) {
     if (kReleaseMode) return;
     final current = state.valueOrNull;

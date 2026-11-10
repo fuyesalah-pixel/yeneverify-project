@@ -7,7 +7,7 @@
   },
   "loginTitle": "Yene Verify",
   "@loginTitle": {},
-  "loginSubtitle": "Enter your phone number to get started",
+  "loginSubtitle": "Sign in with Google to get started",
   "@loginSubtitle": {},
   "taglinePrimary": "Verify any Ethiopian bank payment. In seconds.",
   "@taglinePrimary": {
@@ -71,31 +71,6 @@
   "@phoneHint": {},
   "phoneInvalid": "Enter a valid Ethiopian phone number",
   "@phoneInvalid": {},
-  "otpTitle": "Enter verification code",
-  "@otpTitle": {},
-  "otpSubtitle": "We sent a 6-digit code to {phone}",
-  "@otpSubtitle": {
-    "placeholders": {
-      "phone": {
-        "type": "String",
-        "example": "+251912345678"
-      }
-    }
-  },
-  "otpResend": "Resend code",
-  "@otpResend": {},
-  "otpResendIn": "Resend in {seconds}s",
-  "@otpResendIn": {
-    "placeholders": {
-      "seconds": {
-        "type": "int"
-      }
-    }
-  },
-  "otpInvalid": "Incorrect code. Try again.",
-  "@otpInvalid": {},
-  "otpExpired": "Code has expired. Request a new one.",
-  "@otpExpired": {},
   "pinIncorrect": "Incorrect PIN. Try again.",
   "@pinIncorrect": {},
   "authWeakPin": "PIN is too weak. Use 4 or 6 digits, avoid sequential or repeated numbers.",
@@ -120,8 +95,8 @@
   "@pinEntryTitle": {},
   "pinEntryForgot": "Forgot PIN?",
   "@pinEntryForgot": {},
-  "otpMaxAttempts": "Too many attempts. Please wait before trying again.",
-  "@otpMaxAttempts": {},
+  "authTooManyAttempts": "Too many attempts. Please wait before trying again.",
+  "@authTooManyAttempts": {},
   "pinTitle": "Set your PIN",
   "@pinTitle": {},
   "pinSubtitle": "Choose a {length}-digit PIN to secure your account",
@@ -332,8 +307,6 @@
   "@logoutConfirmTitle": {},
   "logoutConfirmBody": "You will need to verify your identity to log back in.",
   "@logoutConfirmBody": {},
-  "devicesTitle": "Trusted devices",
-  "@devicesTitle": {},
   "deviceThisDevice": "This device",
   "@deviceThisDevice": {},
   "deviceRevoke": "Remove device",
@@ -978,7 +951,7 @@
   "@profileSignOut": {},
   "profileSignOutConfirmTitle": "Sign out of Yene Verify?",
   "@profileSignOutConfirmTitle": {},
-  "profileSignOutConfirmBody": "You'll need to sign in again with your phone and PIN.",
+  "profileSignOutConfirmBody": "You'll need to sign in again with Google.",
   "@profileSignOutConfirmBody": {},
   "profileComingSoon": "Coming soon",
   "@profileComingSoon": {},
@@ -1337,10 +1310,6 @@
   "@settingsTitle": {},
   "settingsSignInMethods": "Sign-in methods",
   "@settingsSignInMethods": {},
-  "settingsSignInPhone": "Phone",
-  "@settingsSignInPhone": {},
-  "settingsSignInPhoneSubtitle": "Sign in with your phone number and PIN",
-  "@settingsSignInPhoneSubtitle": {},
   "settingsSignInGoogle": "Google",
   "@settingsSignInGoogle": {},
   "settingsSignInGoogleSubtitle": "Sign in with your Google account",
@@ -1353,10 +1322,6 @@
   "@settingsPhone": {},
   "profileUnknownUser": "User",
   "@profileUnknownUser": {},
-  "orContinueWith": "or continue with",
-  "@orContinueWith": {},
-  "orSignInWithPhone": "or sign in with phone number instead",
-  "@orSignInWithPhone": {},
   "pinSkip": "Skip for now",
   "@pinSkip": {},
   "profileSetUpPin": "Set up PIN",

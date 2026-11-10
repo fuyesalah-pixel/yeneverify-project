@@ -13,27 +13,6 @@ class AuthApi {
 
   static const _prefix = '/auth';
 
-  Future<ApiResult<OtpRequestResponse>> requestOtp(String phone) async {
-    // purpose defaults to LOGIN on the backend; send nothing extra.
-    return _post<OtpRequestResponse>(
-      '$_prefix/request-otp',
-      data: {'phone': phone},
-      fromJson: OtpRequestResponse.fromJson,
-    );
-  }
-
-  Future<ApiResult<AuthResponse>> verifyOtp({
-    required String phone,
-    required String code,
-    required Map<String, dynamic> device,
-  }) async {
-    return _post<AuthResponse>(
-      '$_prefix/verify-otp',
-      data: {'phone': phone, 'code': code, 'device': device},
-      fromJson: AuthResponse.fromJson,
-    );
-  }
-
   /// POST /auth/refresh returns FLAT tokens (no user/device envelope), so it
   /// maps to FlatTokensResponse rather than AuthResponse.
   Future<ApiResult<FlatTokensResponse>> refresh(String refreshToken) async {
@@ -45,7 +24,8 @@ class AuthApi {
   }
 
   /// POST /auth/pin/set — Bearer access token required (interceptor supplies
-  /// the in-memory token obtained from verifyOtp just before this).
+  /// the in-memory token obtained from the Google onboarding/sign-in response
+  /// just before this).
   Future<ApiResult<void>> setPin({required String pin}) async {
     return _post<void>(
       '$_prefix/pin/set',

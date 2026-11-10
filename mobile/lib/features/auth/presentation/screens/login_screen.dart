@@ -10,14 +10,16 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/brand/brand_logo.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
-import '../../../../core/widgets/inputs/app_text_field.dart';
 import '../../../../core/widgets/layout/app_card.dart';
+import '../../../auth/domain/auth_notifier.dart'
+    show AuthStatus, authStatusProvider;
 import '../../../auth/domain/google_auth_provider.dart';
-import '../providers/auth_flow_providers.dart';
 import '../providers/dev_overrides.dart';
 
-/// Login screen — Google Sign-In primary, phone + OTP fallback. Step 21.
+/// Login screen — Google Sign-In only. Phone pairing happens after the Google
+/// account is authenticated (see [Routes.phonePairing]).
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -26,8 +28,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _phoneFocus = FocusNode();
-
   @override
   void initState() {
     super.initState();
@@ -38,17 +38,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   @override
-  void dispose() {
-    _phoneFocus.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = AppLocalizations.of(context);
-    final flow = ref.watch(loginFlowProvider);
-    final notifier = ref.read(loginFlowProvider.notifier);
     final googleAuth = ref.watch(googleAuthProvider);
 
     return Scaffold(
@@ -62,84 +54,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  l10n.loginTitle,
-                  style: AppTypography.displayLarge.copyWith(
-                    color: colors.primaryAction,
-                    fontSize: 40,
-                    letterSpacing: -1.2,
-                  ),
+                BrandLogo(
+                  height: 92,
+                  semanticLabel: l10n.loginTitle,
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.lg),
                 Text(
                   l10n.loginSubtitle,
-                  style: AppTypography.bodyLarge.copyWith(color: colors.textSecondary),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-
-                // ── Google Sign-In (primary) ─────────────────────────────
-                _GoogleSignInSection(
-                  onSignIn: _handleGoogleSignIn,
-                  status: googleAuth.status,
-                  error: googleAuth.error,
-                  l10n: l10n,
-                ),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // ── Phone fallback link ──────────────────────────────────
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => _phoneFocus.requestFocus(),
-                    child: Text(
-                      l10n.orSignInWithPhone,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: colors.primaryAction,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: AppSpacing.xxl),
-
-                // ── Phone entry (fallback) ───────────────────────────────
-                AppTextField(
-                  label: l10n.phoneNumber,
-                  hint: l10n.phoneHint,
-                  errorText: flow.phone.isNotEmpty && !flow.isValid ? l10n.phoneInvalid : null,
-                  keyboardType: TextInputType.phone,
-                  focusNode: _phoneFocus,
-                  onChanged: notifier.setPhone,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                if (flow.error != null)
-                  Text(
-                    flow.error!.userFacingMessage(l10n),
-                    style: AppTypography.bodySmall.copyWith(color: colors.error),
-                    textAlign: TextAlign.center,
-                  ),
-                const SizedBox(height: AppSpacing.lg),
-                AppButton(
-                  label: l10n.continueLabel,
-                  onPressed: flow.isValid && !flow.isLoading
-                      ? () async {
-                          FocusScope.of(context).unfocus();
-                          final ok = await notifier.submit();
-                          if (ok && context.mounted) {
-                            context.pushReplacement(
-                              Routes.otp,
-                              extra: normalizeEthiopianPhone(flow.phone),
-                            );
-                          }
-                        }
-                      : null,
-                  isLoading: flow.isLoading,
+                  style: AppTypography.bodyLarge
+                      .copyWith(color: colors.textSecondary),
                 ),
 
                 // ── Device accounts (paired Google accounts) ─────────────
                 if (googleAuth.deviceAccounts.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: AppSpacing.xl),
                   Text(
                     l10n.devicesTitle,
                     style: AppTypography.headingSmall.copyWith(
@@ -147,20 +75,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  ...googleAuth.deviceAccounts.map(
-                    (account) => ListTile(
-                      leading: const Icon(Icons.account_circle_rounded),
-                      title: Text(account.googleEmail),
-                      subtitle: Text(l10n.devicePhoneSuffix(account.phoneLast4)),
-                      trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                      onTap: () {
-                        // Selecting a paired device account signs in with Google
-                        // directly (no phone needed).
-                        ref.read(googleAuthProvider.notifier).signInWithGoogle();
-                      },
-                    ),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      for (final account in googleAuth.deviceAccounts)
+                        Tooltip(
+                          message: account.googleEmail,
+                          child: ActionChip(
+                            avatar: const Icon(
+                              Icons.account_circle_rounded,
+                              size: 18,
+                            ),
+                            label:
+                                Text(l10n.devicePhoneSuffix(account.phoneLast4)),
+                            onPressed: () {
+                              // Selecting a paired device account signs in with
+                              // Google directly (no phone needed).
+                              ref
+                                  .read(googleAuthProvider.notifier)
+                                  .signInWithGoogle();
+                            },
+                          ),
+                        ),
+                    ],
                   ),
                 ],
+
+                const SizedBox(height: AppSpacing.xl),
+
+                // ── Google Sign-In (only login method) ───────────────────
+                _GoogleSignInSection(
+                  onSignIn: _handleGoogleSignIn,
+                  status: googleAuth.status,
+                  error: googleAuth.error,
+                  l10n: l10n,
+                ),
 
                 const SizedBox(height: AppSpacing.xxl),
 
@@ -168,7 +118,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 if (kDebugMode) ...[
                   Text(
                     'Dev: ${AppEnv.apiBaseUrl}',
-                    style: AppTypography.bodySmall.copyWith(color: colors.textDisabled),
+                    style: AppTypography.bodySmall
+                        .copyWith(color: colors.textDisabled),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.xs),
@@ -197,21 +148,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     final notifier = ref.read(googleAuthProvider.notifier);
     final account = await notifier.signInWithGoogle();
-    if (!context.mounted || account == null) return;
+    if (!mounted || account == null) return;
 
-    // If the provider says pairing is required, navigate to the pairing screen.
     final state = ref.read(googleAuthProvider);
+    if (state.status == GoogleAuthStatus.error) return;
+
+    // New Google user: collect the phone number (no OTP) before continuing.
     if (state.requiresPairing && state.googleAccount != null) {
       final paired = await context.push<bool>(Routes.phonePairing);
-      if (paired == true && context.mounted) {
-        context.go(Routes.dashboard);
-      }
+      if (paired == true && mounted) _continueAfterAuth();
       return;
     }
 
-    // Otherwise sign-in completed; navigate to dashboard.
-    if (context.mounted) {
-      context.go(Routes.dashboard);
+    _continueAfterAuth();
+  }
+
+  /// Routes Google-authenticated users without racing the redirect guard:
+  /// first-time users set a PIN, returning users unlock, everyone else lands
+  /// on the dashboard (onboarding is handled by the guard).
+  void _continueAfterAuth() {
+    if (!mounted) return;
+    switch (ref.read(authStatusProvider)) {
+      case AuthStatus.pinSetup:
+        context.go(Routes.pinSetup);
+      case AuthStatus.locked:
+        context.go(Routes.unlock);
+      default:
+        context.go(Routes.dashboard);
     }
   }
 }
@@ -241,12 +204,14 @@ class _GoogleSignInSection extends ConsumerWidget {
         children: [
           Text(
             l10n.googleSignInTitle,
-            style: AppTypography.headingMedium.copyWith(color: colors.textPrimary),
+            style:
+                AppTypography.headingMedium.copyWith(color: colors.textPrimary),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             l10n.googleSignInSubtitle,
-            style: AppTypography.bodyMedium.copyWith(color: colors.textSecondary),
+            style:
+                AppTypography.bodyMedium.copyWith(color: colors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.lg),
           AppButton(

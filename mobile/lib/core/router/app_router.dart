@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/domain/auth_notifier.dart';
 import '../../features/auth/presentation/screens/biometric_enroll_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
-import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/phone_pairing_screen.dart';
 import '../../features/auth/presentation/screens/pin_entry_screen.dart';
 import '../../features/auth/presentation/screens/pin_setup_screen.dart';
@@ -37,7 +36,6 @@ import 'auth_redirect.dart';
 abstract final class Routes {
   static const String splash = '/';
   static const String login = '/login';
-  static const String otp = '/otp';
   static const String pinSetup = '/pin-setup';
   static const String unlock = '/unlock';
   static const String biometricEnroll = '/biometric-enroll';
@@ -109,10 +107,6 @@ final appRouter = GoRouter(
     GoRoute(
       path: Routes.phonePairing,
       builder: (_, __) => const PhonePairingScreen(),
-    ),
-    GoRoute(
-      path: Routes.otp,
-      builder: (_, state) => OtpScreen(phone: (state.extra as String?) ?? ''),
     ),
     GoRoute(
       path: Routes.pinSetup,

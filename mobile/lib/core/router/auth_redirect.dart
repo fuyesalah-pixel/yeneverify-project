@@ -14,7 +14,7 @@ String? authRedirect(AuthState auth, String location) {
       return location == '/' ? null : '/';
     case AuthStatus.unauthenticated:
       // Google-first phone pairing completes before a session exists.
-      return const {'/', '/login', '/otp', '/phone-pairing', '/design-system'}
+      return const {'/', '/login', '/phone-pairing', '/design-system'}
               .contains(location)
           ? null
           : '/login';
@@ -64,7 +64,6 @@ String? authRedirect(AuthState auth, String location) {
       if (const {
         '/',
         '/login',
-        '/otp',
         '/pin-setup',
         '/unlock',
         '/biometric-enroll',

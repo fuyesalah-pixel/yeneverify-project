@@ -26,7 +26,7 @@ class DeviceIdentity {
   /// (pin/set, pin/verify, biometric/enable).
   Map<String, String> headers() => {'x-device-fingerprint': fingerprint};
 
-  /// JSON body form used by verify-otp / unlock. Matches DeviceInfoSchema.
+  /// JSON body form used by Google auth / unlock. Matches DeviceInfoSchema.
   Map<String, dynamic> toJson() => {
         'fingerprint': fingerprint,
         'platform': platform,

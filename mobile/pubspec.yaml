@@ -116,15 +116,15 @@ flutter:
     - assets/lottie/
 
   fonts:
-    - family: Inter
+    - family: Poppins
       fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Poppins-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Inter-Medium.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Inter-SemiBold.ttf
+        - asset: assets/fonts/Poppins-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Inter-Bold.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
 
     - family: NotoSansEthiopic

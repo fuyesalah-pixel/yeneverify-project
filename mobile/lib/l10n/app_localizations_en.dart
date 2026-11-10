@@ -15,7 +15,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTitle => 'Yene Verify';
 
   @override
-  String get loginSubtitle => 'Enter your phone number to get started';
+  String get loginSubtitle => 'Sign in with Google to get started';
 
   @override
   String get taglinePrimary => 'Verify any Ethiopian bank payment. In seconds.';
@@ -98,28 +98,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneInvalid => 'Enter a valid Ethiopian phone number';
 
   @override
-  String get otpTitle => 'Enter verification code';
-
-  @override
-  String otpSubtitle(String phone) {
-    return 'We sent a 6-digit code to $phone';
-  }
-
-  @override
-  String get otpResend => 'Resend code';
-
-  @override
-  String otpResendIn(int seconds) {
-    return 'Resend in ${seconds}s';
-  }
-
-  @override
-  String get otpInvalid => 'Incorrect code. Try again.';
-
-  @override
-  String get otpExpired => 'Code has expired. Request a new one.';
-
-  @override
   String get pinIncorrect => 'Incorrect PIN. Try again.';
 
   @override
@@ -152,7 +130,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pinEntryForgot => 'Forgot PIN?';
 
   @override
-  String get otpMaxAttempts =>
+  String get authTooManyAttempts =>
       'Too many attempts. Please wait before trying again.';
 
   @override
@@ -410,9 +388,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get logoutConfirmBody =>
       'You will need to verify your identity to log back in.';
-
-  @override
-  String get devicesTitle => 'Google accounts on this device';
 
   @override
   String get deviceThisDevice => 'This device';
@@ -1406,7 +1381,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSignOutConfirmBody =>
-      'You\'ll need to sign in again with your phone and PIN.';
+      'You\'ll need to sign in again with Google.';
 
   @override
   String get profileComingSoon => 'Coming soon';
@@ -1784,6 +1759,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullNameHint => 'e.g., Selam Ayele';
 
   @override
+  String get devicesTitle => 'Google accounts on this device';
+
+  @override
   String devicePhoneSuffix(String last4) {
     return '...$last4';
   }
@@ -1804,13 +1782,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSignInMethods => 'Sign-in methods';
 
   @override
-  String get settingsSignInPhone => 'Phone';
-
-  @override
-  String get settingsSignInPhoneSubtitle =>
-      'Sign in with your phone number and PIN';
-
-  @override
   String get settingsSignInGoogle => 'Google';
 
   @override
@@ -1827,12 +1798,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileUnknownUser => 'User';
-
-  @override
-  String get orContinueWith => 'or continue with';
-
-  @override
-  String get orSignInWithPhone => 'or sign in with phone number instead';
 
   @override
   String get pinSkip => 'Skip for now';

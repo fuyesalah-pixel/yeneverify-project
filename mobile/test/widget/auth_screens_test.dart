@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yene_verify/core/network/api_error.dart';
 import 'package:yene_verify/core/theme/app_theme.dart';
+import 'package:yene_verify/core/widgets/brand/brand_logo.dart';
 import 'package:yene_verify/features/auth/domain/auth_notifier.dart';
 import 'package:yene_verify/features/auth/presentation/screens/login_screen.dart';
-import 'package:yene_verify/features/auth/presentation/screens/otp_screen.dart';
 import 'package:yene_verify/features/auth/presentation/screens/pin_entry_screen.dart';
 import 'package:yene_verify/features/auth/presentation/screens/pin_setup_screen.dart';
 import 'package:yene_verify/l10n/app_localizations.dart';
@@ -15,8 +15,7 @@ import 'package:yene_verify/l10n/app_localizations.dart';
 /// Stubbed auth state machine: every unlock attempt fails with a wrong PIN.
 class _WrongPinAuthNotifier extends AuthNotifier {
   @override
-  Future<AuthState> build() async =>
-      const AuthState(status: AuthStatus.locked);
+  Future<AuthState> build() async => const AuthState(status: AuthStatus.locked);
 
   @override
   Future<ApiError?> unlockWithPin(String pin) async =>
@@ -37,55 +36,23 @@ Widget _wrap(Widget child, {List<Override> overrides = const []}) {
 }
 
 void main() {
-  testWidgets('LoginScreen renders title, subtitle, and phone field', (tester) async {
+  testWidgets('LoginScreen offers Google sign-in only', (tester) async {
     await tester.pumpWidget(_wrap(const LoginScreen()));
     await tester.pump();
 
-    expect(find.text('Yene Verify'), findsAtLeastNWidgets(1));
-    expect(find.text('Enter your phone number to get started'), findsOneWidget);
-    expect(find.text('Phone number'), findsOneWidget);
-    expect(find.text('Continue'), findsOneWidget);
+    expect(find.byType(BrandLogo), findsOneWidget);
+    expect(find.text('Sign in with Google to get started'), findsOneWidget);
+    expect(find.text('Continue with Google'), findsOneWidget);
+
+    // No phone entry, OTP fallback, or "sign in with phone" link remains.
+    expect(find.byType(TextField), findsNothing);
+    expect(find.text('Phone number'), findsNothing);
+    expect(find.text('Continue'), findsNothing);
+    expect(find.text('or sign in with phone number instead'), findsNothing);
   });
 
-  testWidgets('LoginScreen disables Continue with an invalid phone', (tester) async {
-    await tester.pumpWidget(_wrap(const LoginScreen()));
-    await tester.pump();
-
-    ElevatedButton continueButton() => tester.widget<ElevatedButton>(
-          find.widgetWithText(ElevatedButton, 'Continue'),
-        );
-
-    // Valid number keeps the button enabled.
-    await tester.enterText(find.byType(TextField), '0911555001');
-    await tester.pump();
-    expect(continueButton().onPressed, isNotNull);
-
-    // Invalid landline number disables it.
-    await tester.enterText(find.byType(TextField), '0211555001');
-    await tester.pump();
-    expect(continueButton().onPressed, isNull);
-  });
-
-  testWidgets('OtpScreen counts down and then offers resend', (tester) async {
-    await tester.pumpWidget(_wrap(const OtpScreen(phone: '+251911555001')));
-    await tester.pump();
-
-    expect(find.text('Enter verification code'), findsOneWidget);
-    expect(find.textContaining('Resend in 45s'), findsOneWidget);
-
-    await tester.pump(const Duration(seconds: 2));
-    expect(find.textContaining('Resend in 43s'), findsOneWidget);
-
-    // Countdown reaches zero → the resend button replaces the timer label.
-    await tester.pump(const Duration(seconds: 43));
-    expect(find.text('Resend code'), findsOneWidget);
-    expect(find.textContaining('Resend in'), findsNothing);
-
-    // Dispose the tree so the countdown timer is cancelled before teardown.
-    await tester.pumpWidget(const SizedBox());
-  });
-
-  testWidgets('PinSetupScreen rejects a mismatched confirmation', (tester) async {
+  testWidgets('PinSetupScreen rejects a mismatched confirmation',
+      (tester) async {
     await tester.pumpWidget(_wrap(const PinSetupScreen()));
     await tester.pump();
 

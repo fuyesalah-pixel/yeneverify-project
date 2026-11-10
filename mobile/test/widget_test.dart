@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:yene_verify/app.dart';
+import 'package:yene_verify/core/widgets/brand/brand_logo.dart';
 
 void main() {
   testWidgets('App boots to the splash wordmark', (WidgetTester tester) async {
@@ -13,8 +14,8 @@ void main() {
     );
     await tester.pump();
 
-    // The splash screen shows the app name before the 1.5s timer fires.
-    expect(find.text('Yene Verify'), findsOneWidget);
+    // The splash screen shows the brand logo before the 1.5s timer fires.
+    expect(find.byType(BrandLogo), findsOneWidget);
 
     // Advance past the splash's 8s safety net and the startup check's 5s
     // timeout clock (both fake-timer based) so no timer stays pending at

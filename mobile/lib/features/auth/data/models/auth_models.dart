@@ -3,8 +3,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'auth_models.freezed.dart';
 part 'auth_models.g.dart';
 
-/// Device identity sent with verify-otp / unlock / step-up calls.
-/// Contract: backend/src/auth/dto/verify-otp.dto.ts DeviceInfoSchema.
+/// Device identity sent with Google auth / unlock / step-up calls.
+/// Contract: backend DeviceInfoSchema (auth DTOs).
 @freezed
 class DeviceInfo with _$DeviceInfo {
   const factory DeviceInfo({
@@ -34,7 +34,7 @@ class AuthTokens with _$AuthTokens {
 }
 
 /// Authenticated user. Kept as a hand-written model (not freezed) because
-/// GET /auth/me returns the raw Prisma record while verify-otp returns the
+/// GET /auth/me returns the raw Prisma record while Google auth returns the
 /// DTO shape — `fromJson` normalizes both.
 class User {
   const User({
@@ -214,20 +214,6 @@ class OnboardingStatus with _$OnboardingStatus {
 
   factory OnboardingStatus.fromJson(Map<String, dynamic> json) =>
       _$OnboardingStatusFromJson(json);
-}
-
-/// POST /auth/request-otp contract (dev mock includes otpCode; production
-/// returns just the delivery notice).
-@freezed
-class OtpRequestResponse with _$OtpRequestResponse {
-  const factory OtpRequestResponse({
-    String? otpId,
-    String? otpCode,
-    String? expiresAt,
-  }) = _OtpRequestResponse;
-
-  factory OtpRequestResponse.fromJson(Map<String, dynamic> json) =>
-      _$OtpRequestResponseFromJson(json);
 }
 
 /// POST /auth/pin/verify contract.

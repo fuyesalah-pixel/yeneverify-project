@@ -57,7 +57,7 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen> {
   }
 
   Future<void> _forgotPin() async {
-    // A forgotten PIN means re-authenticating from scratch with OTP.
+    // A forgotten PIN means signing in again with Google.
     await ref.read(authProvider.notifier).logout();
     if (mounted) context.go(Routes.login);
   }

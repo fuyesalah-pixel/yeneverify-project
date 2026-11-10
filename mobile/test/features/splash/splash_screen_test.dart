@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yene_verify/core/router/app_router.dart';
 import 'package:yene_verify/core/theme/app_theme.dart';
+import 'package:yene_verify/core/widgets/brand/brand_logo.dart';
 import 'package:yene_verify/features/auth/domain/auth_notifier.dart';
 import 'package:yene_verify/features/splash/presentation/screens/splash_screen.dart';
 import 'package:yene_verify/l10n/app_localizations.dart';
@@ -23,7 +24,7 @@ void main() {
     testWidgets('renders the app name on the splash', (tester) async {
       await _pumpWithAuth(tester, const AuthState(status: AuthStatus.unknown));
 
-      expect(find.text('Yene Verify'), findsOneWidget);
+      expect(find.byType(BrandLogo), findsOneWidget);
     });
 
     testWidgets('navigates to /login when auth is unauthenticated',
@@ -52,7 +53,7 @@ void main() {
       final container = await _pumpSplash(tester);
 
       // Still showing the splash: the build future never resolved.
-      expect(find.text('Yene Verify'), findsOneWidget);
+      expect(find.byType(BrandLogo), findsOneWidget);
 
       // Startup resolves with an unauthenticated session.
       container.read(authProvider.notifier).state = const AsyncValue.data(
@@ -68,7 +69,7 @@ void main() {
         (tester) async {
       final container = await _pumpSplash(tester);
 
-      expect(find.text('Yene Verify'), findsOneWidget);
+      expect(find.byType(BrandLogo), findsOneWidget);
 
       container.read(authProvider.notifier).state = const AsyncValue.data(
         AuthState(status: AuthStatus.locked),
@@ -84,7 +85,7 @@ void main() {
       await _pumpSplash(tester);
 
       await tester.pumpAndSettle();
-      expect(find.text('Yene Verify'), findsOneWidget);
+      expect(find.byType(BrandLogo), findsOneWidget);
 
       // Past the 8s safety net the splash must not stay stuck.
       await tester.pump(const Duration(seconds: 9));
@@ -97,8 +98,8 @@ void main() {
 
 /// Pumps a [MaterialApp] wrapped with [ProviderScope] and the app router,
 /// seeded with a fixed auth state.
-Future<void> _pumpWithAuth(
-    WidgetTester tester, AuthState authState, {Key? key}) async {
+Future<void> _pumpWithAuth(WidgetTester tester, AuthState authState,
+    {Key? key}) async {
   // Pump the first frame with the (unknown) loading state so the splash's
   // mount-time fireImmediately listener sees `unknown` and does not
   // navigate mid-build. Only then seed the fixed state, which drives the

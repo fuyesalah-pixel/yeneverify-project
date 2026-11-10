@@ -270,7 +270,7 @@ class GoogleAuthNotifier extends Notifier<GoogleAuthState> {
   }
 
   Future<void> _completeAuth(AuthResponse response) async {
-    final sessionResult = await repo.verifyOtpGoogle(
+    final sessionResult = await repo.persistGoogleSession(
       tokens: response.tokens,
       user: response.user,
     );

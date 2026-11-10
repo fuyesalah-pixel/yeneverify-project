@@ -58,13 +58,6 @@ class SettingsScreen extends ConsumerWidget {
           _Section(
             title: l10n.settingsSignInMethods,
             children: [
-              AppListTile(
-                leading: const Icon(Icons.phone_android_rounded),
-                title: l10n.settingsSignInPhone,
-                subtitle: l10n.settingsSignInPhoneSubtitle,
-                trailing: const Icon(Icons.check_circle_rounded, size: 20),
-                enabled: false,
-              ),
               if (googleAuth.deviceAccounts.isNotEmpty) ...[
                 ...googleAuth.deviceAccounts.map(
                   (account) => AppListTile(

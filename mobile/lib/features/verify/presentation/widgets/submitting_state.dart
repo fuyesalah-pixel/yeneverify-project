@@ -1,16 +1,15 @@
 // "Verifying…" state shared by the submitting and polling phases.
 //
-// A shimmer skeleton (not a spinner) is used because the verdict will land
-// in this exact area on the next screen, so the shape hints at what is
-// coming. After 10 s the caption switches to "Still verifying…" to keep the
-// user from assuming the app froze.
+// A branded pulse loader and progress line keep the wait calm without adding
+// fake content. After 10 s the caption switches to "Still verifying…" to keep
+// the user from assuming the app froze.
 import 'package:flutter/material.dart';
 import 'package:yene_verify/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/layout/app_loading_skeleton.dart';
+import '../../../../core/widgets/brand/brand_loading.dart';
 
 class VerifyingSkeleton extends StatelessWidget {
   const VerifyingSkeleton({super.key, this.elapsed = Duration.zero});
@@ -33,22 +32,16 @@ class VerifyingSkeleton extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        AppShimmer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                height: 140,
-                decoration: BoxDecoration(
-                  color: colors.surfaceAlt,
-                  borderRadius: BorderRadius.circular(AppSpacing.md),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _SkeletonLine(width: 180, color: colors.surfaceAlt),
-              const SizedBox(height: AppSpacing.sm),
-              _SkeletonLine(width: 120, color: colors.surfaceAlt),
-            ],
+        Center(
+          child: BrandLoadingMark(
+            semanticLabel: l10n.verificationPending,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        const Center(
+          child: SizedBox(
+            width: 208,
+            child: BrandProgressLine(),
           ),
         ),
         const SizedBox(height: AppSpacing.xxl),
@@ -64,25 +57,6 @@ class VerifyingSkeleton extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ],
-    );
-  }
-}
-
-class _SkeletonLine extends StatelessWidget {
-  const _SkeletonLine({required this.width, required this.color});
-
-  final double width;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: 14,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(AppSpacing.xs),
-      ),
     );
   }
 }

@@ -23,7 +23,7 @@ import '../../theme/app_typography.dart';
 /// ## Example
 /// ```dart
 /// AppOtpField(
-///   onCompleted: (code) => ref.read(authProvider.notifier).verifyOtp(code),
+///   onCompleted: (code) => _handleCode(code),
 ///   hasError: state.hasOtpError,
 /// )
 /// ```

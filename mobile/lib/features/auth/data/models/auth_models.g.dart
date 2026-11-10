@@ -75,22 +75,6 @@ Map<String, dynamic> _$$OnboardingStatusImplToJson(
       'pendingInvite': instance.pendingInvite,
     };
 
-_$OtpRequestResponseImpl _$$OtpRequestResponseImplFromJson(
-        Map<String, dynamic> json) =>
-    _$OtpRequestResponseImpl(
-      otpId: json['otpId'] as String?,
-      otpCode: json['otpCode'] as String?,
-      expiresAt: json['expiresAt'] as String?,
-    );
-
-Map<String, dynamic> _$$OtpRequestResponseImplToJson(
-        _$OtpRequestResponseImpl instance) =>
-    <String, dynamic>{
-      'otpId': instance.otpId,
-      'otpCode': instance.otpCode,
-      'expiresAt': instance.expiresAt,
-    };
-
 _$StepUpResponseImpl _$$StepUpResponseImplFromJson(Map<String, dynamic> json) =>
     _$StepUpResponseImpl(
       stepUpToken: json['stepUpToken'] as String,

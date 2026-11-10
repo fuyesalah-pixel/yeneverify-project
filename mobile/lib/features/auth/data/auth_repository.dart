@@ -42,25 +42,6 @@ class AuthRepository {
   }
 
   // -- login flow ------------------------------------------------------------
-  Future<ApiResult<OtpRequestResponse>> requestOtp(String phone) {
-    return _api.requestOtp(phone);
-  }
-
-  Future<ApiResult<AuthStateResult>> verifyOtp({
-    required String phone,
-    required String code,
-  }) async {
-    final device = await deviceIdentity();
-    final result = await _api.verifyOtp(
-      phone: phone,
-      code: code,
-      device: device.toJson(),
-    );
-    return switch (result) {
-      Failure<AuthResponse>() => Failure<AuthStateResult>(result.error),
-      Success<AuthResponse>() => await _persistSession(result.data),
-    };
-  }
 
   /// Unlock via /auth/unlock. Backend verifies device + refresh token; the
   /// unlockMethod tells the backend which path was used.
@@ -181,9 +162,8 @@ class AuthRepository {
   // -- Google auth -----------------------------------------------------------
 
   /// Persists a Google-auth session directly (tokens + user from
-  /// POST /auth/google/onboard or /auth/google/signin). Mirrors _persistSession
-  /// but skips the OTP flow entirely.
-  Future<ApiResult<AuthStateResult>> verifyOtpGoogle({
+  /// POST /auth/google/onboard or /auth/google/signin).
+  Future<ApiResult<AuthStateResult>> persistGoogleSession({
     required AuthTokens tokens,
     required User user,
   }) async {
@@ -278,7 +258,7 @@ class AuthRepository {
   /// on the backend (@SkipOnboarding), but the local-session fallback stays
   /// for resilience. Onboarding flags themselves now come from
   /// /onboarding/status — never from `/me`.
-  Future<ApiResult<User>> _meOrLocalFallback({User? fallback}) async {
+  Future<ApiResult<User>> _meOrLocalFallback() async {
     final result = await me();
     if (result is Success<User>) return result;
 
@@ -288,10 +268,6 @@ class AuthRepository {
     if (!blockedByOnboarding) return result;
 
     final hasPin = await _sessionStore.readHasPin();
-    if (fallback != null) {
-      return Success(fallback.copyWith(needsPinSetup: !hasPin));
-    }
-
     final id = await _sessionStore.readUserId();
     if (id == null || id.isEmpty) return result;
     return Success(
@@ -303,53 +279,10 @@ class AuthRepository {
         status: 'ACTIVE',
         needsPinSetup: !hasPin,
         // Not used for routing; /onboarding/status is the only source.
-        needsOnboarding: fallback?.needsOnboarding ?? false,
+        needsOnboarding: false,
       ),
     );
   }
-
-  /// Called after successful verifyOtp. Persists tokens + user summary and
-  /// reports whether the user still needs to set a PIN.
-  ///
-  /// verify-otp's DTO is not trusted for PIN state, so we re-fetch GET
-  /// /auth/me — whose raw record carries pinSetAt — and use its real value.
-  /// Onboarding state is deliberately NOT read here; AuthNotifier asks
-  /// /onboarding/status once the session unlocks.
-  Future<ApiResult<AuthStateResult>> _persistSession(
-      AuthResponse response) async {
-    try {
-      _sessionStore.setAccessToken(response.tokens.accessToken);
-      await _sessionStore.setRefreshToken(response.tokens.refreshToken);
-      final deviceId = response.device.id;
-      if (deviceId != null && deviceId.isNotEmpty) {
-        await _sessionStore.setDeviceId(deviceId);
-      }
-      await _sessionStore.touchUnlock();
-
-      final meResult = await _meOrLocalFallback(fallback: response.user);
-      final user = switch (meResult) {
-        Success<User>(:final data) => data,
-        // A real failure (network, server) must not be papered over: the
-        // caller needs to see the error rather than a half-built session.
-        Failure<User>(:final error) => throw _MeFailure(error),
-      };
-      await _sessionStore.setUserId(user.id);
-      await _sessionStore.setUserPhone(user.phone);
-      await _sessionStore.setHasPin(!user.needsPinSetup);
-      return Success(AuthStateResult(user: user, tokens: response.tokens));
-    } on _MeFailure catch (e) {
-      return Failure<AuthStateResult>(e.error);
-    } catch (e) {
-      return Failure(ApiError(message: 'Storage write failed: $e'));
-    }
-  }
-}
-
-/// Internal signal: the post-login profile fetch failed for a reason the user
-/// must see, so the session is not reported as ready.
-class _MeFailure implements Exception {
-  const _MeFailure(this.error);
-  final ApiError error;
 }
 
 class AuthStateResult {

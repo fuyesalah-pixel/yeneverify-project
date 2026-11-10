@@ -9,8 +9,6 @@ import '../token_store.dart';
 /// Paths that never receive a Bearer token and never trigger the 401
 /// refresh dance (they are the refresh dance).
 const _publicAuthPaths = {
-  '/auth/request-otp',
-  '/auth/verify-otp',
   '/auth/refresh',
   '/auth/unlock',
   '/auth/step-up/biometric',
@@ -61,8 +59,8 @@ class AuthInterceptor extends Interceptor {
       return;
     }
 
-    // Public auth calls (request-otp / verify-otp / unlock) legitimately return
-    // 401 for bad input; the session, if any, is still valid.
+    // Public auth calls (unlock / pin reset) legitimately return 401 for
+    // bad input; the session, if any, is still valid.
     if (_isPublicAuthPath(err.requestOptions.path)) {
       handler.next(err);
       return;

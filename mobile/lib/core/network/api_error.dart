@@ -20,7 +20,7 @@ class ApiError implements Exception {
     this.networkCause,
   });
 
-  /// Backend error code, e.g. `AUTH_INVALID_OTP`. Null when the failure
+  /// Backend error code, e.g. `AUTH_PIN_INVALID`. Null when the failure
   /// never reached the backend (network, timeout, malformed envelope).
   final String? code;
 
@@ -74,15 +74,6 @@ enum NetworkFailureCause { dns, refused, timeout, noRoute, other }
 /// category + context to pick a localized message; strings themselves stay
 /// in the ARBs so this file never hardcodes English UI copy.
 abstract final class ApiErrorCodes {
-  /// Codes that mean "the code the user entered is wrong".
-  static const wrongOtp = <String>{
-    'AUTH_INVALID_OTP',
-    'AUTH_OTP_INVALID',
-  };
-
-  /// Codes that mean "the code the user entered has expired".
-  static const expiredOtp = <String>{'AUTH_OTP_EXPIRED'};
-
   /// Codes that mean "the PIN the user entered is wrong".
   static const wrongPin = <String>{'AUTH_PIN_INVALID'};
 
@@ -91,8 +82,6 @@ abstract final class ApiErrorCodes {
 
   /// Codes that mean "too many attempts, wait before retrying".
   static const attemptsExhausted = <String>{
-    'AUTH_OTP_MAX_ATTEMPTS',
-    'AUTH_OTP_RATE_LIMITED',
     'AUTH_PIN_MAX_ATTEMPTS',
     'AUTH_PIN_LOCKED',
     'AUTH_RATE_LIMITED',
@@ -268,14 +257,8 @@ extension ApiErrorX on ApiError {
         return l10n?.pinLocked(minutes) ??
             'Too many attempts. Try again in $minutes minutes.';
       }
-      return l10n?.otpMaxAttempts ??
+      return l10n?.authTooManyAttempts ??
           'Too many attempts. Please wait before trying again.';
-    }
-    if (code != null && ApiErrorCodes.expiredOtp.contains(code)) {
-      return l10n?.otpExpired ?? 'Code expired. Resend a new one.';
-    }
-    if (code != null && ApiErrorCodes.wrongOtp.contains(code)) {
-      return l10n?.otpInvalid ?? 'Incorrect code. Try again.';
     }
     if (code != null && ApiErrorCodes.wrongPin.contains(code)) {
       return l10n?.pinIncorrect ?? 'Incorrect PIN. Try again.';

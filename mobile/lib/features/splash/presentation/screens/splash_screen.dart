@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +8,10 @@ import 'package:yene_verify/l10n/app_localizations.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors_extension.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/brand/brand_background.dart';
+import '../../../../core/widgets/brand/brand_logo.dart';
 import '../../../auth/domain/auth_notifier.dart';
 
 /// # SplashScreen
@@ -93,16 +97,56 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final foreground = isDark ? colors.textPrimary : colors.onPrimary;
 
     return Scaffold(
       backgroundColor: colors.background,
-      body: Center(
-        child: Text(
-          l10n.appName,
-          style: AppTypography.displayLarge.copyWith(
-            color: colors.primaryAction,
-            fontSize: 40,
-            letterSpacing: -1.2,
+      body: BrandSplashBackground(
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final logoWidth = math.min(constraints.maxWidth * 0.78, 340.0);
+
+              return Center(
+                child: Padding(
+                  padding: AppSpacing.screenHTablet,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      BrandSplashLogo(
+                        width: logoWidth,
+                        appearance: isDark
+                            ? BrandLogoAppearance.dark
+                            : BrandLogoAppearance.onBrand,
+                        semanticLabel: l10n.appName,
+                      ),
+                      const SizedBox(height: AppSpacing.xxl),
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 650),
+                        tween: Tween(begin: 0, end: 1),
+                        builder: (context, value, child) => Opacity(
+                          opacity: value,
+                          child: Transform.translate(
+                            offset: Offset(0, (1 - value) * 10),
+                            child: child,
+                          ),
+                        ),
+                        child: Text(
+                          l10n.taglinePrimary,
+                          maxLines: 2,
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: foreground.withValues(alpha: 0.78),
+                            letterSpacing: 0.15,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

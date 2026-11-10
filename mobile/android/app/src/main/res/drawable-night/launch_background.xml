@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Night-mode launch surface: black-green brand canvas with the white mark. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#000000" />
+        </shape>
+    </item>
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/launch_mark" />
+    </item>
+</layer-list>

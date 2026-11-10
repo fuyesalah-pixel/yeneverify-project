@@ -25,7 +25,6 @@ void main() {
       expect(authRedirect(auth, '/'), isNull);
       expect(authRedirect(auth, '/dashboard'), '/login');
       expect(authRedirect(auth, '/login'), isNull);
-      expect(authRedirect(auth, '/otp'), isNull);
       expect(authRedirect(auth, '/phone-pairing'), isNull);
       expect(authRedirect(auth, '/design-system'), isNull);
     });
@@ -88,7 +87,7 @@ void main() {
       expect(status.pendingInvite?.branchLabel, 'Bole');
     });
 
-    test('honours an explicit needsPinSetup from the verify-otp DTO', () {
+    test('honours an explicit needsPinSetup from the auth DTO', () {
       final user = User.fromJson({
         'id': 'u1',
         'phone': '+251911555001',
@@ -116,9 +115,14 @@ void main() {
   });
 
   group('ApiError.userFacingMessage', () {
-    test('maps wrong OTP code to incorrect-code message', () {
-      const err = ApiError(code: 'AUTH_INVALID_OTP');
-      expect(err.userFacingMessage(), contains('ncorrect code'));
+    test('maps wrong PIN to incorrect-PIN message', () {
+      const err = ApiError(code: 'AUTH_PIN_INVALID');
+      expect(err.userFacingMessage(), contains('Incorrect PIN'));
+    });
+
+    test('maps rate limiting without retryAfter to the wait message', () {
+      const err = ApiError(code: 'AUTH_RATE_LIMITED');
+      expect(err.userFacingMessage(), contains('Too many attempts'));
     });
 
     test('maps lockout with retryAfter to minutes message', () {

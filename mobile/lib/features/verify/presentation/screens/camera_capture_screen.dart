@@ -25,6 +25,7 @@ import 'package:yene_verify/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/brand/brand_scan_overlay.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 
 /// Why the camera could not start. Distinguishes "user said no" (recoverable
@@ -156,8 +157,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
 
   Future<void> _toggleFlash() async {
     final controller = _controller;
-    final next =
-        _flashMode == FlashMode.off ? FlashMode.torch : FlashMode.off;
+    final next = _flashMode == FlashMode.off ? FlashMode.torch : FlashMode.off;
     setState(() => _flashMode = next);
     try {
       await controller?.setFlashMode(next);
@@ -192,6 +192,10 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
         child: Stack(
           children: [
             Positioned.fill(child: _preview(l10n)),
+            if (_captured == null && _problem == null)
+              const Positioned.fill(
+                child: IgnorePointer(child: BrandScanOverlay()),
+              ),
             Positioned(
               top: AppSpacing.sm,
               left: AppSpacing.sm,
@@ -231,7 +235,9 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
     }
 
     final controller = _controller;
-    if (_initializing || controller == null || !controller.value.isInitialized) {
+    if (_initializing ||
+        controller == null ||
+        !controller.value.isInitialized) {
       return const Center(
         child: CircularProgressIndicator(color: Colors.white),
       );
@@ -268,8 +274,7 @@ class _CameraCaptureScreenState extends State<CameraCaptureScreen> {
             const SizedBox(height: AppSpacing.lg),
             Text(
               isPermission ? l10n.cameraAccessNeeded : l10n.cameraNotAvailable,
-              style: AppTypography.headingSmall
-                  .copyWith(color: Colors.white),
+              style: AppTypography.headingSmall.copyWith(color: Colors.white),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),

@@ -15,7 +15,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get loginTitle => 'ዬን ቨሪፋይ';
 
   @override
-  String get loginSubtitle => 'ለመጀመር የስልክ ቁጥርዎን ያስገቡ';
+  String get loginSubtitle => 'ለመጀመር በGoogle ይግቡ';
 
   @override
   String get taglinePrimary => 'ማንኛውንም የኢትዮጵያ ባንክ ክፍያ ያረጋግጡ። በሰከንዶች።';
@@ -97,28 +97,6 @@ class AppLocalizationsAm extends AppLocalizations {
   String get phoneInvalid => 'የሚሰራ የኢትዮጵያ ስልክ ቁጥር ያስገቡ';
 
   @override
-  String get otpTitle => 'የማረጋገጫ ኮድ ያስገቡ';
-
-  @override
-  String otpSubtitle(String phone) {
-    return 'ወደ $phone 6 አሃዝ ኮድ ልከናል';
-  }
-
-  @override
-  String get otpResend => 'ኮድ እንደገና ላክ';
-
-  @override
-  String otpResendIn(int seconds) {
-    return 'በ$seconds ሰከንድ ውስጥ እንደገና ላክ';
-  }
-
-  @override
-  String get otpInvalid => 'ኮዱ ስህተት ነው። እንደገና ይሞክሩ።';
-
-  @override
-  String get otpExpired => 'ኮዱ ጊዜው አልፏል። አዲስ ኮድ ይጠይቁ።';
-
-  @override
   String get pinIncorrect => 'የPIN ኮድ ስህተት ነው። እንደገና ይሞክሩ።';
 
   @override
@@ -149,7 +127,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get pinEntryForgot => 'PIN ረስዋል?';
 
   @override
-  String get otpMaxAttempts => 'ብዙ ሙከራዎች። ከጥቂት ጊዜ በኋላ እንደገና ይሞክሩ።';
+  String get authTooManyAttempts => 'ብዙ ሙከራዎች። ከጥቂት ጊዜ በኋላ እንደገና ይሞክሩ።';
 
   @override
   String get pinTitle => 'PIN ያቀናብሩ';
@@ -397,9 +375,6 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get logoutConfirmBody => 'ለመግባት ማንነትዎን ማረጋገጥ ያስፈልግዎታል።';
-
-  @override
-  String get devicesTitle => 'በዚህ መሳሪያ ውስጥ የGoogle መለያዎች';
 
   @override
   String get deviceThisDevice => 'ይህ መሳሪያ';
@@ -1364,7 +1339,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get profileSignOutConfirmTitle => 'ከYene Verify ይውጡ?';
 
   @override
-  String get profileSignOutConfirmBody => 'በስልክዎ እና PIN እንደገና መግባት ይኖርብዎታል።';
+  String get profileSignOutConfirmBody => 'እንደገና በGoogle መግባት ይኖርብዎታል።';
 
   @override
   String get profileComingSoon => 'በቅርቡ';
@@ -1739,6 +1714,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get fullNameHint => 'ለምሳሌ፦ ሰላም አየሌ';
 
   @override
+  String get devicesTitle => 'በዚህ መሳሪያ ውስጥ የGoogle መለያዎች';
+
+  @override
   String devicePhoneSuffix(String last4) {
     return '...$last4';
   }
@@ -1759,12 +1737,6 @@ class AppLocalizationsAm extends AppLocalizations {
   String get settingsSignInMethods => 'የመግባት ዘዴዎች';
 
   @override
-  String get settingsSignInPhone => 'ስልክ';
-
-  @override
-  String get settingsSignInPhoneSubtitle => 'በስልክ ቁጥሩ እና PIN ይግቡ';
-
-  @override
   String get settingsSignInGoogle => 'Google';
 
   @override
@@ -1781,12 +1753,6 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get profileUnknownUser => 'ተጠቃሚ';
-
-  @override
-  String get orContinueWith => 'ወይም እንደገና ይግቡ';
-
-  @override
-  String get orSignInWithPhone => 'ወይም በስልክ ቁጥሩ ይግቡ';
 
   @override
   String get pinSkip => 'አሁን ዝለል';

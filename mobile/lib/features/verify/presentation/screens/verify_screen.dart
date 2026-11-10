@@ -19,6 +19,7 @@ import '../../../../core/theme/app_radii.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/brand/brand_loading.dart';
 import '../../../../core/widgets/buttons/app_button.dart';
 import '../../../../core/widgets/layout/app_error_state.dart';
 import '../../../transactions/domain/transactions_query.dart';
@@ -71,14 +72,12 @@ class VerifyScreen extends ConsumerWidget {
                   UploadingState(:final progress) => Center(
                       child: UploadProgress(progress: progress),
                     ),
-                  SubmittingState() =>
-                    const Center(child: VerifyingSkeleton()),
+                  SubmittingState() => const Center(child: VerifyingSkeleton()),
                   PollingState(:final elapsed) =>
                     Center(child: VerifyingSkeleton(elapsed: elapsed)),
                   PendingVerificationState(:final isRefreshing) =>
                     _PendingBody(isRefreshing: isRefreshing),
-                  ResultState() =>
-                    const Center(child: VerifyingSkeleton()),
+                  ResultState() => const Center(child: VerifyingSkeleton()),
                   ErrorState(:final code, :final retryable) => _ErrorBody(
                       message: verifyErrorMessage(l10n, code),
                       retryable: retryable,
@@ -136,7 +135,8 @@ class _IdleBody extends ConsumerWidget {
             title: l10n.uploadImage,
             subtitle: l10n.uploadImageCardSubtitle,
             accent: colors.textPrimary,
-            onTap: () => ref.read(verifyControllerProvider.notifier).startGallery(),
+            onTap: () =>
+                ref.read(verifyControllerProvider.notifier).startGallery(),
           ),
           const SizedBox(height: AppSpacing.xxxl),
           const _CreditsCard(),
@@ -175,7 +175,10 @@ class _Preparing extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(color: colors.primaryAction),
+          BrandLoadingMark(
+            size: 96,
+            semanticLabel: l10n.preparingImage,
+          ),
           const SizedBox(height: AppSpacing.xxl),
           Text(
             l10n.preparingImage,
@@ -344,9 +347,8 @@ class _ActionCard extends StatelessWidget {
           borderRadius: AppRadii.radiusLg,
           child: Ink(
             decoration: BoxDecoration(
-              color: highlighted
-                  ? accent.withValues(alpha: 0.08)
-                  : colors.surface,
+              color:
+                  highlighted ? accent.withValues(alpha: 0.08) : colors.surface,
               borderRadius: AppRadii.radiusLg,
               border: Border.all(
                 color: highlighted
@@ -361,7 +363,8 @@ class _ActionCard extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Icon(icon, size: 48, color: highlighted ? accent : colors.textPrimary),
+                Icon(icon,
+                    size: 48, color: highlighted ? accent : colors.textPrimary),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   title,

@@ -34,9 +34,8 @@ void main() {
   });
 
   group('unauthenticated', () {
-    test('login, otp, splash and design-system are reachable', () {
+    test('login, splash and design-system are reachable', () {
       expect(_redirect(AuthStatus.unauthenticated, '/login'), isNull);
-      expect(_redirect(AuthStatus.unauthenticated, '/otp'), isNull);
       expect(_redirect(AuthStatus.unauthenticated, '/'), isNull);
       expect(_redirect(AuthStatus.unauthenticated, '/design-system'), isNull);
     });
@@ -107,10 +106,6 @@ void main() {
         _redirect(AuthStatus.unlocked, '/login', needsOnboarding: true),
         '/onboarding',
       );
-      expect(
-        _redirect(AuthStatus.unlocked, '/otp', needsOnboarding: true),
-        '/onboarding',
-      );
     });
 
     test('splash redirects to onboarding', () {
@@ -138,7 +133,6 @@ void main() {
 
     test('auth flow screens redirect to dashboard', () {
       expect(_redirect(AuthStatus.unlocked, '/login'), '/dashboard');
-      expect(_redirect(AuthStatus.unlocked, '/otp'), '/dashboard');
       expect(_redirect(AuthStatus.unlocked, '/pin-setup'), '/dashboard');
       expect(_redirect(AuthStatus.unlocked, '/unlock'), '/dashboard');
     });
