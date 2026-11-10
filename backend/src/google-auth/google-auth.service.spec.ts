@@ -27,6 +27,8 @@ const prismaMock: any = {
     deleteMany: jest.fn(),
   },
   device: { findFirst: jest.fn(), create: jest.fn() },
+  merchant: { findFirst: jest.fn().mockResolvedValue(null) },
+  subMerchant: { findFirst: jest.fn().mockResolvedValue(null) },
 };
 const tokenServiceMock: any = { signAccessToken: jest.fn().mockReturnValue('access-token') };
 const sessionServiceMock: any = {
@@ -37,6 +39,7 @@ const sessionServiceMock: any = {
 const deviceServiceMock: any = { resolveOrCreate: jest.fn().mockResolvedValue({ id: 'dev-1' }) };
 const redisMock: any = { incr: jest.fn().mockResolvedValue(1) };
 const auditMock: any = { log: jest.fn() };
+const firebaseAdminMock: any = {};
 
 function buildService() {
   return new GoogleAuthService(
@@ -47,6 +50,7 @@ function buildService() {
     deviceServiceMock,
     auditMock,
     redisMock,
+    firebaseAdminMock,
   );
 }
 
@@ -168,18 +172,19 @@ describe('GoogleAuthService', () => {
         googleUid: 'google-uid-1',
         googleEmail: 'fuad@example.com',
         status: 'ACTIVE',
+        role: 'MERCHANT',
       });
       prismaMock.device.findFirst.mockResolvedValue(null);
       prismaMock.device.create.mockResolvedValue({ id: 'dev-new' });
 
       const out = await service.onboard(validDto);
 
-      expect(out.ok).toBe(true);
-      expect(out.needsOnboarding).toBe(true);
+      expect(out.tokens.accessToken).toBe('access-token');
+      expect(out.tokens.refreshToken).toBe('refresh-token');
+      expect(out.user.needsOnboarding).toBe(true);
+      expect(out.user.needsPinSetup).toBe(true);
       expect(out.user.phone).toBe('+251911111111');
-      expect(out.user.googleUid).toBe('google-uid-1');
-      expect(out.accessToken).toBe('access-token');
-      expect(out.refreshToken).toBe('refresh-token');
+      expect(out.device.fingerprint).toBe('fp-device-1');
       expect(prismaMock.user.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -286,16 +291,19 @@ describe('GoogleAuthService', () => {
         googleUid: 'google-uid-1',
         googleEmail: 'fuad@example.com',
         status: 'ACTIVE',
+        role: 'MERCHANT',
+        pinSetAt: new Date(),
       });
       prismaMock.userDevice.findUnique.mockResolvedValue({ id: 'ud-1' });
       prismaMock.device.findFirst.mockResolvedValue({ id: 'dev-1' });
+      prismaMock.merchant.findFirst.mockResolvedValue({ id: 'merchant-1' });
 
       const out = await service.signin(validDto);
 
-      expect(out.ok).toBe(true);
-      expect(out.needsOnboarding).toBe(false);
+      expect(out.tokens.accessToken).toBe('access-token');
+      expect(out.user.needsOnboarding).toBe(false);
+      expect(out.user.needsPinSetup).toBe(false);
       expect(out.user.phone).toBe('+251911111111');
-      expect(out.accessToken).toBe('access-token');
     });
 
     it('throws GoogleNotLinkedError when no user is linked', async () => {

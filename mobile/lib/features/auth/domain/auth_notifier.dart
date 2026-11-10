@@ -397,7 +397,10 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   /// OTP/PIN flow entirely — Google identity is the source of truth.
   /// If the user needs PIN setup, status is `pinSetup` so the router sends
   /// them to the PIN setup screen; otherwise `unlocked` → dashboard.
-  void setGoogleSession({required User user, required AuthTokens tokens}) {
+  Future<void> setGoogleSession({
+    required User user,
+    required AuthTokens tokens,
+  }) async {
     final current = state.valueOrNull;
     final needsPin = user.needsPinSetup;
     state = AsyncValue.data(
@@ -410,6 +413,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         lastLoginPhone: user.phone,
       ),
     );
+    if (!needsPin) await refreshOnboardingStatus();
   }
 
   /// Skips PIN setup — marks the PIN as skipped in storage and transitions to
@@ -422,6 +426,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       state = AsyncValue.data(
         current.copyWith(status: AuthStatus.unlocked, clearError: true),
       );
+      await refreshOnboardingStatus();
     }
   }
 

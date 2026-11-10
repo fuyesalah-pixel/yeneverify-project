@@ -9,12 +9,13 @@ export const firebaseAdminProvider: Provider = {
   inject: [AppConfigService],
   useFactory: (config: AppConfigService) => {
     if (admin.apps.length > 0) return admin.app();
+    // verifyIdToken validates against Google's public certs and needs no
+    // service-account credential; only token-minting ops require one.
     const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-    if (!credentialsPath) {
-      throw new Error('GOOGLE_APPLICATION_CREDENTIALS is not set');
-    }
     return admin.initializeApp({
-      credential: admin.credential.applicationDefault(),
+      ...(credentialsPath
+        ? { credential: admin.credential.applicationDefault() }
+        : {}),
       projectId: config.firebaseProjectId,
     });
   },

@@ -13,7 +13,7 @@ import { SessionService } from '../auth/session/session.service';
 import { DeviceService } from '../auth/device/device.service';
 import { AuditService } from '../audit/audit.service';
 import { RedisService } from '../redis/redis.service';
-import { DevicePlatform } from '@prisma/client';
+import { DevicePlatform, type User } from '@prisma/client';
 import { FIREBASE_ADMIN } from '../common/firebase/firebase-admin.provider';
 import {
   GoogleAlreadyLinkedError,
@@ -38,32 +38,16 @@ export interface GoogleTokens {
   expiresIn: number;
 }
 
-export interface OnboardResult {
-  ok: boolean;
-  user: {
-    id: string;
-    phone: string;
-    fullName: string;
-    googleUid: string;
-    googleEmail: string;
+export interface GoogleSessionResult {
+  tokens: GoogleTokens;
+  user: Pick<
+    User,
+    'id' | 'phone' | 'fullName' | 'role' | 'status' | 'preferredLanguage' | 'lastLoginAt'
+  > & {
+    needsPinSetup: boolean;
+    needsOnboarding: boolean;
   };
-  accessToken: string;
-  refreshToken: string;
-  needsOnboarding: true;
-}
-
-export interface SigninResult {
-  ok: boolean;
-  user: {
-    id: string;
-    phone: string;
-    fullName: string;
-    googleUid: string;
-    googleEmail: string;
-  };
-  accessToken: string;
-  refreshToken: string;
-  needsOnboarding: false;
+  device: { id: string; fingerprint: string; platform: string };
 }
 
 export interface DeviceAccount {
@@ -73,6 +57,8 @@ export interface DeviceAccount {
 
 @Injectable()
 export class GoogleAuthService {
+  private readonly logger = new Logger(GoogleAuthService.name);
+
   constructor(
     private readonly config: AppConfigService,
     private readonly prisma: PrismaService,
@@ -82,7 +68,6 @@ export class GoogleAuthService {
     private readonly audit: AuditService,
     private readonly redis: RedisService,
     @Inject(FIREBASE_ADMIN) private readonly firebaseAdmin: admin.app.App,
-    private readonly logger = new Logger(GoogleAuthService.name),
   ) {}
 
   /**
@@ -202,7 +187,7 @@ export class GoogleAuthService {
     };
     ip?: string;
     userAgent?: string;
-  }): Promise<OnboardResult> {
+  }): Promise<GoogleSessionResult> {
     const { idToken, phone, fullName, device, ip, userAgent } = dto;
     const normalizedPhone = this.normalizePhone(phone);
 
@@ -389,19 +374,7 @@ export class GoogleAuthService {
       },
     });
 
-    return {
-      ok: true,
-      user: {
-        id: user.id,
-        phone: user.phone,
-        fullName: user.fullName,
-        googleUid: user.googleUid!,
-        googleEmail: user.googleEmail!,
-      },
-      accessToken,
-      refreshToken: rawRefreshToken,
-      needsOnboarding: true,
-    };
+    return this.sessionPayload(user, deviceId, device, accessToken, rawRefreshToken);
   }
 
   /**
@@ -419,7 +392,7 @@ export class GoogleAuthService {
     };
     ip?: string;
     userAgent?: string;
-  }): Promise<SigninResult> {
+  }): Promise<GoogleSessionResult> {
     const { idToken, device, ip, userAgent } = dto;
 
     // Rate limit: 10 per IP per hour
@@ -578,19 +551,7 @@ export class GoogleAuthService {
       },
     });
 
-    return {
-      ok: true,
-      user: {
-        id: user.id,
-        phone: user.phone,
-        fullName: user.fullName,
-        googleUid: user.googleUid!,
-        googleEmail: user.googleEmail!,
-      },
-      accessToken,
-      refreshToken: rawRefreshToken,
-      needsOnboarding: false,
-    };
+    return this.sessionPayload(user, deviceId, device, accessToken, rawRefreshToken);
   }
 
   /**
@@ -777,6 +738,52 @@ export class GoogleAuthService {
       process.stderr.write('FIREBASE_VERIFY_ID_TOKEN_ERROR: ' + String(e) + '\n');
       throw e;
     }
+  }
+
+  // Same envelope as POST /auth/verify-otp so the mobile session parser
+  // handles Google and OTP logins identically.
+  private async sessionPayload(
+    user: User,
+    deviceId: string,
+    device: { fingerprint: string; platform: string },
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<GoogleSessionResult> {
+    const [ownedMerchant, subProfile] = await Promise.all([
+      this.prisma.merchant.findFirst({
+        where: { ownerUserId: user.id },
+        select: { id: true },
+      }),
+      this.prisma.subMerchant.findFirst({
+        where: { userId: user.id },
+        select: { status: true },
+      }),
+    ]);
+    return {
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: this.parseTtl(String(this.config.jwt.accessTtl ?? '15m')) / 1000,
+      },
+      user: {
+        id: user.id,
+        phone: user.phone,
+        fullName: user.fullName,
+        role: user.role,
+        status: user.status,
+        preferredLanguage: user.preferredLanguage,
+        lastLoginAt: user.lastLoginAt,
+        needsPinSetup: !user.pinSetAt,
+        needsOnboarding:
+          (user.role === 'MERCHANT' && !ownedMerchant?.id) ||
+          (user.role === 'SUB_MERCHANT' && subProfile?.status === 'INVITED'),
+      },
+      device: {
+        id: deviceId,
+        fingerprint: device.fingerprint,
+        platform: device.platform,
+      },
+    };
   }
 
   private parseTtl(ttl: string): number {

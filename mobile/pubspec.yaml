@@ -83,6 +83,7 @@ dependencies:
   zxing2: ^0.2.4
   image: 4.9.2
   google_mlkit_text_recognition: ^1.0.1
+  firebase_auth: ^4.20.0
 
 dev_dependencies:
   flutter_test:

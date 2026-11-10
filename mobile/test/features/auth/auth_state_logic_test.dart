@@ -26,6 +26,7 @@ void main() {
       expect(authRedirect(auth, '/dashboard'), '/login');
       expect(authRedirect(auth, '/login'), isNull);
       expect(authRedirect(auth, '/otp'), isNull);
+      expect(authRedirect(auth, '/phone-pairing'), isNull);
       expect(authRedirect(auth, '/design-system'), isNull);
     });
 
@@ -134,9 +135,9 @@ void main() {
       expect(err.userFacingMessage(), contains('sequential'));
     });
 
-    test('maps network errors to connection message', () {
+    test('maps bare network errors to the generic network message', () {
       const err = ApiError(kind: ApiErrorKind.network);
-      expect(err.userFacingMessage(), contains('connection'));
+      expect(err.userFacingMessage(), contains('Network problem'));
     });
 
     test('unknown codes fall back to generic message', () {

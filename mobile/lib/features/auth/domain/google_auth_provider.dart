@@ -6,6 +6,7 @@
 // The pairing step collects phone + fullName and calls POST /auth/google/onboard.
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -66,7 +67,8 @@ class GoogleAuthNotifier extends Notifier<GoogleAuthState> {
     scopes: <String>['email', 'profile'],
     serverClientId: const String.fromEnvironment(
       'GOOGLE_WEB_CLIENT_ID',
-      defaultValue: '',
+      defaultValue:
+          '1042108670897-mvf53pl5jnrqpe7kco0cl75bbgm9vfuh.apps.googleusercontent.com',
     ),
   );
 
@@ -118,8 +120,7 @@ class GoogleAuthNotifier extends Notifier<GoogleAuthState> {
         return null;
       }
 
-      final authentication = await account.authentication;
-      final idToken = authentication.idToken;
+      final idToken = await _firebaseIdToken(account);
       if (idToken == null || idToken.isEmpty) {
         state = state.copyWith(
           status: GoogleAuthStatus.idle,
@@ -186,8 +187,7 @@ class GoogleAuthNotifier extends Notifier<GoogleAuthState> {
     );
 
     try {
-      final authentication = await state.googleAccount!.authentication;
-      final idToken = authentication.idToken;
+      final idToken = await _firebaseIdToken(state.googleAccount!);
       if (idToken == null || idToken.isEmpty) {
         state = state.copyWith(
           status: GoogleAuthStatus.error,
@@ -255,6 +255,20 @@ class GoogleAuthNotifier extends Notifier<GoogleAuthState> {
     }
   }
 
+  // Backend verifies Firebase ID tokens, not raw Google OAuth tokens.
+  Future<String?> _firebaseIdToken(GoogleSignInAccount account) async {
+    final auth = await account.authentication;
+    final googleIdToken = auth.idToken;
+    if (googleIdToken == null || googleIdToken.isEmpty) return null;
+    final credential = GoogleAuthProvider.credential(
+      idToken: googleIdToken,
+      accessToken: auth.accessToken,
+    );
+    final userCred =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+    return userCred.user?.getIdToken();
+  }
+
   Future<void> _completeAuth(AuthResponse response) async {
     final sessionResult = await repo.verifyOtpGoogle(
       tokens: response.tokens,
@@ -262,7 +276,7 @@ class GoogleAuthNotifier extends Notifier<GoogleAuthState> {
     );
     switch (sessionResult) {
       case Success<AuthStateResult>():
-        authNotifier.setGoogleSession(
+        await authNotifier.setGoogleSession(
           user: response.user,
           tokens: response.tokens,
         );

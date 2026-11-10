@@ -13,7 +13,9 @@ String? authRedirect(AuthState auth, String location) {
       // Still resolving: only the splash may be visible.
       return location == '/' ? null : '/';
     case AuthStatus.unauthenticated:
-      return const {'/', '/login', '/otp', '/design-system'}.contains(location)
+      // Google-first phone pairing completes before a session exists.
+      return const {'/', '/login', '/otp', '/phone-pairing', '/design-system'}
+              .contains(location)
           ? null
           : '/login';
     case AuthStatus.pinSetup:

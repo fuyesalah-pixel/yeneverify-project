@@ -10,7 +10,6 @@ import {
   Body,
   Controller,
   Post,
-  Get,
   Ip,
   Req,
   HttpCode,
