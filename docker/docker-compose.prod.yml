@@ -58,12 +58,12 @@ services:
       context: ../web
       dockerfile: public/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: https://api.mekatanker.shop/api/v1
+        NEXT_PUBLIC_API_URL: https://verify-api.togttrading.com/api/v1
     image: yene-web-public:latest
     container_name: yene-web-public
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: https://api.mekatanker.shop/api/v1
+      NEXT_PUBLIC_API_URL: https://verify-api.togttrading.com/api/v1
     ports:
       - "127.0.0.1:3101:3000"
     networks:
@@ -84,7 +84,7 @@ services:
       context: ../web
       dockerfile: admin/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: https://api.mekatanker.shop/api/v1
+        NEXT_PUBLIC_API_URL: https://verify-api.togttrading.com/api/v1
     image: yene-web-admin:latest
     container_name: yene-web-admin
     restart: unless-stopped
