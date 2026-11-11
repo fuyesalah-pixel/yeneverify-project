@@ -58,6 +58,8 @@ export class AppConfigService {
       queue: this.queue,
       payment: this.payment,
       adminBootstrap: this.adminBootstrap,
+      admin: this.admin,
+      google: this.google,
     } as const;
   }
 
@@ -232,6 +234,17 @@ export class AppConfigService {
     return this.value('FIREBASE_PROJECT_ID');
   }
 
+  // ── Google OAuth (admin dashboard web sign-in) ────────────────────────
+  get google() {
+    return {
+      webClientId: this.value('GOOGLE_WEB_CLIENT_ID'),
+    } as const;
+  }
+
+  get googleWebClientId(): string {
+    return this.value('GOOGLE_WEB_CLIENT_ID');
+  }
+
   // ── Payment destinations (Step 16 billing flow) ─────────────────────────
   get payment() {
     return {
@@ -387,6 +400,21 @@ export class AppConfigService {
     return {
       phone: this.value('ADMIN_BOOTSTRAP_PHONE'),
       name: this.value('ADMIN_BOOTSTRAP_NAME'),
+    } as const;
+  }
+
+  // ── Admin emails allowlist ─────────────────────────────────────────────
+  get adminEmails() {
+    return this.value('ADMIN_EMAILS')
+      .split(',')
+      .map((e) => e.trim())
+      .filter(Boolean);
+  }
+
+  /** Admin dashboard namespace: the Google Sign-In allowlist only. */
+  get admin() {
+    return {
+      emails: this.adminEmails,
     } as const;
   }
 }

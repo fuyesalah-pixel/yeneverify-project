@@ -1,4 +1,17 @@
-function P({ title, body }: { title: string; body: string }) {
-  return <main className="p-6 md:p-8"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1><div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">{body}</div></main>;
+import { SectionPlaceholder } from '@/components/section-placeholder';
+
+export default function Page() {
+  return (
+    <SectionPlaceholder
+      phase="Phase D"
+      title="Fraud & duplicates"
+      description="Cross-merchant duplicate fingerprints and velocity patterns that need a human decision."
+      planned={[
+        'Duplicate fingerprints grouped by receipt hash across merchants',
+        'Suspicious patterns such as one receipt used by 3+ merchants in 24h',
+        'Merchant drill-down with related verifications',
+        'Export and audit trail for every follow-up action',
+      ]}
+    />
+  );
 }
-export default function Page() { return <P title="Fraud / Duplicates" body="Cross-merchant fingerprint review and velocity alerts ship in Phase 5." />; }

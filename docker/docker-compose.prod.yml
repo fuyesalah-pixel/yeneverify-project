@@ -23,10 +23,10 @@ services:
         condition: service_started
     labels:
       - traefik.enable=true
-      - traefik.http.routers.yene-api.rule=Host(`api.mekatanker.shop`)
+      - traefik.http.routers.yene-api.rule=Host(`verify-api.togttrading.com`)
       - traefik.http.routers.yene-api.entrypoints=websecure
       - traefik.http.routers.yene-api.tls.certresolver=letsencrypt
-      - traefik.http.services.yene-api.loadbalancer.server.port=3100
+      - traefik.http.services.yene-api.loadbalancer.server.port=3000
 
   yene-postgres:
     image: postgres:16-alpine
@@ -73,7 +73,7 @@ services:
         condition: service_started
     labels:
       - traefik.enable=true
-      - traefik.http.routers.yene-web.rule=Host(`mekatanker.shop`) || Host(`www.mekatanker.shop`)
+      - traefik.http.routers.yene-web.rule=Host(`verify.togttrading.com`)
       - traefik.http.routers.yene-web.entrypoints=websecure
       - traefik.http.routers.yene-web.tls=true
       - traefik.http.routers.yene-web.tls.certresolver=letsencrypt
@@ -89,7 +89,9 @@ services:
     container_name: yene-web-admin
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: https://api.mekatanker.shop/api/v1
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: 1042108670897-mvf53pl5jnrqpe7kco0cl75bbgm9vfuh.apps.googleusercontent.com
+      BACKEND_API_URL: https://verify-api.togttrading.com/api/v1
+      NODE_ENV: production
     ports:
       - "127.0.0.1:3102:3000"
     networks:
@@ -99,7 +101,7 @@ services:
         condition: service_started
     labels:
       - traefik.enable=true
-      - traefik.http.routers.yene-admin.rule=Host(`admin.mekatanker.shop`)
+      - traefik.http.routers.yene-admin.rule=Host(`verify-admin.togttrading.com`)
       - traefik.http.routers.yene-admin.entrypoints=websecure
       - traefik.http.routers.yene-admin.tls=true
       - traefik.http.routers.yene-admin.tls.certresolver=letsencrypt

@@ -316,6 +316,13 @@ export const envSchema = z
     GOOGLE_APPLICATION_CREDENTIALS: z.string().optional().default(''),
     // Firebase project ID for verifyIdToken audience check.
     FIREBASE_PROJECT_ID: z.string().min(1, 'must not be empty').default('yeneverify'),
+    // OAuth 2.0 Web client ID. Google Identity Services (the admin dashboard's
+    // Google button) issues ID tokens with this client ID as the audience, so
+    // the admin login verifies them against this value. Public, not a secret.
+    GOOGLE_WEB_CLIENT_ID: z
+      .string()
+      .min(1, 'must not be empty.')
+      .default('1042108670897-mvf53pl5jnrqpe7kco0cl75bbgm9vfuh.apps.googleusercontent.com'),
 
     // ── Payment destinations (Step 16 billing flow) ───────────────────────
     // Shown to merchants by POST /billing/initiate. MVP: hardcoded env
@@ -471,8 +478,38 @@ export const envSchema = z
         'must be an Ethiopian number in +251XXXXXXXXX format.',
       ),
     ADMIN_BOOTSTRAP_NAME: z.string().min(1, 'must not be empty.').default('Fuad'),
+
+    // ── Admin emails allowlist (Google Sign-In access control) ───────────
+    // Empty in development/test means the admin dashboard rejects every
+    // sign-in; it must be populated outside development (checked below).
+    ADMIN_EMAILS: z
+      .string()
+      .optional()
+      .default('')
+      .refine(
+        (value) =>
+          value === '' ||
+          value
+            .split(',')
+            .map((email) => email.trim())
+            .filter(Boolean)
+            .every((email) => z.string().email().safeParse(email).success),
+        'must be empty or comma-separated valid email addresses.',
+      ),
   })
   .superRefine((env, ctx) => {
+    const adminEmails = env.ADMIN_EMAILS.split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (new Set(adminEmails).size !== adminEmails.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['ADMIN_EMAILS'],
+        message: 'must not contain duplicate email addresses.',
+      });
+    }
+
     if (env.DATABASE_POOL_MAX < env.DATABASE_POOL_MIN) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -540,6 +577,13 @@ export const envSchema = z
           code: z.ZodIssueCode.custom,
           path: ['CORS_ORIGINS'],
           message: 'must not use a wildcard origin in production.',
+        });
+      }
+      if (adminEmails.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['ADMIN_EMAILS'],
+          message: 'must contain at least one email outside development.',
         });
       }
     }

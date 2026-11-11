@@ -1,4 +1,18 @@
-function P({ title, body }: { title: string; body: string }) {
-  return <main className="p-6 md:p-8"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1><div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">{body}</div></main>;
+import { SectionPlaceholder } from '@/components/section-placeholder';
+
+export default function Page() {
+  return (
+    <SectionPlaceholder
+      phase="Phase D"
+      title="Audit log"
+      description="Every admin action, newest first. Rows are written by the backend and cannot be edited or deleted from the dashboard."
+      planned={[
+        'Columns: timestamp, admin, action, target, details, IP',
+        'Search by action, admin email, or target id',
+        'Filter by date range and action family',
+        'CSV export of the current filter',
+        'Backed by GET /admin/audit',
+      ]}
+    />
+  );
 }
-export default function Page() { return <P title="Audit log" body="Searchable/exportable admin audit log ships in Phase 5." />; }

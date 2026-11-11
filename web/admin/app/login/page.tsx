@@ -1,22 +1,37 @@
-'use client';
-
-import { useState } from 'react';
+import Image from 'next/image';
+import { GoogleSignIn } from './google-signin';
 
 export default function LoginPage() {
-  const [phone, setPhone] = useState('');
   return (
-    <main className="flex min-h-screen items-center justify-center px-6">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-sm text-white">YV</span>
-          <span className="font-semibold">Yene Verify Admin</span>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-6">
+      <div
+        className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-brand/10 blur-3xl"
+        aria-hidden="true"
+      />
+      <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand via-brand-accent to-brand-lime" />
+        <div className="mb-7">
+          <Image
+            src="/logo-color.svg"
+            alt="Yene Verify"
+            width={923}
+            height={890}
+            priority
+            className="h-16 w-auto"
+          />
+          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+            Admin console
+          </p>
         </div>
-        <h1 className="text-xl font-semibold tracking-tight">Sign in</h1>
-        <p className="mt-2 text-sm text-slate-600">Admin access uses phone + OTP (ADMIN role only). Full auth wiring ships in Phase 4.</p>
-        <label className="mt-6 block text-sm font-medium text-slate-700" htmlFor="phone">Phone</label>
-        <input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+251..." className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-brand" />
-        <button type="button" className="mt-4 w-full rounded-xl bg-brand px-4 py-3 text-sm font-medium text-white hover:bg-brand-dark">Request OTP</button>
-        <p className="mt-4 text-xs text-slate-500">Phase 1 scaffold: login UI is present; backend session/cookie flow is implemented in Phase 4.</p>
+        <h1 className="text-xl font-semibold tracking-tight">Sign in with Google</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Only allowlisted admin accounts can open this dashboard. Access is granted by email, not
+          by phone or OTP.
+        </p>
+        <GoogleSignIn />
+        <p className="mt-6 border-t border-slate-100 pt-4 text-[11px] leading-relaxed text-slate-500">
+          Unauthorized accounts are rejected and the attempt is recorded in the audit log.
+        </p>
       </div>
     </main>
   );

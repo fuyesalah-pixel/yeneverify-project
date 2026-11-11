@@ -1,4 +1,17 @@
-function P({ title, body }: { title: string; body: string }) {
-  return <main className="p-6 md:p-8"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1><div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">{body}</div></main>;
+import { SectionPlaceholder } from '@/components/section-placeholder';
+
+export default function Page() {
+  return (
+    <SectionPlaceholder
+      phase="Phase E"
+      title="Platform config"
+      description="Feature flags and billing destinations. All changes are confirmed and audited."
+      planned={[
+        'Feature flags: manual review, AI fallback, billing verification, ML insights',
+        'Payment destinations: CBE and Telebirr accounts used by the billing flow',
+        'Payment instruction note shown to merchants',
+        'Every toggle requires confirmation and writes an ADMIN audit entry',
+      ]}
+    />
+  );
 }
-export default function Page() { return <P title="Settings" body="Payment accounts, package overrides, feature flags, and announcements ship in Phase 5." />; }

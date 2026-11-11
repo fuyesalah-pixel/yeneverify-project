@@ -4,9 +4,18 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        brand: { DEFAULT: '#16A34A', accent: '#00D54B', dark: '#15803D' },
+        brand: {
+          DEFAULT: '#16A34A',
+          accent: '#22C55E',
+          dark: '#0A5F2A',
+          deep: '#026932',
+          lime: '#44C624',
+          ink: '#14231A',
+        },
       },
-      fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+      fontFamily: {
+        sans: ['Poppins', 'Noto Sans Ethiopic', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
     },
   },
   plugins: [],

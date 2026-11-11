@@ -36,6 +36,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { PackagesModule } from './packages/packages.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ExportsModule } from './exports/exports.module';
+import { AdminModule } from './admin/admin.module';
 
 import { RootController } from './root/root.controller';
 import { VersionController } from './version/version.controller';
@@ -104,6 +105,7 @@ import { buildLoggerOptions } from './common/logger/logger.config';
     PackagesModule,
     AnalyticsModule,
     ExportsModule,
+    AdminModule,
     NotificationsModule,
   ],
 
