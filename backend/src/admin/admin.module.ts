@@ -10,10 +10,11 @@ import { AppConfigModule } from '../config/config.module';
 import { RedisModule } from '../redis/redis.module';
 import { AuthModule } from '../auth/auth.module';
 import { AuditModule } from '../audit/audit.module';
+import { CreditsModule } from '../credits/credits.module';
 import { firebaseAdminProvider } from '../common/firebase/firebase-admin.provider';
 
 @Module({
-  imports: [PrismaModule, AppConfigModule, RedisModule, AuthModule, AuditModule],
+  imports: [PrismaModule, AppConfigModule, RedisModule, AuthModule, AuditModule, CreditsModule],
   providers: [firebaseAdminProvider, AdminService],
   controllers: [AdminController],
 })

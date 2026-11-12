@@ -18,6 +18,7 @@ const NAV = [
     group: 'Finance',
     items: [
       { href: '/reports', label: 'Reports & credits', icon: 'chart' },
+      { href: '/credits/adjust', label: 'Adjust credits', icon: 'edit' },
       { href: '/subscriptions', label: 'Subscriptions', icon: 'repeat' },
     ],
   },

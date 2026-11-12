@@ -194,6 +194,72 @@ export class CreditsService {
     return result;
   }
 
+  // ── manual adjustment (admin) ───────────────────────────────────────────
+
+  /**
+   * Signed manual correction, written by an admin from the console.
+   *
+   * Unlike grant() this accepts a negative amount (remove credits), so the
+   * ledger row type follows the sign: GRANT for a credit, CONSUME for a
+   * debit. Both types count toward the ledger sum, unlike ADJUSTMENT rows,
+   * which are cache-correction records written by reconcile() and are
+   * deliberately excluded from the sum.
+   *
+   * The balance comes from the LEDGER, never the cache, and a debit that
+   * would push the merchant negative is rejected before any row is written.
+   */
+  async adjust(input: {
+    merchantId: string;
+    amount: bigint;
+    reason: string;
+    actorUserId: string;
+  }): Promise<{ previousBalance: bigint; newBalance: bigint; txId: string }> {
+    if (input.amount === 0n) {
+      throw new CreditGrantInvalidError(input.amount);
+    }
+
+    const result = await this.runInTx(undefined, async (runTx) => {
+      const ledgerBalance = await this.repo.sumLedgerForMerchant(input.merchantId, runTx);
+      const newBalance = ledgerBalance + input.amount;
+
+      if (newBalance < 0n) {
+        throw new CreditsExhaustedError(ledgerBalance);
+      }
+
+      const row = await this.safeInsert(
+        'adjust',
+        {
+          merchantId: input.merchantId,
+          type: input.amount > 0n ? 'GRANT' : 'CONSUME',
+          amount: input.amount,
+          balanceAfter: newBalance,
+          reason: input.reason,
+          actorUserId: input.actorUserId,
+        },
+        runTx,
+      );
+      await this.repo.updateCachedBalance(input.merchantId, input.amount, runTx);
+      return { previousBalance: ledgerBalance, newBalance, txId: row.id };
+    });
+
+    this.audit.log({
+      actorType: 'ADMIN',
+      actorUserId: input.actorUserId,
+      action: 'credits.adjusted',
+      targetType: 'merchant',
+      targetId: input.merchantId,
+      metadata: {
+        amount: input.amount.toString(),
+        previousBalance: result.previousBalance.toString(),
+        newBalance: result.newBalance.toString(),
+        reason: input.reason,
+        ledgerType: input.amount > 0n ? 'GRANT' : 'CONSUME',
+      },
+    });
+
+    return result;
+  }
+
   // ── reconcile ──────────────────────────────────────────────────────────
 
   /**
@@ -324,7 +390,7 @@ export class CreditsService {
 
   /** Wrap the append-only insert; surface unexpected DB failures as 500s. */
   private async safeInsert(
-    operation: 'consume' | 'grant' | 'reconcile',
+    operation: 'consume' | 'grant' | 'reconcile' | 'adjust',
     input: Parameters<CreditsRepository['insertCreditTx']>[0],
     tx: Tx,
   ) {
