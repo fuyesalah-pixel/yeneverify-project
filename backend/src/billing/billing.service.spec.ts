@@ -20,8 +20,8 @@ import type { PrismaService } from '../prisma/prisma.service';
 import type { CreditsService } from '../credits/credits.service';
 import type { NotificationsService } from '../notifications/notifications.service';
 import type { AuditService } from '../audit/audit.service';
-import type { AppConfigService } from '../config/config.service';
 import type { VerificationQueueService } from '../verification/queue/verification-queue.service';
+import type { PlatformConfigService } from '../platform-config/platform-config.service';
 
 // ── Fixtures ─────────────────────────────────────────────────────────────
 
@@ -122,13 +122,15 @@ describe('BillingService', () => {
   const notificationsMock = { notify: jest.fn().mockResolvedValue({ notificationId: 'n1' }) };
   const auditMock = { log: jest.fn() };
   const queueMock = { enqueue: jest.fn().mockResolvedValue(undefined) };
-  const configMock = {
-    payment: {
+  const platformMock = {
+    getPaymentInstructions: jest.fn().mockResolvedValue({
       accountName: 'Yene Verify',
-      destinationCbe: '1000123456789',
-      destinationTelebirr: '+251911000111',
+      cbeAccountNumber: '1000123456789',
+      telebirrPhoneNumber: '+251911000111',
       instructionsNote: 'Pay the exact amount.',
-    },
+      source: 'env',
+      updatedAt: null,
+    }),
   };
 
   beforeEach(() => {
@@ -145,8 +147,8 @@ describe('BillingService', () => {
       creditsMock as unknown as CreditsService,
       notificationsMock as unknown as NotificationsService,
       auditMock as unknown as AuditService,
-      configMock as unknown as AppConfigService,
       queueMock as unknown as VerificationQueueService,
+      platformMock as unknown as PlatformConfigService,
     );
   });
 

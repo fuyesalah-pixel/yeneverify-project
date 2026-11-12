@@ -490,3 +490,66 @@ export interface ReviewDetailResponse {
     resolvedBy: { fullName: string | null; googleEmail: string | null } | null;
   } | null;
 }
+
+export interface DashboardOverview {
+  kpis: {
+    totalMerchants: number;
+    activeSubscriptions: number;
+    verificationsToday: number;
+    mrrMinor: string;
+    currency: string;
+  };
+  volume: Array<{ date: string; total: number; verified: number }>;
+  alerts: {
+    pendingReviews: number;
+    flaggedDuplicates: number;
+    lowCreditMerchants: number;
+  };
+  recentActivity: Array<{
+    id: string;
+    action: string;
+    targetType: string | null;
+    targetId: string | null;
+    createdAt: string;
+    actorName: string;
+  }>;
+  generatedAt: string;
+  windowStart: string;
+}
+
+export interface BankAdapterRow {
+  code: string;
+  name: string;
+  mode: 'mock' | 'real' | 'unconfigured';
+  configured: boolean;
+  detail: string;
+}
+
+export interface SystemAdaptersResponse {
+  adapters: BankAdapterRow[];
+  mockMode: boolean;
+  checkedAt: string;
+}
+
+export interface FeatureFlagRow {
+  key: string;
+  envKey: string | null;
+  label: string;
+  description: string;
+  enabled: boolean;
+  envDefault: boolean | null;
+  updatedAt: string | null;
+}
+
+export interface FeatureFlagsResponse {
+  flags: FeatureFlagRow[];
+}
+
+export interface PaymentInstructions {
+  accountName: string;
+  cbeAccountNumber: string;
+  telebirrPhoneNumber: string;
+  instructionsNote: string;
+  source: 'db' | 'env';
+  updatedAt: string | null;
+}

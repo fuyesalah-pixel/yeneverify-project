@@ -6,13 +6,19 @@
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { AdminService } from './admin.service';
 
-const WEB_CLIENT_ID =
-  '1042108670897-mvf53pl5jnrqpe7kco0cl75bbgm9vfuh.apps.googleusercontent.com';
+const WEB_CLIENT_ID = '1042108670897-mvf53pl5jnrqpe7kco0cl75bbgm9vfuh.apps.googleusercontent.com';
 
 const configMock: any = {
   adminEmails: ['Fuad@Example.com', 'fuyesalah@gmail.com'],
   jwt: { accessTtl: '15m' },
   googleWebClientId: WEB_CLIENT_ID,
+  bankAdapters: { mock: false },
+  telebirr: { headlessEnabled: true },
+  awash: { endpoints: ['https://awash.example/receipt'] },
+  dashen: { endpoints: [] },
+  abyssinia: { endpoints: ['https://abyssinia.example/receipt'] },
+  mpesa: { endpoints: [] },
+  zemen: { endpoints: ['https://zemen.example/receipt'] },
 };
 
 const prismaMock: any = {
@@ -39,7 +45,13 @@ const prismaMock: any = {
   session: { count: jest.fn(), updateMany: jest.fn() },
   subscription: { findFirst: jest.fn() },
   transaction: { findMany: jest.fn() },
-  verification: { groupBy: jest.fn(), findMany: jest.fn(), findUnique: jest.fn(), count: jest.fn(), update: jest.fn() },
+  verification: {
+    groupBy: jest.fn(),
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+    count: jest.fn(),
+    update: jest.fn(),
+  },
   verificationReview: { upsert: jest.fn() },
   adminNotification: { create: jest.fn(), findUnique: jest.fn() },
   creditTransaction: { aggregate: jest.fn(), groupBy: jest.fn(), findMany: jest.fn() },
@@ -69,6 +81,12 @@ const notificationsMock: any = { notify: jest.fn().mockResolvedValue({}) };
 const storageMock: any = { getObject: jest.fn() };
 const projectorMock: any = { project: jest.fn() };
 const firebaseAdminMock: any = {};
+const platformMock: any = {
+  listFlags: jest.fn(),
+  setFlag: jest.fn(),
+  getPaymentInstructions: jest.fn(),
+  setPaymentInstructions: jest.fn(),
+};
 
 function buildService(): AdminService {
   return new AdminService(
@@ -81,6 +99,7 @@ function buildService(): AdminService {
     creditsMock,
     notificationsMock,
     storageMock,
+    platformMock,
     projectorMock,
     firebaseAdminMock,
   );
@@ -818,14 +837,10 @@ describe('AdminService', () => {
           { type: 'CONSUME', _sum: { amount: -250n }, _count: { _all: 250 } },
           { type: 'ADJUSTMENT', _sum: { amount: 5n }, _count: { _all: 1 } },
         ])
-        .mockResolvedValueOnce([
-          { merchantId: 'merchant-1', _sum: { amount: -200n } },
-        ]);
+        .mockResolvedValueOnce([{ merchantId: 'merchant-1', _sum: { amount: -200n } }]);
       prismaMock.merchant.aggregate.mockResolvedValue({ _sum: { creditsBalance: 750n } });
       prismaMock.package.findMany.mockResolvedValue([{ code: 'BUSINESS_PRO' }]);
-      prismaMock.$queryRaw.mockResolvedValue([
-        { day: key, granted: '1000', consumed: '250' },
-      ]);
+      prismaMock.$queryRaw.mockResolvedValue([{ day: key, granted: '1000', consumed: '250' }]);
       prismaMock.merchant.findMany.mockResolvedValue([
         {
           id: 'merchant-1',
@@ -835,12 +850,20 @@ describe('AdminService', () => {
           owner: { fullName: 'Selam', phone: '+251911000111' },
         },
       ]);
-      prismaMock.merchant.count.mockResolvedValueOnce(10).mockResolvedValueOnce(1).mockResolvedValueOnce(1);
+      prismaMock.merchant.count
+        .mockResolvedValueOnce(10)
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(1);
       prismaMock.auditLog.findMany.mockResolvedValue([
         {
           id: 'audit-1',
           targetId: 'merchant-1',
-          metadata: { businessName: 'Selam Coffee', amount: '5', newBalance: '755', reason: 'goodwill' },
+          metadata: {
+            businessName: 'Selam Coffee',
+            amount: '5',
+            newBalance: '755',
+            reason: 'goodwill',
+          },
           createdAt: new Date(),
           actorUser: { fullName: 'Fuad', googleEmail: 'fuad@example.com' },
         },
@@ -1332,7 +1355,10 @@ describe('AdminService', () => {
       expect(auditMock.log).toHaveBeenCalledWith(
         expect.objectContaining({
           action: 'admin.verification.approved',
-          metadata: expect.objectContaining({ previousStatus: 'NEEDS_REVIEW', note: 'Bank statement confirms the transfer.' }),
+          metadata: expect.objectContaining({
+            previousStatus: 'NEEDS_REVIEW',
+            note: 'Bank statement confirms the transfer.',
+          }),
         }),
       );
     });
@@ -1638,6 +1664,145 @@ describe('AdminService', () => {
         actor: { name: 'Fuad', email: 'fuad@example.com', phone: '+251900000001' },
       });
       expect(result.logs[0].createdAt).toBe(createdAt.toISOString());
+    });
+  });
+
+  describe('getDashboardOverview()', () => {
+    it('assembles KPIs, the 7-day series, alerts and recent activity', async () => {
+      prismaMock.merchant.count.mockResolvedValueOnce(12).mockResolvedValueOnce(3);
+      prismaMock.verification.count.mockResolvedValueOnce(42).mockResolvedValueOnce(4);
+      prismaMock.$queryRaw
+        .mockResolvedValueOnce([{ activeSubscriptions: 5, mrrMinor: '59700' }])
+        .mockResolvedValueOnce([
+          { date: '2026-11-06', total: 1, verified: 1 },
+          { date: '2026-11-12', total: 41, verified: 37 },
+        ])
+        .mockResolvedValueOnce([{ count: 2 }]);
+      prismaMock.auditLog.findMany.mockResolvedValueOnce([
+        {
+          id: 'audit-9',
+          action: 'admin.config.flag.updated',
+          targetType: 'feature_flag',
+          targetId: 'ff_ml_insights_enabled',
+          createdAt: new Date('2026-11-12T08:00:00Z'),
+          actorUser: { fullName: 'Fuad', googleEmail: 'fuad@example.com' },
+        },
+      ]);
+
+      const result = await service.getDashboardOverview();
+
+      expect(result.kpis).toMatchObject({
+        totalMerchants: 12,
+        activeSubscriptions: 5,
+        verificationsToday: 42,
+        mrrMinor: '59700',
+        currency: 'ETB',
+      });
+      expect(result.alerts).toEqual({
+        pendingReviews: 4,
+        flaggedDuplicates: 2,
+        lowCreditMerchants: 3,
+      });
+      expect(result.volume).toHaveLength(2);
+      expect(result.recentActivity[0]).toMatchObject({
+        id: 'audit-9',
+        action: 'admin.config.flag.updated',
+        actorName: 'Fuad',
+      });
+    });
+  });
+
+  describe('getSystemAdapters()', () => {
+    it('marks configured adapters real and unconfigured ones explicit', () => {
+      const result = service.getSystemAdapters();
+
+      expect(result.adapters).toHaveLength(7);
+      expect(result.mockMode).toBe(false);
+      expect(result.adapters.find((a) => a.code === 'CBE')).toMatchObject({ mode: 'real' });
+      expect(result.adapters.find((a) => a.code === 'DASHEN')).toMatchObject({
+        mode: 'unconfigured',
+        configured: false,
+      });
+      expect(result.adapters.find((a) => a.code === 'AWASH')).toMatchObject({ mode: 'real' });
+    });
+
+    it('reports every adapter as mock when BANK_ADAPTER_MOCK is on', () => {
+      configMock.bankAdapters.mock = true;
+      const result = service.getSystemAdapters();
+      configMock.bankAdapters.mock = false;
+
+      expect(result.mockMode).toBe(true);
+      expect(result.adapters.every((a) => a.mode === 'mock')).toBe(true);
+    });
+  });
+
+  describe('platform config', () => {
+    it('returns the flag list from the platform service', async () => {
+      platformMock.listFlags.mockResolvedValue([{ key: 'ff_ml_insights_enabled', enabled: false }]);
+      await expect(service.getConfigFlags()).resolves.toEqual({
+        flags: [{ key: 'ff_ml_insights_enabled', enabled: false }],
+      });
+    });
+
+    it('audits a flag change with the previous value', async () => {
+      platformMock.setFlag.mockResolvedValue({
+        flag: { key: 'ff_ml_insights_enabled', enabled: true },
+        previous: false,
+      });
+
+      const result = await service.updateConfigFlag({
+        key: 'ff_ml_insights_enabled',
+        enabled: true,
+        actorUserId: 'admin-1',
+        ip: '1.2.3.4',
+      });
+
+      expect(result.flag).toMatchObject({ enabled: true });
+      expect(platformMock.setFlag).toHaveBeenCalledWith('ff_ml_insights_enabled', true);
+      expect(auditMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'admin.config.flag.updated',
+          targetType: 'feature_flag',
+          metadata: { key: 'ff_ml_insights_enabled', enabled: true, previous: false },
+        }),
+      );
+    });
+
+    it('audits payment changes with before and after payloads', async () => {
+      const before = {
+        accountName: 'Yene Verify',
+        cbeAccountNumber: '1000123456789',
+        telebirrPhoneNumber: '+251911000111',
+        instructionsNote: 'old',
+        source: 'env' as const,
+        updatedAt: null,
+      };
+      const after = { ...before, cbeAccountNumber: '1000999888777', instructionsNote: 'new' };
+      platformMock.setPaymentInstructions.mockResolvedValue({
+        next: { ...after, source: 'db', updatedAt: '2026-11-12T09:00:00Z' },
+        previous: before,
+      });
+
+      const result = await service.updateConfigPayments({
+        payment: {
+          accountName: after.accountName,
+          cbeAccountNumber: after.cbeAccountNumber,
+          telebirrPhoneNumber: after.telebirrPhoneNumber,
+          instructionsNote: after.instructionsNote,
+        },
+        actorUserId: 'admin-1',
+      });
+
+      expect(result).toMatchObject({ cbeAccountNumber: '1000999888777' });
+      expect(auditMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'admin.config.payments.updated',
+          targetType: 'platform_setting',
+          metadata: { key: 'payment.instructions' },
+          before: expect.objectContaining({ cbeAccountNumber: '1000123456789' }),
+          after: expect.objectContaining({ cbeAccountNumber: '1000999888777' }),
+        }),
+      );
     });
   });
 });

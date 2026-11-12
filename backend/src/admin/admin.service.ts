@@ -33,6 +33,10 @@ import { CreditsService } from '../credits/credits.service';
 import { LOW_CREDITS_WARNING_THRESHOLD } from '../credits/credits.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { StorageService } from '../storage/storage.service';
+import {
+  PlatformConfigService,
+  type PaymentInstructions,
+} from '../platform-config/platform-config.service';
 import { TransactionProjector } from '../verification/verifications/transaction-projector';
 import { newId } from '../common/utils/id.util';
 import { FIREBASE_ADMIN } from '../common/firebase/firebase-admin.provider';
@@ -90,6 +94,7 @@ export class AdminService {
     private readonly credits: CreditsService,
     private readonly notifications: NotificationsService,
     private readonly storage: StorageService,
+    private readonly platform: PlatformConfigService,
     private readonly projector: TransactionProjector,
     @Inject(FIREBASE_ADMIN) private readonly firebaseAdmin: admin.app.App,
   ) {}
@@ -2614,6 +2619,267 @@ export class AdminService {
       pageSize,
       totalPages: Math.ceil(total / pageSize),
     };
+  }
+
+  // ── dashboard ───────────────────────────────────────────────────────────
+
+  /** At-a-glance counts, 7-day volume, alerts and recent admin activity. */
+  async getDashboardOverview() {
+    const now = new Date();
+    const todayStart = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    );
+    const since = new Date(todayStart.getTime() - 6 * 24 * 60 * 60 * 1000);
+
+    const [
+      merchantCount,
+      subscriptionRows,
+      todayCount,
+      dailyRows,
+      pendingReviews,
+      flaggedRows,
+      lowCreditCount,
+      recentActivity,
+    ] = await Promise.all([
+      this.prisma.merchant.count({ where: { deletedAt: null } }),
+      this.prisma.$queryRaw<Array<{ activeSubscriptions: number; mrrMinor: string }>>`
+          SELECT count(m.id)::int AS "activeSubscriptions",
+                 COALESCE(SUM(COALESCE(p.price_minor, 0)), 0)::text AS "mrrMinor"
+          FROM merchants m
+          JOIN subscriptions s ON s.id = m.subscription_id
+          JOIN packages p ON p.code = s.package_code
+          WHERE m.deleted_at IS NULL AND s.status = 'ACTIVE'
+        `,
+      this.prisma.verification.count({ where: { createdAt: { gte: todayStart } } }),
+      this.prisma.$queryRaw<Array<{ date: string; total: number; verified: number }>>`
+          WITH days AS (
+            SELECT generate_series(${since}::date, ${todayStart}::date, interval '1 day')::date AS day
+          )
+          SELECT to_char(d.day, 'YYYY-MM-DD') AS date,
+                 count(v.id)::int AS total,
+                 COALESCE(count(v.id) FILTER (WHERE v.status = 'VERIFIED'), 0)::int AS verified
+          FROM days d
+          LEFT JOIN verifications v
+            ON v.created_at >= d.day AND v.created_at < d.day + interval '1 day'
+          GROUP BY d.day
+          ORDER BY d.day
+        `,
+      this.prisma.verification.count({
+        where: { status: 'NEEDS_REVIEW', source: 'TRANSACTION' },
+      }),
+      this.prisma.$queryRaw<Array<{ count: number }>>`
+          WITH hits AS (
+            SELECT v.id, v.bank_code, v.reference_normalized, v.merchant_id, v.created_at
+            FROM verifications v
+            WHERE v.reference_normalized IS NOT NULL AND v.bank_code IS NOT NULL
+          ),
+          agg AS (
+            SELECT d.id,
+                   d.total_hits,
+                   count(DISTINCT h.merchant_id)::int AS merchants,
+                   COALESCE(count(DISTINCT h.merchant_id) FILTER (
+                     WHERE h.created_at >= d.first_seen_at
+                       AND h.created_at < d.first_seen_at + interval '24 hours'
+                   ), 0) >= 3 AS suspicious
+            FROM duplicate_fingerprints d
+            LEFT JOIN hits h
+              ON h.bank_code = d.bank_code AND h.reference_normalized = d.bank_reference
+            GROUP BY d.id
+          )
+          SELECT count(*)::int AS count
+          FROM agg
+          WHERE suspicious AND (total_hits > 1 OR merchants > 1)
+        `,
+      this.prisma.merchant.count({
+        where: { deletedAt: null, creditsBalance: { lte: LOW_CREDITS_WARNING_THRESHOLD } },
+      }),
+      this.prisma.auditLog.findMany({
+        where: { actorType: 'ADMIN' },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: {
+          id: true,
+          action: true,
+          targetType: true,
+          targetId: true,
+          createdAt: true,
+          actorUser: { select: { fullName: true, googleEmail: true } },
+        },
+      }),
+    ]);
+
+    const subscriptions = subscriptionRows[0] ?? { activeSubscriptions: 0, mrrMinor: '0' };
+
+    return {
+      kpis: {
+        totalMerchants: merchantCount,
+        activeSubscriptions: subscriptions.activeSubscriptions,
+        verificationsToday: todayCount,
+        mrrMinor: subscriptions.mrrMinor,
+        currency: 'ETB',
+      },
+      volume: dailyRows.map((row) => ({
+        date: row.date,
+        total: row.total,
+        verified: row.verified,
+      })),
+      alerts: {
+        pendingReviews,
+        flaggedDuplicates: flaggedRows[0]?.count ?? 0,
+        lowCreditMerchants: lowCreditCount,
+      },
+      recentActivity: recentActivity.map((row) => ({
+        id: row.id,
+        action: row.action,
+        targetType: row.targetType,
+        targetId: row.targetId,
+        createdAt: row.createdAt.toISOString(),
+        actorName: row.actorUser?.fullName ?? row.actorUser?.googleEmail ?? 'Admin',
+      })),
+      generatedAt: now.toISOString(),
+      windowStart: since.toISOString(),
+    };
+  }
+
+  // ── system ──────────────────────────────────────────────────────────────
+
+  /** The seven bank adapters and whether each one runs mock or real. */
+  getSystemAdapters() {
+    const mock = this.config.bankAdapters.mock;
+    const mode = (configured: boolean): 'mock' | 'real' | 'unconfigured' =>
+      mock ? 'mock' : configured ? 'real' : 'unconfigured';
+
+    const rows: Array<{
+      code: string;
+      name: string;
+      configured: boolean;
+      detail: string;
+    }> = [
+      {
+        code: 'CBE',
+        name: 'Commercial Bank of Ethiopia',
+        configured: true,
+        detail: 'New-system JSON + BranchReceipt PDF',
+      },
+      {
+        code: 'TELEBIRR',
+        name: 'Telebirr (Ethio Telecom)',
+        configured: this.config.telebirr.headlessEnabled,
+        detail: this.config.telebirr.headlessEnabled
+          ? 'Headless browser enabled'
+          : 'Headless browser disabled',
+      },
+      {
+        code: 'AWASH',
+        name: 'Awash Bank',
+        configured: true,
+        detail: 'Fixed public receipt endpoint',
+      },
+      {
+        code: 'DASHEN',
+        name: 'Dashen Bank',
+        configured: this.config.dashen.endpoints.length > 0,
+        detail: `${this.config.dashen.endpoints.length} endpoint(s) configured`,
+      },
+      {
+        code: 'ABYSSINIA',
+        name: 'Bank of Abyssinia',
+        configured: this.config.abyssinia.endpoints.length > 0,
+        detail: `${this.config.abyssinia.endpoints.length} endpoint(s) configured`,
+      },
+      {
+        code: 'MPESA',
+        name: 'M-Pesa (Safaricom)',
+        configured: this.config.mpesa.endpoints.length > 0,
+        detail: `${this.config.mpesa.endpoints.length} endpoint(s) configured`,
+      },
+      {
+        code: 'ZEMEN',
+        name: 'Zemen Bank',
+        configured: this.config.zemen.endpoints.length > 0,
+        detail: `${this.config.zemen.endpoints.length} endpoint(s) configured`,
+      },
+    ];
+
+    return {
+      adapters: rows.map((row) => ({
+        code: row.code,
+        name: row.name,
+        mode: mode(row.configured),
+        configured: row.configured,
+        detail: row.detail,
+      })),
+      mockMode: mock,
+      checkedAt: new Date().toISOString(),
+    };
+  }
+
+  // ── platform config ─────────────────────────────────────────────────────
+
+  async getConfigFlags() {
+    return { flags: await this.platform.listFlags() };
+  }
+
+  async updateConfigFlag(input: {
+    key: string;
+    enabled: boolean;
+    actorUserId: string;
+    ip?: string;
+    userAgent?: string;
+  }) {
+    const { flag, previous } = await this.platform.setFlag(input.key, input.enabled);
+
+    this.audit.log({
+      actorType: 'ADMIN',
+      actorUserId: input.actorUserId,
+      action: 'admin.config.flag.updated',
+      targetType: 'feature_flag',
+      ip: input.ip,
+      userAgent: input.userAgent,
+      metadata: { key: input.key, enabled: input.enabled, previous },
+    });
+
+    return { flag };
+  }
+
+  async getConfigPayments() {
+    return this.platform.getPaymentInstructions();
+  }
+
+  async updateConfigPayments(input: {
+    payment: PaymentInstructions;
+    actorUserId: string;
+    ip?: string;
+    userAgent?: string;
+  }) {
+    const { next, previous } = await this.platform.setPaymentInstructions(
+      input.payment,
+      input.actorUserId,
+    );
+
+    this.audit.log({
+      actorType: 'ADMIN',
+      actorUserId: input.actorUserId,
+      action: 'admin.config.payments.updated',
+      targetType: 'platform_setting',
+      ip: input.ip,
+      userAgent: input.userAgent,
+      metadata: { key: 'payment.instructions' },
+      before: {
+        accountName: previous.accountName,
+        cbeAccountNumber: previous.cbeAccountNumber,
+        telebirrPhoneNumber: previous.telebirrPhoneNumber,
+        instructionsNote: previous.instructionsNote,
+      },
+      after: {
+        accountName: next.accountName,
+        cbeAccountNumber: next.cbeAccountNumber,
+        telebirrPhoneNumber: next.telebirrPhoneNumber,
+        instructionsNote: next.instructionsNote,
+      },
+    });
+
+    return next;
   }
 
   /**

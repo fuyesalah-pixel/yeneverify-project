@@ -18,6 +18,8 @@ export interface AuditEntry {
   userAgent?: string;
   requestId?: string;
   metadata?: Record<string, unknown>;
+  before?: Record<string, unknown>;
+  after?: Record<string, unknown>;
 }
 
 @Injectable()
@@ -61,6 +63,12 @@ export class AuditService {
         userAgent: sanitized.userAgent,
         requestId: sanitized.requestId,
         metadata: sanitized.metadata as Prisma.InputJsonValue | undefined,
+        ...(sanitized.before !== undefined
+          ? { before: sanitized.before as Prisma.InputJsonValue }
+          : {}),
+        ...(sanitized.after !== undefined
+          ? { after: sanitized.after as Prisma.InputJsonValue }
+          : {}),
       },
     });
   }

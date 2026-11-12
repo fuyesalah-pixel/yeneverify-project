@@ -337,3 +337,51 @@ export async function blockReceiptFingerprint(formData: FormData): Promise<void>
     ),
   );
 }
+
+export async function updateFeatureFlag(formData: FormData): Promise<void> {
+  const key = String(formData.get('key') ?? '').trim();
+  const enabled = String(formData.get('enabled') ?? '') === 'true';
+  const returnTo = safeReturnPath(formData.get('returnTo'), '/settings');
+
+  if (!key) {
+    redirect(withMessage(returnTo, 'error', 'Unknown feature flag.'));
+  }
+
+  const result = await mutate<{ flag: { key: string; enabled: boolean } }>(
+    '/admin/config/flags',
+    { key, enabled },
+    'PATCH',
+  );
+
+  if (!result.ok) {
+    redirect(withMessage(returnTo, 'error', result.message));
+  }
+
+  revalidatePath('/settings');
+  redirect(withMessage(returnTo, 'notice', `Saved ${key} — now ${enabled ? 'enabled' : 'disabled'}.`));
+}
+
+export async function updatePaymentInstructions(formData: FormData): Promise<void> {
+  const returnTo = safeReturnPath(formData.get('returnTo'), '/settings');
+  const payload = {
+    accountName: String(formData.get('accountName') ?? '').trim(),
+    cbeAccountNumber: String(formData.get('cbeAccountNumber') ?? '').trim(),
+    telebirrPhoneNumber: String(formData.get('telebirrPhoneNumber') ?? '').trim(),
+    instructionsNote: String(formData.get('instructionsNote') ?? '').trim(),
+  };
+
+  const result = await mutate<{ source: string }>('/admin/config/payments', payload, 'PATCH');
+
+  if (!result.ok) {
+    redirect(withMessage(returnTo, 'error', result.message));
+  }
+
+  revalidatePath('/settings');
+  redirect(
+    withMessage(
+      returnTo,
+      'notice',
+      'Payment instructions saved — merchants see the new destinations on their next billing session.',
+    ),
+  );
+}

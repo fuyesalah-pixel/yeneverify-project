@@ -1,17 +1,23 @@
-import { SectionPlaceholder } from '@/components/section-placeholder';
+import { SystemHealth } from '@/components/system-health';
 
-export default function Page() {
+export const metadata = { title: 'System health' };
+
+export default function HealthPage() {
   return (
-    <SectionPlaceholder
-      phase="Phase A / E"
-      title="System health"
-      description="Live dependency status for the backend, database, Redis, and tunnel."
-      planned={[
-        'Backend uptime and version',
-        'Database and Redis connection checks (GET /admin/health)',
-        'Cloudflare Tunnel reachability',
-        'Recent errors from logs / Sentry (last 20)',
-      ]}
-    />
+    <main className="p-6 md:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">System health</h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-600">
+            Live dependency status from the backend readiness probes, the Cloudflare tunnel, and the
+            seven bank adapters.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5">
+        <SystemHealth />
+      </div>
+    </main>
   );
 }

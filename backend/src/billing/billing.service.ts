@@ -26,11 +26,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import type { BankCode } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { AppConfigService } from '../config/config.service';
 import { AuditService } from '../audit/audit.service';
 import { CreditsService } from '../credits/credits.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { VerificationQueueService } from '../verification/queue/verification-queue.service';
+import { PlatformConfigService } from '../platform-config/platform-config.service';
 import { AppError } from '../common/errors/app-error';
 import { ERROR_CODES } from '../common/constants/error-codes';
 import {
@@ -85,8 +85,8 @@ export class BillingService {
     private readonly credits: CreditsService,
     private readonly notifications: NotificationsService,
     private readonly audit: AuditService,
-    private readonly config: AppConfigService,
     private readonly queue: VerificationQueueService,
+    private readonly platform: PlatformConfigService,
   ) {}
 
   // ── Initiation ────────────────────────────────────────────────────────
@@ -128,6 +128,7 @@ export class BillingService {
       packageCode: pkg.code as string,
       expectedAmountMinor: pkg.priceMinor as bigint,
     });
+    const payment = await this.platform.getPaymentInstructions();
 
     this.audit.log({
       actorType: 'USER',
@@ -149,14 +150,14 @@ export class BillingService {
       currency: 'ETB',
       instructions: {
         cbe: {
-          accountNumber: this.config.payment.destinationCbe,
-          accountName: this.config.payment.accountName,
+          accountNumber: payment.cbeAccountNumber,
+          accountName: payment.accountName,
         },
         telebirr: {
-          phoneNumber: this.config.payment.destinationTelebirr,
-          accountName: this.config.payment.accountName,
+          phoneNumber: payment.telebirrPhoneNumber,
+          accountName: payment.accountName,
         },
-        note: this.config.payment.instructionsNote,
+        note: payment.instructionsNote,
       },
       billingSessionId: session.id,
     };

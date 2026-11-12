@@ -12,6 +12,7 @@ import { AuthModule } from '../auth/auth.module';
 import { AuditModule } from '../audit/audit.module';
 import { CreditsModule } from '../credits/credits.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { PlatformConfigModule } from '../platform-config/platform-config.module';
 import { firebaseAdminProvider } from '../common/firebase/firebase-admin.provider';
 
 @Module({
@@ -23,6 +24,7 @@ import { firebaseAdminProvider } from '../common/firebase/firebase-admin.provide
     AuditModule,
     CreditsModule,
     NotificationsModule,
+    PlatformConfigModule,
   ],
   providers: [firebaseAdminProvider, AdminService],
   controllers: [AdminController],

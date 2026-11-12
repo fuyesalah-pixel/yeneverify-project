@@ -901,7 +901,8 @@ model BankReferenceLookup {
   @@map("bank_reference_lookups")
 }
 
-/// DB-backed feature flags. Env vars take precedence in MVP.
+/// DB-backed feature flags. A row set by an admin takes precedence;
+/// env vars supply the defaults for flags without a row.
 model FeatureFlag {
   key         String   @id
   enabled     Boolean  @default(false)
@@ -910,6 +911,17 @@ model FeatureFlag {
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("feature_flags")
+}
+
+/// Admin-editable platform settings (payment destinations and similar).
+/// Key/value so a new setting never needs a migration.
+model PlatformSetting {
+  key             String   @id
+  value           Json
+  updatedByUserId String?  @map("updated_by_user_id") @db.Uuid
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("platform_settings")
 }
 
 /// Email capture for the public waitlist (mekatanker.shop).

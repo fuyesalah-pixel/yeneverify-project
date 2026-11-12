@@ -26,6 +26,12 @@
 // POST /api/v1/admin/fraud/duplicates/:fingerprint/block
 // GET  /api/v1/admin/subscriptions/overview
 // GET  /api/v1/admin/audit
+// GET  /api/v1/admin/dashboard/overview
+// GET  /api/v1/admin/system/adapters
+// GET  /api/v1/admin/config/flags
+// PATCH /api/v1/admin/config/flags
+// GET  /api/v1/admin/config/payments
+// PATCH /api/v1/admin/config/payments
 // ============================================================
 
 import {
@@ -56,6 +62,7 @@ import type { AuthUser } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AdminOnly } from '../common/decorators/admin-only.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import { PLATFORM_FLAG_KEYS } from '../platform-config/platform-config.service';
 import { AdminService } from './admin.service';
 
 const GoogleIdTokenDtoSchema = z.object({
@@ -184,6 +191,28 @@ const AuditLogsDtoSchema = z.object({
 type AuditLogsDto = z.infer<typeof AuditLogsDtoSchema>;
 
 const FINGERPRINT_PATTERN = /^[0-9a-f]{64}$/i;
+
+const UpdateFlagDtoSchema = z.object({
+  key: z.string().min(1, 'Flag key is required.'),
+  enabled: z.boolean(),
+});
+type UpdateFlagDto = z.infer<typeof UpdateFlagDtoSchema>;
+
+const UpdatePaymentsDtoSchema = z.object({
+  accountName: z.string().trim().min(1, 'Account name is required.').max(120),
+  cbeAccountNumber: z
+    .string()
+    .trim()
+    .min(6, 'CBE account number is too short.')
+    .max(32)
+    .regex(/^[0-9]+$/, 'CBE account number must be digits only.'),
+  telebirrPhoneNumber: z
+    .string()
+    .trim()
+    .regex(/^\+?[0-9]{9,15}$/, 'Telebirr number must be a phone number (9–15 digits).'),
+  instructionsNote: z.string().trim().max(500).default(''),
+});
+type UpdatePaymentsDto = z.infer<typeof UpdatePaymentsDtoSchema>;
 
 function parseFingerprint(value: string): string {
   if (!FINGERPRINT_PATTERN.test(value)) {
@@ -685,5 +714,108 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'Paginated ADMIN audit entries' })
   async getAuditLogs(@Query(new ZodValidationPipe(AuditLogsDtoSchema)) dto: AuditLogsDto) {
     return this.admin.getAuditLogs(dto);
+  }
+
+  // ── Dashboard ───────────────────────────────────────────────────────────
+
+  /** KPIs, 7-day verification volume, operational alerts, recent activity. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('dashboard/overview')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Dashboard overview (admin only)' })
+  @ApiResponse({ status: 200, description: 'Counts, volume series, alerts and recent activity' })
+  async getDashboardOverview() {
+    return this.admin.getDashboardOverview();
+  }
+
+  // ── System ──────────────────────────────────────────────────────────────
+
+  /** Bank adapter list with mock/real status derived from the environment. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('system/adapters')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Bank adapter configuration (admin only)' })
+  @ApiResponse({ status: 200, description: 'Seven adapters with mode and configuration detail' })
+  getSystemAdapters() {
+    return this.admin.getSystemAdapters();
+  }
+
+  // ── Platform config ─────────────────────────────────────────────────────
+
+  /** Feature flags with their effective DB value and env default. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('config/flags')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Feature flags (admin only)' })
+  @ApiResponse({ status: 200, description: 'Flag list with effective values' })
+  async getConfigFlags() {
+    return this.admin.getConfigFlags();
+  }
+
+  /** Toggle a feature flag. Writes an ADMIN audit entry. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Patch('config/flags')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Update a feature flag (admin only)' })
+  @ApiResponse({ status: 200, description: 'Updated flag and audit entry' })
+  @ApiResponse({ status: 400, description: 'Unknown flag key' })
+  async updateConfigFlag(
+    @CurrentUser() admin: AuthUser,
+    @Body(new ZodValidationPipe(UpdateFlagDtoSchema)) dto: UpdateFlagDto,
+    @Ip() ip: string,
+    @Req() req: Request,
+  ) {
+    if (!PLATFORM_FLAG_KEYS.includes(dto.key)) {
+      throw new BadRequestException(`Unknown feature flag: ${dto.key}`);
+    }
+    return this.admin.updateConfigFlag({
+      key: dto.key,
+      enabled: dto.enabled,
+      actorUserId: admin.id,
+      ip,
+      userAgent: req.headers['user-agent'],
+    });
+  }
+
+  /** Payment instructions merchants see during billing. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('config/payments')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Payment instructions (admin only)' })
+  @ApiResponse({ status: 200, description: 'CBE and Telebirr destinations plus note' })
+  async getConfigPayments() {
+    return this.admin.getConfigPayments();
+  }
+
+  /** Replace payment instructions. Writes an ADMIN audit entry. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Patch('config/payments')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Update payment instructions (admin only)' })
+  @ApiResponse({ status: 200, description: 'Saved payment instructions and audit entry' })
+  async updateConfigPayments(
+    @CurrentUser() admin: AuthUser,
+    @Body(new ZodValidationPipe(UpdatePaymentsDtoSchema)) dto: UpdatePaymentsDto,
+    @Ip() ip: string,
+    @Req() req: Request,
+  ) {
+    return this.admin.updateConfigPayments({
+      payment: dto,
+      actorUserId: admin.id,
+      ip,
+      userAgent: req.headers['user-agent'],
+    });
   }
 }
