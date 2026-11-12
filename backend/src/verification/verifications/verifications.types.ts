@@ -62,6 +62,8 @@ export type DuplicateCheck = {
   firstMerchantId: string;
   firstSeenAt: Date;
   totalHits: number;
+  /** Set when an admin blocklisted the receipt; verdict becomes FAKE. */
+  blockedAt?: Date | null;
 };
 
 /** Why the resolver was asked to produce an ERROR for a pre-adapter failure. */

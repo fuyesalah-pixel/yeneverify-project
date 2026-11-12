@@ -268,15 +268,20 @@ export class VerificationsService {
     // outcomes (test stubs) can never be recorded, checked for, or hit-
     // escalated — skipping consistently keeps VERIFIED as their verdict.
     let duplicate = null;
+    let blockedFingerprint: string | null = null;
     if (adapterResult.status === 'VERIFIED' && DB_BANK_CODES.has(adapter.bankCode)) {
       const fingerprint = this.duplicates.computeFingerprint(
         adapter.bankCode as never,
         referenceNormalized,
       );
-      duplicate = await this.duplicates.check(fingerprint);
-      if (duplicate) {
+      const existing = await this.duplicates.check(fingerprint);
+      if (existing?.blockedAt) {
+        // Admin blocklist: skip hit escalation and fail the receipt outright.
+        blockedFingerprint = fingerprint;
+      } else if (existing) {
         // Escalate the counter for the admin dashboard before finalizing.
         await this.duplicates.incrementHits(fingerprint);
+        duplicate = existing;
       } else {
         await this.duplicates.record(fingerprint, {
           firstVerificationId: verification.id,
@@ -287,12 +292,20 @@ export class VerificationsService {
       }
     }
 
-    const outcome = resolveVerdict({
-      adapterResult,
-      adapterBankCode: adapter.bankCode as never,
-      duplicate,
-      errorContext: null,
-    });
+    const outcome: VerdictOutcome = blockedFingerprint
+      ? {
+          status: 'FAKE',
+          bankCode: adapter.bankCode as never,
+          errorCode: 'VERIFICATION_FINGERPRINT_BLOCKED',
+          errorMessage: 'This receipt has been blocked by an administrator.',
+          metadata: { blockedFingerprint: true, fingerprint: blockedFingerprint },
+        }
+      : resolveVerdict({
+          adapterResult,
+          adapterBankCode: adapter.bankCode as never,
+          duplicate,
+          errorContext: null,
+        });
     outcome.referenceNormalized = referenceNormalized;
     // Persisted alongside bankCode so the status endpoint shows it.
     outcome.bankReference ??= referenceNormalized;

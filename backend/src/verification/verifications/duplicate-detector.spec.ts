@@ -15,6 +15,7 @@ type Row = {
   bankReference: string;
   firstSeenAt: Date;
   totalHits: number;
+  blockedAt?: Date | null;
 };
 
 const makePrisma = (rows: Map<string, Row>): PrismaService =>
@@ -88,6 +89,19 @@ describe('DuplicateDetector', () => {
       totalHits: 1,
     });
     expect(found?.firstSeenAt).toBeInstanceOf(Date);
+  });
+
+  it('check() surfaces the blocklist timestamp', async () => {
+    const rows = new Map<string, Row>();
+    const d = new DuplicateDetector(makePrisma(rows) as PrismaService);
+    const fingerprint = d.computeFingerprint('CBE', 'FT26195DBK5W81465291');
+    await d.record(fingerprint, seed('first-verif'));
+    const blockedAt = new Date('2026-11-01T00:00:00Z');
+    rows.get(fingerprint)!.blockedAt = blockedAt;
+
+    const found = await d.check(fingerprint);
+
+    expect(found?.blockedAt).toEqual(blockedAt);
   });
 
   it('record() creates a row with the correct fields', async () => {

@@ -2193,6 +2193,429 @@ export class AdminService {
     };
   }
 
+  // ── fraud & duplicates ──────────────────────────────────────────────────
+
+  /**
+   * Receipts seen more than once. A fingerprint is created on the first
+   * VERIFIED use and its counter increments on every later use, so the
+   * fraud list is fingerprints with hits > 1 (or, defensively, more than
+   * one merchant in the raw verifications). "Suspicious" flags three or
+   * more distinct merchants within 24h of first sight.
+   */
+  async getFraudDuplicates(dto: { page?: number; pageSize?: number; search?: string }) {
+    const page = Math.max(1, dto.page ?? 1);
+    const pageSize = Math.min(50, Math.max(1, dto.pageSize ?? 20));
+    const search = dto.search?.trim() || null;
+    const pattern = search ? `%${search}%` : null;
+
+    const rows = await this.prisma.$queryRaw<
+      Array<{
+        id: string;
+        fingerprint: string;
+        bankCode: string;
+        bankReference: string;
+        firstSeenAt: Date;
+        totalHits: number;
+        blockedAt: Date | null;
+        firstMerchantId: string;
+        firstMerchant: string;
+        uses: number;
+        merchants: number;
+        lastSeenAt: Date | null;
+        suspicious: boolean;
+      }>
+    >`
+      WITH hits AS (
+        SELECT v.id, v.bank_code, v.reference_normalized, v.merchant_id, v.created_at
+        FROM verifications v
+        WHERE v.reference_normalized IS NOT NULL AND v.bank_code IS NOT NULL
+      ),
+      agg AS (
+        SELECT d.id,
+               d.fingerprint,
+               d.bank_code::text AS "bankCode",
+               d.bank_reference AS "bankReference",
+               d.first_seen_at AS "firstSeenAt",
+               d.total_hits::int AS "totalHits",
+               d.blocked_at AS "blockedAt",
+               d.first_merchant_id AS "firstMerchantId",
+               count(h.id)::int AS uses,
+               count(DISTINCT h.merchant_id)::int AS merchants,
+               max(h.created_at) AS "lastSeenAt",
+               COALESCE(count(DISTINCT h.merchant_id) FILTER (
+                 WHERE h.created_at >= d.first_seen_at
+                   AND h.created_at < d.first_seen_at + interval '24 hours'
+               ), 0) >= 3 AS suspicious
+        FROM duplicate_fingerprints d
+        LEFT JOIN hits h
+          ON h.bank_code = d.bank_code AND h.reference_normalized = d.bank_reference
+        GROUP BY d.id
+      )
+      SELECT a.*, m.business_name AS "firstMerchant"
+      FROM agg a
+      JOIN merchants m ON m.id = a."firstMerchantId"
+      WHERE (a."totalHits" > 1 OR a.merchants > 1)
+        AND (
+          ${pattern}::text IS NULL
+          OR a.fingerprint ILIKE ${pattern}
+          OR a."bankReference" ILIKE ${pattern}
+          OR m.business_name ILIKE ${pattern}
+        )
+      ORDER BY a.suspicious DESC, a."totalHits" DESC, a."lastSeenAt" DESC NULLS LAST
+      LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}
+    `;
+
+    const countRows = await this.prisma.$queryRaw<Array<{ count: number }>>`
+      WITH hits AS (
+        SELECT v.id, v.bank_code, v.reference_normalized, v.merchant_id
+        FROM verifications v
+        WHERE v.reference_normalized IS NOT NULL AND v.bank_code IS NOT NULL
+      ),
+      agg AS (
+        SELECT d.id, d.fingerprint, d.bank_reference, d.total_hits,
+               d.first_merchant_id,
+               count(DISTINCT h.merchant_id)::int AS merchants
+        FROM duplicate_fingerprints d
+        LEFT JOIN hits h
+          ON h.bank_code = d.bank_code AND h.reference_normalized = d.bank_reference
+        GROUP BY d.id
+      )
+      SELECT count(*)::int AS count
+      FROM agg a
+      JOIN merchants m ON m.id = a.first_merchant_id
+      WHERE (a.total_hits > 1 OR a.merchants > 1)
+        AND (
+          ${pattern}::text IS NULL
+          OR a.fingerprint ILIKE ${pattern}
+          OR a.bank_reference ILIKE ${pattern}
+          OR m.business_name ILIKE ${pattern}
+        )
+    `;
+
+    const total = countRows[0]?.count ?? 0;
+
+    return {
+      duplicates: rows.map((row) => ({
+        id: row.id,
+        fingerprint: row.fingerprint,
+        bankCode: row.bankCode,
+        bankReference: row.bankReference,
+        firstMerchant: { id: row.firstMerchantId, businessName: row.firstMerchant },
+        firstSeenAt: row.firstSeenAt.toISOString(),
+        lastSeenAt: (row.lastSeenAt ?? row.firstSeenAt).toISOString(),
+        totalHits: row.totalHits,
+        merchantCount: row.merchants,
+        uses: row.uses,
+        suspicious: row.suspicious,
+        blockedAt: row.blockedAt ? row.blockedAt.toISOString() : null,
+      })),
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+      suspiciousCount: rows.filter((row) => row.suspicious).length,
+    };
+  }
+
+  /** Every verification that used a flagged receipt, newest first. */
+  async getFraudDuplicateDetail(fingerprint: string) {
+    const row = await this.prisma.duplicateFingerprint.findUnique({ where: { fingerprint } });
+    if (!row) throw new NotFoundException('Fingerprint not found.');
+
+    const uses = await this.prisma.verification.findMany({
+      where: { bankCode: row.bankCode, referenceNormalized: row.bankReference },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+      select: {
+        id: true,
+        status: true,
+        amountMinor: true,
+        createdAt: true,
+        merchantId: true,
+        merchant: { select: { businessName: true } },
+        verifiedBy: { select: { fullName: true, phone: true } },
+      },
+    });
+
+    return {
+      fingerprint: {
+        id: row.id,
+        fingerprint: row.fingerprint,
+        bankCode: row.bankCode,
+        bankReference: row.bankReference,
+        firstMerchantId: row.firstMerchantId,
+        firstSeenAt: row.firstSeenAt.toISOString(),
+        totalHits: row.totalHits,
+        blockedAt: row.blockedAt ? row.blockedAt.toISOString() : null,
+      },
+      uses: uses.map((use) => ({
+        verificationId: use.id,
+        merchantId: use.merchantId,
+        merchant: use.merchant.businessName,
+        submittedBy: use.verifiedBy.fullName || use.verifiedBy.phone,
+        amountMinor: use.amountMinor === null ? null : use.amountMinor.toString(),
+        status: use.status,
+        createdAt: use.createdAt.toISOString(),
+      })),
+    };
+  }
+
+  /** Blocklist a receipt so future verifications fail as FAKE. */
+  async blockFingerprint(
+    fingerprint: string,
+    input: { actorUserId: string; ip?: string; userAgent?: string },
+  ) {
+    const row = await this.prisma.duplicateFingerprint.findUnique({ where: { fingerprint } });
+    if (!row) throw new NotFoundException('Fingerprint not found.');
+
+    const alreadyBlocked = Boolean(row.blockedAt);
+    const blockedAt = row.blockedAt ?? new Date();
+    if (!alreadyBlocked) {
+      await this.prisma.duplicateFingerprint.update({
+        where: { fingerprint },
+        data: { blockedAt, blockedByUserId: input.actorUserId },
+      });
+    }
+
+    this.audit.log({
+      actorType: 'ADMIN',
+      actorUserId: input.actorUserId,
+      action: 'admin.fingerprint.blocked',
+      targetType: 'duplicate_fingerprint',
+      targetId: row.id,
+      ip: input.ip,
+      userAgent: input.userAgent,
+      metadata: {
+        fingerprint,
+        bankCode: row.bankCode,
+        bankReference: row.bankReference,
+        totalHits: row.totalHits,
+        alreadyBlocked,
+      },
+    });
+
+    return { fingerprint, blockedAt: blockedAt.toISOString(), alreadyBlocked };
+  }
+
+  // ── subscriptions ───────────────────────────────────────────────────────
+
+  /** Plan mix, MRR, churn and 30-day growth for the finance overview. */
+  async getSubscriptionsOverview() {
+    const now = new Date();
+    const since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [planRows, churnRows, growthRows, activeRows] = await Promise.all([
+      this.prisma.$queryRaw<
+        Array<{ plan: string; name: string; count: number; priceMinor: string }>
+      >`
+        SELECT p.code::text AS plan,
+               p.name,
+               count(m.id)::int AS count,
+               COALESCE(p.price_minor, 0)::text AS "priceMinor"
+        FROM packages p
+        LEFT JOIN subscriptions s ON s.package_code = p.code AND s.status = 'ACTIVE'
+        LEFT JOIN merchants m ON m.subscription_id = s.id AND m.deleted_at IS NULL
+        WHERE p.active = true
+        GROUP BY p.code, p.name, p.display_order, p.price_minor
+        ORDER BY p.display_order
+      `,
+      this.prisma.$queryRaw<Array<{ cancelled: number; activeAtStart: number }>>`
+        SELECT count(*) FILTER (WHERE cancelled_at >= ${since})::int AS cancelled,
+               count(*) FILTER (
+                 WHERE started_at < ${since}
+                   AND (cancelled_at IS NULL OR cancelled_at >= ${since})
+               )::int AS "activeAtStart"
+        FROM subscriptions
+      `,
+      this.prisma.$queryRaw<Array<{ date: string; active: number; started: number }>>`
+        WITH days AS (
+          SELECT generate_series(${since}::date, ${now}::date, interval '1 day')::date AS day
+        )
+        SELECT to_char(d.day, 'YYYY-MM-DD') AS date,
+               (
+                 SELECT count(*) FROM subscriptions s
+                 WHERE s.started_at IS NOT NULL
+                   AND s.started_at::date <= d.day
+                   AND (s.cancelled_at IS NULL OR s.cancelled_at::date > d.day)
+               )::int AS active,
+               (
+                 SELECT count(*) FROM subscriptions s
+                 WHERE s.started_at IS NOT NULL AND s.started_at::date = d.day
+               )::int AS started
+        FROM days d
+        ORDER BY d.day
+      `,
+      this.prisma.$queryRaw<
+        Array<{
+          merchantId: string;
+          businessName: string;
+          merchantStatus: string;
+          plan: string;
+          planName: string;
+          status: string;
+          startedAt: Date | null;
+          expiresAt: Date | null;
+        }>
+      >`
+        SELECT m.id AS "merchantId",
+               m.business_name AS "businessName",
+               m.status::text AS "merchantStatus",
+               s.package_code::text AS plan,
+               p.name AS "planName",
+               s.status::text AS status,
+               s.started_at AS "startedAt",
+               s.expires_at AS "expiresAt"
+        FROM merchants m
+        JOIN subscriptions s ON s.id = m.subscription_id
+        JOIN packages p ON p.code = s.package_code
+        WHERE m.deleted_at IS NULL
+        ORDER BY (s.status = 'ACTIVE') DESC, s.expires_at DESC NULLS LAST
+        LIMIT 100
+      `,
+    ]);
+
+    const plans = planRows.map((row) => ({
+      plan: row.plan,
+      name: row.name,
+      count: row.count,
+      priceMinor: row.priceMinor,
+      mrrMinor: (BigInt(row.priceMinor) * BigInt(row.count)).toString(),
+    }));
+    const activeCount = plans.reduce((sum, plan) => sum + plan.count, 0);
+    const mrrMinor = plans.reduce((sum, plan) => sum + BigInt(plan.mrrMinor), 0n).toString();
+
+    const cancelled = churnRows[0]?.cancelled ?? 0;
+    const activeAtStart = churnRows[0]?.activeAtStart ?? 0;
+    const churnRate = activeAtStart > 0 ? cancelled / activeAtStart : 0;
+
+    return {
+      kpis: {
+        activeSubscriptions: activeCount,
+        mrrMinor,
+        currency: 'ETB',
+        churnRate: Number(churnRate.toFixed(4)),
+        cancelledLast30d: cancelled,
+        activeAtStart,
+      },
+      plans,
+      growth: growthRows.map((row) => ({
+        date: row.date,
+        active: row.active,
+        started: row.started,
+      })),
+      since: since.toISOString(),
+      subscriptions: activeRows.map((row) => ({
+        merchantId: row.merchantId,
+        businessName: row.businessName,
+        merchantStatus: row.merchantStatus,
+        plan: row.plan,
+        planName: row.planName,
+        status: row.status,
+        startedAt: row.startedAt ? row.startedAt.toISOString() : null,
+        expiresAt: row.expiresAt ? row.expiresAt.toISOString() : null,
+      })),
+    };
+  }
+
+  // ── audit log ───────────────────────────────────────────────────────────
+
+  /** Admin-actor audit rows, newest first. Immutable source of truth. */
+  async getAuditLogs(dto: { page?: number; pageSize?: number; search?: string }) {
+    const page = Math.max(1, dto.page ?? 1);
+    const pageSize = Math.min(100, Math.max(1, dto.pageSize ?? 25));
+    const search = dto.search?.trim() || null;
+    const pattern = search ? `%${search}%` : null;
+
+    const rows = await this.prisma.$queryRaw<
+      Array<{
+        id: string;
+        createdAt: Date;
+        action: string;
+        targetType: string | null;
+        targetId: string | null;
+        ip: string | null;
+        requestId: string | null;
+        userAgent: string | null;
+        metadata: Prisma.JsonValue | null;
+        before: Prisma.JsonValue | null;
+        after: Prisma.JsonValue | null;
+        actorName: string | null;
+        actorEmail: string | null;
+        actorPhone: string | null;
+      }>
+    >`
+      SELECT a.id,
+             a.created_at AS "createdAt",
+             a.action,
+             a.target_type AS "targetType",
+             a.target_id AS "targetId",
+             host(a.ip) AS ip,
+             a.request_id AS "requestId",
+             a.user_agent AS "userAgent",
+             a.metadata,
+             a.before,
+             a.after,
+             u.full_name AS "actorName",
+             u.google_email AS "actorEmail",
+             u.phone AS "actorPhone"
+      FROM audit_logs a
+      LEFT JOIN users u ON u.id = a.actor_user_id
+      WHERE a.actor_type = 'ADMIN'
+        AND (
+          ${pattern}::text IS NULL
+          OR a.action ILIKE ${pattern}
+          OR a.target_type ILIKE ${pattern}
+          OR a.target_id::text ILIKE ${pattern}
+          OR u.google_email ILIKE ${pattern}
+          OR u.full_name ILIKE ${pattern}
+        )
+      ORDER BY a.created_at DESC
+      LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}
+    `;
+
+    const countRows = await this.prisma.$queryRaw<Array<{ count: number }>>`
+      SELECT count(*)::int AS count
+      FROM audit_logs a
+      LEFT JOIN users u ON u.id = a.actor_user_id
+      WHERE a.actor_type = 'ADMIN'
+        AND (
+          ${pattern}::text IS NULL
+          OR a.action ILIKE ${pattern}
+          OR a.target_type ILIKE ${pattern}
+          OR a.target_id::text ILIKE ${pattern}
+          OR u.google_email ILIKE ${pattern}
+          OR u.full_name ILIKE ${pattern}
+        )
+    `;
+
+    const total = countRows[0]?.count ?? 0;
+
+    return {
+      logs: rows.map((row) => ({
+        id: row.id,
+        createdAt: row.createdAt.toISOString(),
+        action: row.action,
+        targetType: row.targetType,
+        targetId: row.targetId,
+        ip: row.ip,
+        requestId: row.requestId,
+        userAgent: row.userAgent,
+        metadata: row.metadata,
+        before: row.before,
+        after: row.after,
+        actor: {
+          name: row.actorName,
+          email: row.actorEmail,
+          phone: row.actorPhone,
+        },
+      })),
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
   /**
    * Verify a Google ID token. Separate method so tests can stub it.
    *

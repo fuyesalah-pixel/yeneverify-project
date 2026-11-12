@@ -33,6 +33,7 @@ export class DuplicateDetector {
       firstMerchantId: row.firstMerchantId,
       firstSeenAt: row.firstSeenAt,
       totalHits: row.totalHits,
+      blockedAt: row.blockedAt,
     };
   }
 

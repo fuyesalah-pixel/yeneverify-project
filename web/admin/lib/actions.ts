@@ -7,7 +7,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { mutate, safeReturnPath, withMessage } from './backend';
-import type { CreditAdjustmentResult } from './types';
+import type { BlockFingerprintResult, CreditAdjustmentResult } from './types';
 
 const STATUS_MESSAGES: Record<string, string> = {
   SUSPEND: 'Account suspended and sessions revoked.',
@@ -301,6 +301,39 @@ export async function reviewVerificationDecision(formData: FormData): Promise<vo
       decision === 'APPROVE'
         ? 'Verification approved as VERIFIED.'
         : 'Verification rejected as FAKE.',
+    ),
+  );
+}
+
+// ── Phase D: fraud ──────────────────────────────────────────────────────────
+
+const FINGERPRINT = /^[0-9a-f]{64}$/i;
+
+export async function blockReceiptFingerprint(formData: FormData): Promise<void> {
+  const fingerprint = String(formData.get('fingerprint') ?? '').trim();
+  const returnTo = safeReturnPath(formData.get('returnTo'), '/fraud');
+
+  if (!FINGERPRINT.test(fingerprint)) {
+    redirect(withMessage(returnTo, 'error', 'Unknown receipt fingerprint.'));
+  }
+
+  const result = await mutate<BlockFingerprintResult>(
+    `/admin/fraud/duplicates/${fingerprint.toLowerCase()}/block`,
+    {},
+  );
+
+  if (!result.ok) {
+    redirect(withMessage(returnTo, 'error', result.message));
+  }
+
+  revalidatePath('/fraud');
+  redirect(
+    withMessage(
+      returnTo,
+      'notice',
+      result.data.alreadyBlocked
+        ? 'That fingerprint was already blocked.'
+        : 'Fingerprint blocked — future verifications of this receipt will be rejected as FAKE.',
     ),
   );
 }

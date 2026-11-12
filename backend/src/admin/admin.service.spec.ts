@@ -45,6 +45,7 @@ const prismaMock: any = {
   creditTransaction: { aggregate: jest.fn(), groupBy: jest.fn(), findMany: jest.fn() },
   auditLog: { findMany: jest.fn() },
   package: { findMany: jest.fn() },
+  duplicateFingerprint: { findUnique: jest.fn(), update: jest.fn() },
   $queryRaw: jest.fn(),
   // Supports both the array form and the interactive-callback form.
   $transaction: jest.fn((arg: any) =>
@@ -1395,6 +1396,248 @@ describe('AdminService', () => {
           actorUserId: 'admin-1',
         }),
       ).rejects.toThrow('Billing verifications');
+    });
+  });
+
+  describe('getFraudDuplicates()', () => {
+    it('maps aggregated duplicates and paging metadata', async () => {
+      const firstSeenAt = new Date('2026-11-01T10:00:00Z');
+      prismaMock.$queryRaw
+        .mockResolvedValueOnce([
+          {
+            id: 'fp-1',
+            fingerprint: 'a'.repeat(64),
+            bankCode: 'CBE',
+            bankReference: 'FT123',
+            firstSeenAt,
+            totalHits: 4,
+            blockedAt: null,
+            firstMerchantId: 'merchant-1',
+            firstMerchant: 'Abebe Shop',
+            uses: 5,
+            merchants: 3,
+            lastSeenAt: new Date('2026-11-01T12:00:00Z'),
+            suspicious: true,
+          },
+        ])
+        .mockResolvedValueOnce([{ count: 1 }]);
+
+      const result = await service.getFraudDuplicates({ page: 1, pageSize: 20 });
+
+      expect(result.total).toBe(1);
+      expect(result.suspiciousCount).toBe(1);
+      expect(result.duplicates[0]).toMatchObject({
+        fingerprint: 'a'.repeat(64),
+        bankCode: 'CBE',
+        bankReference: 'FT123',
+        totalHits: 4,
+        merchantCount: 3,
+        uses: 5,
+        suspicious: true,
+        blockedAt: null,
+        firstMerchant: { id: 'merchant-1', businessName: 'Abebe Shop' },
+      });
+      expect(result.duplicates[0].firstSeenAt).toBe(firstSeenAt.toISOString());
+    });
+  });
+
+  describe('getFraudDuplicateDetail()', () => {
+    it('returns the fingerprint and every use', async () => {
+      prismaMock.duplicateFingerprint.findUnique.mockResolvedValue({
+        id: 'fp-1',
+        fingerprint: 'b'.repeat(64),
+        bankCode: 'CBE',
+        bankReference: 'FT999',
+        firstMerchantId: 'merchant-1',
+        firstSeenAt: new Date('2026-11-01T10:00:00Z'),
+        totalHits: 2,
+        blockedAt: null,
+      });
+      prismaMock.verification.findMany.mockResolvedValue([
+        {
+          id: 'ver-2',
+          status: 'DUPLICATE',
+          amountMinor: 12500n,
+          createdAt: new Date('2026-11-02T09:00:00Z'),
+          merchantId: 'merchant-2',
+          merchant: { businessName: 'Kebede Store' },
+          verifiedBy: { fullName: '', phone: '+251911111111' },
+        },
+      ]);
+
+      const result = await service.getFraudDuplicateDetail('b'.repeat(64));
+
+      expect(result.fingerprint).toMatchObject({
+        id: 'fp-1',
+        bankReference: 'FT999',
+        totalHits: 2,
+      });
+      expect(result.uses).toEqual([
+        {
+          verificationId: 'ver-2',
+          merchantId: 'merchant-2',
+          merchant: 'Kebede Store',
+          submittedBy: '+251911111111',
+          amountMinor: '12500',
+          status: 'DUPLICATE',
+          createdAt: '2026-11-02T09:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('404s an unknown fingerprint', async () => {
+      prismaMock.duplicateFingerprint.findUnique.mockResolvedValue(null);
+
+      await expect(service.getFraudDuplicateDetail('c'.repeat(64))).rejects.toThrow(
+        'Fingerprint not found',
+      );
+    });
+  });
+
+  describe('blockFingerprint()', () => {
+    it('sets blockedAt, writes the audit entry and reports success', async () => {
+      prismaMock.duplicateFingerprint.findUnique.mockResolvedValue({
+        id: 'fp-1',
+        fingerprint: 'd'.repeat(64),
+        bankCode: 'CBE',
+        bankReference: 'FT123',
+        totalHits: 3,
+        blockedAt: null,
+      });
+      prismaMock.duplicateFingerprint.update.mockResolvedValue({});
+
+      const result = await service.blockFingerprint('d'.repeat(64), {
+        actorUserId: 'admin-1',
+        ip: '1.2.3.4',
+      });
+
+      expect(result.alreadyBlocked).toBe(false);
+      expect(prismaMock.duplicateFingerprint.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { fingerprint: 'd'.repeat(64) },
+          data: expect.objectContaining({ blockedByUserId: 'admin-1' }),
+        }),
+      );
+      expect(auditMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'admin.fingerprint.blocked',
+          targetType: 'duplicate_fingerprint',
+          targetId: 'fp-1',
+        }),
+      );
+    });
+
+    it('is idempotent for an already-blocked fingerprint', async () => {
+      const blockedAt = new Date('2026-11-03T08:00:00Z');
+      prismaMock.duplicateFingerprint.findUnique.mockResolvedValue({
+        id: 'fp-1',
+        fingerprint: 'e'.repeat(64),
+        bankCode: 'CBE',
+        bankReference: 'FT123',
+        totalHits: 2,
+        blockedAt,
+      });
+
+      const result = await service.blockFingerprint('e'.repeat(64), { actorUserId: 'admin-1' });
+
+      expect(result.alreadyBlocked).toBe(true);
+      expect(result.blockedAt).toBe(blockedAt.toISOString());
+      expect(prismaMock.duplicateFingerprint.update).not.toHaveBeenCalled();
+    });
+
+    it('404s an unknown fingerprint', async () => {
+      prismaMock.duplicateFingerprint.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.blockFingerprint('f'.repeat(64), { actorUserId: 'admin-1' }),
+      ).rejects.toThrow('Fingerprint not found');
+    });
+  });
+
+  describe('getSubscriptionsOverview()', () => {
+    it('derives active count, MRR and churn from the plan mix', async () => {
+      prismaMock.$queryRaw
+        .mockResolvedValueOnce([
+          { plan: 'FREE', name: 'Free', count: 2, priceMinor: '0' },
+          { plan: 'PREMIUM', name: 'Premium', count: 3, priceMinor: '19900' },
+        ])
+        .mockResolvedValueOnce([{ cancelled: 1, activeAtStart: 4 }])
+        .mockResolvedValueOnce([
+          { date: '2026-11-11', active: 4, started: 1 },
+          { date: '2026-11-12', active: 5, started: 1 },
+        ])
+        .mockResolvedValueOnce([
+          {
+            merchantId: 'merchant-1',
+            businessName: 'Abebe Shop',
+            merchantStatus: 'ACTIVE',
+            plan: 'PREMIUM',
+            planName: 'Premium',
+            status: 'ACTIVE',
+            startedAt: new Date('2026-11-01T00:00:00Z'),
+            expiresAt: new Date('2026-12-01T00:00:00Z'),
+          },
+        ]);
+
+      const result = await service.getSubscriptionsOverview();
+
+      expect(result.kpis).toMatchObject({
+        activeSubscriptions: 5,
+        mrrMinor: '59700',
+        currency: 'ETB',
+        churnRate: 0.25,
+        cancelledLast30d: 1,
+        activeAtStart: 4,
+      });
+      expect(result.plans[1]).toMatchObject({ plan: 'PREMIUM', count: 3, mrrMinor: '59700' });
+      expect(result.growth).toHaveLength(2);
+      expect(result.subscriptions[0]).toMatchObject({
+        businessName: 'Abebe Shop',
+        plan: 'PREMIUM',
+        status: 'ACTIVE',
+      });
+    });
+  });
+
+  describe('getAuditLogs()', () => {
+    it('maps admin-actor rows with actor identity and JSON payloads', async () => {
+      const createdAt = new Date('2026-11-12T07:30:00Z');
+      prismaMock.$queryRaw
+        .mockResolvedValueOnce([
+          {
+            id: 'audit-1',
+            createdAt,
+            action: 'admin.credits.adjusted',
+            targetType: 'merchant',
+            targetId: 'merchant-1',
+            ip: '1.2.3.4',
+            requestId: 'req-1',
+            userAgent: 'jest',
+            metadata: { amount: 100 },
+            before: null,
+            after: { balance: 100 },
+            actorName: 'Fuad',
+            actorEmail: 'fuad@example.com',
+            actorPhone: '+251900000001',
+          },
+        ])
+        .mockResolvedValueOnce([{ count: 1 }]);
+
+      const result = await service.getAuditLogs({ page: 1, pageSize: 25 });
+
+      expect(result.total).toBe(1);
+      expect(result.logs[0]).toMatchObject({
+        id: 'audit-1',
+        action: 'admin.credits.adjusted',
+        targetType: 'merchant',
+        targetId: 'merchant-1',
+        ip: '1.2.3.4',
+        requestId: 'req-1',
+        metadata: { amount: 100 },
+        after: { balance: 100 },
+        actor: { name: 'Fuad', email: 'fuad@example.com', phone: '+251900000001' },
+      });
+      expect(result.logs[0].createdAt).toBe(createdAt.toISOString());
     });
   });
 });

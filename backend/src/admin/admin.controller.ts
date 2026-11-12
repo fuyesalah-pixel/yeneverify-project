@@ -21,6 +21,11 @@
 // GET  /api/v1/admin/verifications/:id
 // GET  /api/v1/admin/verifications/:id/receipt
 // POST /api/v1/admin/verifications/:id/review
+// GET  /api/v1/admin/fraud/duplicates
+// GET  /api/v1/admin/fraud/duplicates/:fingerprint
+// POST /api/v1/admin/fraud/duplicates/:fingerprint/block
+// GET  /api/v1/admin/subscriptions/overview
+// GET  /api/v1/admin/audit
 // ============================================================
 
 import {
@@ -38,6 +43,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
@@ -162,6 +168,29 @@ const ReviewDecisionDtoSchema = z.object({
     .max(500),
 });
 type ReviewDecisionDto = z.infer<typeof ReviewDecisionDtoSchema>;
+
+const DuplicatesDtoSchema = z.object({
+  page: z.coerce.number().int().min(1).optional().default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).optional().default(20),
+  search: z.string().optional(),
+});
+type DuplicatesDto = z.infer<typeof DuplicatesDtoSchema>;
+
+const AuditLogsDtoSchema = z.object({
+  page: z.coerce.number().int().min(1).optional().default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).optional().default(25),
+  search: z.string().optional(),
+});
+type AuditLogsDto = z.infer<typeof AuditLogsDtoSchema>;
+
+const FINGERPRINT_PATTERN = /^[0-9a-f]{64}$/i;
+
+function parseFingerprint(value: string): string {
+  if (!FINGERPRINT_PATTERN.test(value)) {
+    throw new BadRequestException('fingerprint must be a 64-character hex digest.');
+  }
+  return value.toLowerCase();
+}
 
 @ApiTags('Admin')
 @Controller({ path: 'admin', version: '1' })
@@ -577,5 +606,84 @@ export class AdminController {
       ip,
       userAgent: req.headers['user-agent'],
     });
+  }
+
+  // ── Fraud & duplicates ──────────────────────────────────────────────────
+
+  /** Receipts reused across verifications, with suspicious-pattern flags. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('fraud/duplicates')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Duplicate receipt fingerprints (admin only)' })
+  @ApiResponse({ status: 200, description: 'Paginated duplicate fingerprints' })
+  async getFraudDuplicates(
+    @Query(new ZodValidationPipe(DuplicatesDtoSchema)) dto: DuplicatesDto,
+  ) {
+    return this.admin.getFraudDuplicates(dto);
+  }
+
+  /** Every verification that used one fingerprint, oldest first. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('fraud/duplicates/:fingerprint')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Duplicate fingerprint detail (admin only)' })
+  @ApiResponse({ status: 200, description: 'Fingerprint row and its verifications' })
+  @ApiResponse({ status: 404, description: 'Fingerprint not found' })
+  async getFraudDuplicateDetail(@Param('fingerprint') fingerprint: string) {
+    return this.admin.getFraudDuplicateDetail(parseFingerprint(fingerprint));
+  }
+
+  /** Block a fingerprint so future verifications are rejected as FAKE. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Post('fraud/duplicates/:fingerprint/block')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Block a duplicate fingerprint (admin only)' })
+  @ApiResponse({ status: 200, description: 'Fingerprint blocked and audited' })
+  @ApiResponse({ status: 404, description: 'Fingerprint not found' })
+  async blockFingerprint(
+    @CurrentUser() admin: AuthUser,
+    @Param('fingerprint') fingerprint: string,
+    @Ip() ip: string,
+    @Req() req: Request,
+  ) {
+    return this.admin.blockFingerprint(parseFingerprint(fingerprint), {
+      actorUserId: admin.id,
+      ip,
+      userAgent: req.headers['user-agent'],
+    });
+  }
+
+  // ── Subscriptions ───────────────────────────────────────────────────────
+
+  /** Active subscriptions by plan, MRR, churn and a 30-day growth series. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('subscriptions/overview')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Subscriptions overview (admin only)' })
+  @ApiResponse({ status: 200, description: 'Plan mix, MRR, churn, growth and active list' })
+  async getSubscriptionsOverview() {
+    return this.admin.getSubscriptionsOverview();
+  }
+
+  // ── Audit log ───────────────────────────────────────────────────────────
+
+  /** Append-only admin action trail. */
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Get('audit')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Admin audit log (admin only)' })
+  @ApiResponse({ status: 200, description: 'Paginated ADMIN audit entries' })
+  async getAuditLogs(@Query(new ZodValidationPipe(AuditLogsDtoSchema)) dto: AuditLogsDto) {
+    return this.admin.getAuditLogs(dto);
   }
 }

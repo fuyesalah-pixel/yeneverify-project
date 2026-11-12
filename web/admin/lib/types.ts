@@ -330,6 +330,117 @@ export interface ReviewQueueResponse {
   totalPages: number;
 }
 
+// ── Phase D: fraud, subscriptions & audit ───────────────────────────────────
+
+export interface FraudDuplicateRow {
+  id: string;
+  fingerprint: string;
+  bankCode: string;
+  bankReference: string;
+  firstMerchant: { id: string; businessName: string };
+  firstSeenAt: string;
+  lastSeenAt: string;
+  totalHits: number;
+  merchantCount: number;
+  uses: number;
+  suspicious: boolean;
+  blockedAt: string | null;
+}
+
+export interface FraudDuplicatesResponse {
+  duplicates: FraudDuplicateRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  suspiciousCount: number;
+}
+
+export interface FraudDuplicateDetail {
+  fingerprint: {
+    id: string;
+    fingerprint: string;
+    bankCode: string;
+    bankReference: string;
+    firstMerchantId: string;
+    firstSeenAt: string;
+    totalHits: number;
+    blockedAt: string | null;
+  };
+  uses: Array<{
+    verificationId: string;
+    merchantId: string;
+    merchant: string;
+    submittedBy: string;
+    amountMinor: string | null;
+    status: string;
+    createdAt: string;
+  }>;
+}
+
+export interface BlockFingerprintResult {
+  fingerprint: string;
+  blockedAt: string;
+  alreadyBlocked: boolean;
+}
+
+export interface SubscriptionsOverview {
+  kpis: {
+    activeSubscriptions: number;
+    mrrMinor: string;
+    currency: string;
+    churnRate: number;
+    cancelledLast30d: number;
+    activeAtStart: number;
+  };
+  plans: Array<{
+    plan: string;
+    name: string;
+    count: number;
+    priceMinor: string;
+    mrrMinor: string;
+  }>;
+  growth: Array<{ date: string; active: number; started: number }>;
+  since: string;
+  subscriptions: Array<{
+    merchantId: string;
+    businessName: string;
+    merchantStatus: string;
+    plan: string;
+    planName: string;
+    status: string;
+    startedAt: string | null;
+    expiresAt: string | null;
+  }>;
+}
+
+export interface AuditLogRow {
+  id: string;
+  createdAt: string;
+  action: string;
+  targetType: string | null;
+  targetId: string | null;
+  ip: string | null;
+  requestId: string | null;
+  userAgent: string | null;
+  metadata: unknown;
+  before: unknown;
+  after: unknown;
+  actor: {
+    name: string | null;
+    email: string | null;
+    phone: string | null;
+  };
+}
+
+export interface AuditLogsResponse {
+  logs: AuditLogRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface ReviewDetailResponse {
   verification: {
     id: string;

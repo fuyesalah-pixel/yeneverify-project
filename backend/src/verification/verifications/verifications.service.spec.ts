@@ -272,6 +272,34 @@ describe('VerificationsService.process', () => {
     expect(JSON.stringify(auditEntry)).not.toContain('FT26195DBK5W81465291Selam');
   });
 
+  it('blocked fingerprint: VERIFIED adapter outcome becomes FAKE, no hit escalation', async () => {
+    const adapter = makeStubAdapter(verifiedAdapterResult());
+    const deps = makeDeps(adapter);
+    deps.duplicates.check.mockResolvedValue({
+      firstVerificationId: 'verif-original',
+      firstMerchantId: 'merchant-1',
+      firstSeenAt: new Date('2026-10-01T00:00:00Z'),
+      totalHits: 3,
+      blockedAt: new Date('2026-11-01T00:00:00Z'),
+    });
+    const service = makeService(deps);
+
+    const result = await service.process(input());
+
+    expect(result.status).toBe('FAKE');
+    expect(deps.duplicates.incrementHits).not.toHaveBeenCalled();
+    expect(deps.duplicates.record).not.toHaveBeenCalled();
+    expect(deps.repo.updateWithOutcome).toHaveBeenCalledWith(
+      expect.anything(),
+      'verif-1',
+      expect.objectContaining({
+        status: 'FAKE',
+        errorCode: 'VERIFICATION_FINGERPRINT_BLOCKED',
+      }),
+      expect.any(Number),
+    );
+  });
+
   it('injects merchant-configured accounts into adapter supplementary (config wins over OCR)', async () => {
     const adapter = makeStubAdapter(verifiedAdapterResult());
     adapter.extractSupplementary = jest.fn(() => ({ last8: '99999999' }));

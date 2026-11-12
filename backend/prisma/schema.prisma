@@ -717,14 +717,16 @@ model Transaction {
 /// Cross-merchant duplicate receipt detection.
 /// Written on first VERIFIED. Subsequent hits → DUPLICATE verdict.
 model DuplicateFingerprint {
-  id                  String   @id @db.Uuid
-  fingerprint         String   @unique
-  bankCode            BankCode @map("bank_code")
-  bankReference       String   @map("bank_reference")
-  firstVerificationId String   @unique @map("first_verification_id") @db.Uuid
-  firstMerchantId     String   @map("first_merchant_id") @db.Uuid
-  firstSeenAt         DateTime @default(now()) @map("first_seen_at") @db.Timestamptz(6)
-  totalHits           Int      @default(1) @map("total_hits")
+  id                  String    @id @db.Uuid
+  fingerprint         String    @unique
+  bankCode            BankCode  @map("bank_code")
+  bankReference       String    @map("bank_reference")
+  firstVerificationId String    @unique @map("first_verification_id") @db.Uuid
+  firstMerchantId     String    @map("first_merchant_id") @db.Uuid
+  firstSeenAt         DateTime  @default(now()) @map("first_seen_at") @db.Timestamptz(6)
+  totalHits           Int       @default(1) @map("total_hits")
+  blockedAt           DateTime? @map("blocked_at") @db.Timestamptz(6)
+  blockedByUserId     String?   @map("blocked_by_user_id") @db.Uuid
 
   firstVerification Verification @relation(fields: [firstVerificationId], references: [id], onDelete: Restrict)
   firstMerchant     Merchant     @relation(fields: [firstMerchantId], references: [id], onDelete: Restrict)
