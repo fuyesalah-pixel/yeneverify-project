@@ -39,7 +39,9 @@ const prismaMock: any = {
   session: { count: jest.fn(), updateMany: jest.fn() },
   subscription: { findFirst: jest.fn() },
   transaction: { findMany: jest.fn() },
-  verification: { groupBy: jest.fn(), findMany: jest.fn() },
+  verification: { groupBy: jest.fn(), findMany: jest.fn(), findUnique: jest.fn(), count: jest.fn(), update: jest.fn() },
+  verificationReview: { upsert: jest.fn() },
+  adminNotification: { create: jest.fn(), findUnique: jest.fn() },
   creditTransaction: { aggregate: jest.fn(), groupBy: jest.fn(), findMany: jest.fn() },
   auditLog: { findMany: jest.fn() },
   package: { findMany: jest.fn() },
@@ -61,7 +63,10 @@ const redisMock: any = {
   raw: { ping: jest.fn().mockResolvedValue('PONG') },
 };
 const auditMock: any = { log: jest.fn() };
-const creditsMock: any = { adjust: jest.fn(), getBalance: jest.fn() };
+const creditsMock: any = { adjust: jest.fn(), getBalance: jest.fn(), consume: jest.fn() };
+const notificationsMock: any = { notify: jest.fn().mockResolvedValue({}) };
+const storageMock: any = { getObject: jest.fn() };
+const projectorMock: any = { project: jest.fn() };
 const firebaseAdminMock: any = {};
 
 function buildService(): AdminService {
@@ -73,6 +78,9 @@ function buildService(): AdminService {
     auditMock,
     redisMock,
     creditsMock,
+    notificationsMock,
+    storageMock,
+    projectorMock,
     firebaseAdminMock,
   );
 }
@@ -442,6 +450,10 @@ describe('AdminService', () => {
           }),
         }),
       );
+      // A search must not AND an ownedMerchant filter on top of the OR, or
+      // email/phone/name hits get filtered out by business name.
+      const where = prismaMock.user.findMany.mock.calls[0][0].where;
+      expect(where.ownedMerchant).toBeUndefined();
     });
 
     it('clamps page size to 100 and page to at least 1', async () => {
@@ -1027,6 +1039,362 @@ describe('AdminService', () => {
         consumed30d: '120',
         lastTopUp: topUp.toISOString(),
       });
+    });
+  });
+
+  // ── Phase C: broadcast notifications ───────────────────────────────────
+
+  describe('getNotificationAudience()', () => {
+    it('counts active merchants by role', async () => {
+      prismaMock.user.count
+        .mockResolvedValueOnce(12)
+        .mockResolvedValueOnce(9)
+        .mockResolvedValueOnce(3);
+
+      const result = await service.getNotificationAudience();
+
+      expect(result).toEqual({ all: 12, merchant: 9, subMerchant: 3 });
+    });
+  });
+
+  describe('sendNotification()', () => {
+    it('writes a campaign, fans out to every active merchant and audits', async () => {
+      prismaMock.user.findMany.mockResolvedValue([{ id: 'u1' }, { id: 'u2' }]);
+      prismaMock.adminNotification.create.mockResolvedValue({});
+
+      const result = await service.sendNotification({
+        targetType: 'ALL',
+        title: 'Scheduled maintenance',
+        body: 'Verification will pause for 10 minutes tonight.',
+        type: 'warning',
+        actorUserId: 'admin-1',
+      });
+
+      expect(result).toMatchObject({
+        recipientCount: 2,
+        rowsWritten: 2,
+        targetLabel: 'All merchants',
+      });
+      expect(prismaMock.adminNotification.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            title: 'Scheduled maintenance',
+            type: 'warning',
+            targetType: 'ALL',
+            targetLabel: 'All merchants',
+            recipientCount: 2,
+            sentByUserId: 'admin-1',
+          }),
+        }),
+      );
+      expect(notificationsMock.notify).toHaveBeenCalledTimes(2);
+      expect(notificationsMock.notify).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'u1',
+          type: 'SYSTEM',
+          data: expect.objectContaining({ adminType: 'warning', targetType: 'ALL' }),
+        }),
+      );
+      expect(auditMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'admin.notification.sent',
+          actorUserId: 'admin-1',
+          metadata: expect.objectContaining({ recipientCount: 2, rowsWritten: 2 }),
+        }),
+      );
+    });
+
+    it('targets one user by id', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        fullName: 'Fuad Nesredin',
+        googleEmail: 'fuadnesredinhiyar@gmail.com',
+        role: 'MERCHANT',
+        deletedAt: null,
+      });
+      prismaMock.adminNotification.create.mockResolvedValue({});
+
+      const result = await service.sendNotification({
+        targetType: 'USER',
+        userId: 'user-1',
+        title: 'Hello',
+        body: 'A direct message.',
+        type: 'info',
+        actorUserId: 'admin-1',
+      });
+
+      expect(result).toMatchObject({ recipientCount: 1, targetLabel: 'Fuad Nesredin' });
+      expect(prismaMock.user.findMany).not.toHaveBeenCalled();
+    });
+
+    it('refuses to broadcast to admin accounts', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 'admin-2',
+        fullName: 'Other admin',
+        role: 'ADMIN',
+        deletedAt: null,
+      });
+
+      await expect(
+        service.sendNotification({
+          targetType: 'USER',
+          userId: 'admin-2',
+          title: 'Hello',
+          body: 'Admin inboxes are not broadcast targets.',
+          type: 'info',
+          actorUserId: 'admin-1',
+        }),
+      ).rejects.toThrow('Admin accounts cannot receive');
+      expect(prismaMock.adminNotification.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects a target with no active recipients', async () => {
+      prismaMock.user.findMany.mockResolvedValue([]);
+
+      await expect(
+        service.sendNotification({
+          targetType: 'ROLE',
+          role: 'SUB_MERCHANT',
+          title: 'Hello',
+          body: 'Nobody is here.',
+          type: 'info',
+          actorUserId: 'admin-1',
+        }),
+      ).rejects.toThrow('No active accounts');
+    });
+
+    it('counts fan-out failures without losing the campaign', async () => {
+      prismaMock.user.findMany.mockResolvedValue([{ id: 'u1' }, { id: 'u2' }]);
+      prismaMock.adminNotification.create.mockResolvedValue({});
+      notificationsMock.notify
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error('insert failed'));
+
+      const result = await service.sendNotification({
+        targetType: 'ALL',
+        title: 'Hello',
+        body: 'One of you will not get this.',
+        type: 'system',
+        actorUserId: 'admin-1',
+      });
+
+      expect(result.rowsWritten).toBe(1);
+      expect(auditMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({ metadata: expect.objectContaining({ rowsWritten: 1 }) }),
+      );
+    });
+  });
+
+  describe('getNotificationHistory()', () => {
+    it('derives delivery status from recipient rows', async () => {
+      const sentAt = new Date('2026-11-12T08:00:00.000Z');
+      prismaMock.$queryRaw
+        .mockResolvedValueOnce([
+          {
+            id: 'camp-1',
+            title: 'Update',
+            body: 'Body',
+            type: 'info',
+            targetType: 'ALL',
+            targetRole: null,
+            targetLabel: 'All merchants',
+            recipientCount: 3,
+            sentByName: 'Fuad',
+            sentByEmail: 'fuad@example.com',
+            createdAt: sentAt,
+            rowsWritten: 3,
+            delivered: 2,
+            failed: 1,
+            read: 1,
+          },
+        ])
+        .mockResolvedValueOnce([{ count: 1 }]);
+
+      const result = await service.getNotificationHistory({ page: 1, pageSize: 20 });
+
+      expect(result.total).toBe(1);
+      expect(result.notifications[0]).toMatchObject({
+        id: 'camp-1',
+        targetLabel: 'All merchants',
+        recipientCount: 3,
+        delivered: 2,
+        failed: 1,
+        status: 'PARTIAL',
+        sentAt: sentAt.toISOString(),
+      });
+    });
+  });
+
+  describe('getNotificationDetail()', () => {
+    it('404s an unknown campaign', async () => {
+      prismaMock.adminNotification.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.getNotificationDetail('00000000-0000-4000-8000-000000000000'),
+      ).rejects.toThrow('Notification not found');
+    });
+  });
+
+  // ── Phase C: review queue ──────────────────────────────────────────────
+
+  describe('getReviewQueue()', () => {
+    it('lists NEEDS_REVIEW transaction verifications with reasons', async () => {
+      prismaMock.verification.findMany.mockResolvedValue([
+        {
+          id: 'ver-1',
+          createdAt: new Date('2026-11-12T07:00:00.000Z'),
+          bankCode: 'CBE',
+          bankReference: 'FT26308B3ZN3',
+          amountMinor: 6000n,
+          errorCode: 'VERIFICATION_MANUAL_REVIEW',
+          errorMessage: 'Merchant flagged this receipt.',
+          merchant: { id: 'm1', businessName: 'Selam Coffee' },
+          verifiedBy: { fullName: 'Fuad', googleEmail: null },
+          review: {
+            id: 'rev-1',
+            status: 'OPEN',
+            reason: 'Amount mismatch',
+            requestedBy: { fullName: 'Fuad' },
+          },
+        },
+      ]);
+      prismaMock.verification.count.mockResolvedValue(1);
+
+      const result = await service.getReviewQueue({ page: 1, pageSize: 20 });
+
+      expect(prismaMock.verification.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ status: 'NEEDS_REVIEW', source: 'TRANSACTION' }),
+        }),
+      );
+      expect(result.total).toBe(1);
+      expect(result.verifications[0]).toMatchObject({
+        id: 'ver-1',
+        amountMinor: '6000',
+        reason: 'Amount mismatch',
+        requestedBy: 'Fuad',
+        merchant: { businessName: 'Selam Coffee' },
+      });
+    });
+  });
+
+  describe('reviewVerification()', () => {
+    const needsReview = {
+      id: 'ver-1',
+      status: 'NEEDS_REVIEW',
+      source: 'TRANSACTION',
+      merchantId: 'merchant-1',
+      verifiedByUserId: 'user-1',
+      bankCode: 'CBE',
+      bankReference: 'FT26308B3ZN3',
+      amountMinor: 6000n,
+      senderName: 'Abebe',
+      receiverName: 'Selam Coffee',
+      paidAt: new Date('2026-11-10T10:00:00.000Z'),
+    };
+
+    it('approves to VERIFIED, projects the transaction, charges the credit and audits', async () => {
+      prismaMock.verification.findUnique.mockResolvedValue(needsReview);
+      prismaMock.verification.update.mockResolvedValue({});
+      prismaMock.verificationReview.upsert.mockResolvedValue({ id: 'rev-1' });
+      creditsMock.consume.mockResolvedValue({ consumed: 1n, newBalance: 14n, txId: 'tx-1' });
+
+      const result = await service.reviewVerification({
+        verificationId: 'ver-1',
+        decision: 'APPROVE',
+        note: 'Bank statement confirms the transfer.',
+        actorUserId: 'admin-1',
+      });
+
+      expect(result).toMatchObject({
+        id: 'ver-1',
+        status: 'VERIFIED',
+        decision: 'APPROVE',
+        reviewId: 'rev-1',
+        creditsConsumed: '1',
+      });
+      expect(prismaMock.verification.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: 'VERIFIED', errorCode: null }),
+        }),
+      );
+      expect(projectorMock.project).toHaveBeenCalledWith(
+        prismaMock,
+        'ver-1',
+        expect.objectContaining({ status: 'VERIFIED', bankReference: 'FT26308B3ZN3' }),
+      );
+      expect(creditsMock.consume).toHaveBeenCalledWith({
+        merchantId: 'merchant-1',
+        verificationId: 'ver-1',
+        verificationStatus: 'VERIFIED',
+      });
+      expect(auditMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'admin.verification.approved',
+          metadata: expect.objectContaining({ previousStatus: 'NEEDS_REVIEW', note: 'Bank statement confirms the transfer.' }),
+        }),
+      );
+    });
+
+    it('rejects to FAKE without charging or projecting', async () => {
+      prismaMock.verification.findUnique.mockResolvedValue(needsReview);
+      prismaMock.verification.update.mockResolvedValue({});
+      prismaMock.verificationReview.upsert.mockResolvedValue({ id: 'rev-2' });
+
+      const result = await service.reviewVerification({
+        verificationId: 'ver-1',
+        decision: 'REJECT',
+        note: 'Reference does not exist at the bank.',
+        actorUserId: 'admin-1',
+      });
+
+      expect(result).toMatchObject({ status: 'FAKE', decision: 'REJECT' });
+      expect(prismaMock.verification.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            status: 'FAKE',
+            errorCode: 'VERIFICATION_ADMIN_REJECTED',
+          }),
+        }),
+      );
+      expect(projectorMock.project).not.toHaveBeenCalled();
+      expect(creditsMock.consume).not.toHaveBeenCalled();
+      expect(auditMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'admin.verification.rejected' }),
+      );
+    });
+
+    it('refuses a verification that left the queue', async () => {
+      prismaMock.verification.findUnique.mockResolvedValue({
+        ...needsReview,
+        status: 'VERIFIED',
+      });
+
+      await expect(
+        service.reviewVerification({
+          verificationId: 'ver-1',
+          decision: 'APPROVE',
+          note: 'too late',
+          actorUserId: 'admin-1',
+        }),
+      ).rejects.toThrow('no longer in the review queue');
+      expect(prismaMock.verification.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses billing verifications', async () => {
+      prismaMock.verification.findUnique.mockResolvedValue({
+        ...needsReview,
+        source: 'BILLING',
+      });
+
+      await expect(
+        service.reviewVerification({
+          verificationId: 'ver-1',
+          decision: 'APPROVE',
+          note: 'wrong surface',
+          actorUserId: 'admin-1',
+        }),
+      ).rejects.toThrow('Billing verifications');
     });
   });
 });

@@ -164,8 +164,7 @@ export async function changeUserRole(formData: FormData): Promise<void> {
   );
 }
 
-export async function adjustCredits(formData: FormData): Promise<void> {
-  const merchantId = String(formData.get('merchantId') ?? '');
+export async function adjustCredits(formData: FormData): Promise<void> {  const merchantId = String(formData.get('merchantId') ?? '');
   const direction = String(formData.get('direction') ?? 'add');
   const reason = String(formData.get('reason') ?? '').trim();
   const rawAmount = String(formData.get('amount') ?? '').trim();
@@ -208,4 +207,100 @@ export async function adjustCredits(formData: FormData): Promise<void> {
     : withMessage(returnTo, 'notice', summary);
 
   redirect(destination);
+}
+
+// ── Phase C: broadcast notifications ────────────────────────────────────────
+
+const BROADCAST_TYPES = ['info', 'warning', 'system'] as const;
+
+export async function sendNotification(formData: FormData): Promise<void> {
+  const returnTo = safeReturnPath(formData.get('returnTo'), '/notifications');
+  const targetType = String(formData.get('targetType') ?? '');
+  const role = String(formData.get('role') ?? '');
+  const userId = String(formData.get('userId') ?? '');
+  const title = String(formData.get('title') ?? '').trim();
+  const body = String(formData.get('body') ?? '').trim();
+  const type = String(formData.get('type') ?? 'info');
+
+  if (!['ALL', 'ROLE', 'USER'].includes(targetType)) {
+    redirect(withMessage(returnTo, 'error', 'Choose who should receive this notification.'));
+  }
+  if (targetType === 'ROLE' && !['MERCHANT', 'SUB_MERCHANT'].includes(role)) {
+    redirect(withMessage(returnTo, 'error', 'Choose a role for a role-targeted notification.'));
+  }
+  if (targetType === 'USER' && !userId) {
+    redirect(withMessage(returnTo, 'error', 'Search for and select a user first.'));
+  }
+  if (title.length < 3 || body.length < 3) {
+    redirect(withMessage(returnTo, 'error', 'A title and message of at least 3 characters are required.'));
+  }
+  if (!BROADCAST_TYPES.includes(type as (typeof BROADCAST_TYPES)[number])) {
+    redirect(withMessage(returnTo, 'error', 'Unknown notification type.'));
+  }
+
+  const result = await mutate<{
+    id: string;
+    recipientCount: number;
+    rowsWritten: number;
+    targetLabel: string;
+  }>('/admin/notifications/send', {
+    targetType,
+    ...(targetType === 'ROLE' ? { role } : {}),
+    ...(targetType === 'USER' ? { userId } : {}),
+    title,
+    body,
+    type,
+  });
+
+  if (!result.ok) {
+    redirect(withMessage(returnTo, 'error', result.message));
+  }
+
+  revalidatePath('/notifications');
+  const { targetLabel, rowsWritten, recipientCount } = result.data;
+  const summary =
+    rowsWritten === recipientCount
+      ? `Sent to ${rowsWritten} recipient(s) — ${targetLabel}.`
+      : `Sent to ${rowsWritten} of ${recipientCount} recipient(s) — ${targetLabel}. The rest failed and are logged.`;
+  redirect(withMessage(returnTo, 'notice', summary));
+}
+
+// ── Phase C: verification review ────────────────────────────────────────────
+
+export async function reviewVerificationDecision(formData: FormData): Promise<void> {
+  const verificationId = String(formData.get('verificationId') ?? '');
+  const decision = String(formData.get('decision') ?? '');
+  const note = String(formData.get('note') ?? '').trim();
+  const returnTo = safeReturnPath(formData.get('returnTo'), '/review-queue');
+
+  if (decision !== 'APPROVE' && decision !== 'REJECT') {
+    redirect(withMessage(returnTo, 'error', 'Unknown review decision.'));
+  }
+  if (note.length < 3) {
+    redirect(withMessage(returnTo, 'error', 'A note of at least 3 characters is required.'));
+  }
+
+  const result = await mutate<{ id: string; status: string }>(
+    `/admin/verifications/${verificationId}/review`,
+    { decision, note },
+  );
+
+  if (!result.ok) {
+    redirect(withMessage(returnTo, 'error', result.message));
+  }
+
+  revalidatePath('/review-queue');
+  revalidatePath(`/review-queue/${verificationId}`);
+  revalidatePath('/dashboard');
+  revalidatePath('/fraud');
+
+  redirect(
+    withMessage(
+      '/review-queue',
+      'notice',
+      decision === 'APPROVE'
+        ? 'Verification approved as VERIFIED.'
+        : 'Verification rejected as FAKE.',
+    ),
+  );
 }

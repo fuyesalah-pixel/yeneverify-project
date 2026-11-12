@@ -253,3 +253,129 @@ export interface CreditAdjustmentResult {
   ledgerTxId: string;
   reason: string;
 }
+
+// ── Phase C: notifications & review queue ────────────────────────────────
+
+export type BroadcastTargetType = 'ALL' | 'ROLE' | 'USER';
+export type BroadcastType = 'info' | 'warning' | 'system';
+export type BroadcastStatus = 'DELIVERED' | 'PARTIAL' | 'FAILED' | 'IN_APP_ONLY';
+
+export interface NotificationAudience {
+  all: number;
+  merchant: number;
+  subMerchant: number;
+}
+
+export interface NotificationHistoryRow {
+  id: string;
+  title: string;
+  body: string;
+  type: string;
+  targetType: BroadcastTargetType;
+  targetRole: string | null;
+  targetLabel: string;
+  recipientCount: number;
+  sentBy: string;
+  sentAt: string;
+  rowsWritten: number;
+  delivered: number;
+  failed: number;
+  read: number;
+  status: BroadcastStatus;
+}
+
+export interface NotificationHistoryResponse {
+  notifications: NotificationHistoryRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface NotificationRecipientRow {
+  userId: string;
+  fullName: string | null;
+  googleEmail: string | null;
+  phone: string;
+  pushedAt: string | null;
+  pushError: string | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface NotificationDetailResponse {
+  notification: NotificationHistoryRow;
+  recipients: NotificationRecipientRow[];
+}
+
+export interface ReviewQueueRow {
+  id: string;
+  createdAt: string;
+  bankCode: string | null;
+  bankReference: string | null;
+  amountMinor: string | null;
+  reason: string;
+  errorCode: string | null;
+  reviewStatus: string | null;
+  requestedBy: string | null;
+  merchant: { id: string; businessName: string };
+  submittedBy: string | null;
+}
+
+export interface ReviewQueueResponse {
+  verifications: ReviewQueueRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface ReviewDetailResponse {
+  verification: {
+    id: string;
+    status: string;
+    source: string;
+    bankCode: string | null;
+    bankReference: string | null;
+    referenceNormalized: string | null;
+    amountMinor: string | null;
+    senderName: string | null;
+    receiverName: string | null;
+    paidAt: string | null;
+    ocrRawText: string | null;
+    ocrConfidence: number | null;
+    clientOcrText: string | null;
+    clientOcrConfidence: number | null;
+    qrContent: string | null;
+    qrType: string | null;
+    adapterMetadata: Record<string, unknown> | null;
+    errorCode: string | null;
+    errorMessage: string | null;
+    durationMs: number | null;
+    attemptCount: number;
+    startedAt: string;
+    completedAt: string | null;
+    createdAt: string;
+  };
+  merchant: { id: string; businessName: string; creditsBalance: string };
+  submittedBy: { id: string; fullName: string | null; phone: string; googleEmail: string | null };
+  receipt: {
+    id: string;
+    mimeType: string;
+    sizeBytes: number;
+    width: number | null;
+    height: number | null;
+    createdAt: string;
+    expiresAt: string | null;
+  } | null;
+  review: {
+    id: string;
+    status: string;
+    reason: string | null;
+    resolution: string | null;
+    resolvedAt: string | null;
+    createdAt: string;
+    requestedBy: { fullName: string | null } | null;
+    resolvedBy: { fullName: string | null; googleEmail: string | null } | null;
+  } | null;
+}

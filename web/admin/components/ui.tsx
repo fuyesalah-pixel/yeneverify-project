@@ -33,6 +33,7 @@ export function statusTone(status: string | null | undefined): Tone {
     case 'VERIFIED':
     case 'APPROVED':
     case 'RESOLVED':
+    case 'DELIVERED':
       return 'green';
     case 'SUSPENDED':
     case 'PENDING':
@@ -40,12 +41,15 @@ export function statusTone(status: string | null | undefined): Tone {
     case 'NEEDS_REVIEW':
     case 'IN_REVIEW':
     case 'INVITED':
+    case 'PARTIAL':
+    case 'IN_APP_ONLY':
       return 'amber';
     case 'BANNED':
     case 'FAKE':
     case 'DUPLICATE':
     case 'REJECTED':
     case 'ERROR':
+    case 'FAILED':
     case 'REMOVED':
       return 'red';
     case 'EXPIRED':

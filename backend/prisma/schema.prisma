@@ -212,6 +212,14 @@ enum NotificationType {
   @@map("notification_type")
 }
 
+enum AdminBroadcastTarget {
+  ALL
+  ROLE
+  USER
+
+  @@map("admin_broadcast_target")
+}
+
 enum ExportFormat {
   CSV
   PDF
@@ -244,53 +252,53 @@ enum ActorType {
 /// Identity table. Every human actor is a User.
 /// Auth: phone + OTP only. No password. No email in MVP.
 model User {
-  id                    String     @id @db.Uuid
-  phone                 String     @unique
-  phoneVerifiedAt       DateTime?  @map("phone_verified_at") @db.Timestamptz(6)
-  fullName              String     @map("full_name")
-  role                  UserRole
-  status                UserStatus @default(ACTIVE)
-  preferredLanguage     String     @default("en") @map("preferred_language")
-  lastLoginAt           DateTime?  @map("last_login_at") @db.Timestamptz(6)
-  createdAt             DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt             DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt             DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  id                String     @id @db.Uuid
+  phone             String     @unique
+  phoneVerifiedAt   DateTime?  @map("phone_verified_at") @db.Timestamptz(6)
+  fullName          String     @map("full_name")
+  role              UserRole
+  status            UserStatus @default(ACTIVE)
+  preferredLanguage String     @default("en") @map("preferred_language")
+  lastLoginAt       DateTime?  @map("last_login_at") @db.Timestamptz(6)
+  createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime?  @map("deleted_at") @db.Timestamptz(6)
 
   // PIN & Biometric (Step 11)
-  pinHash               String?    @map("pin_hash")
-  pinSetAt              DateTime?  @map("pin_set_at") @db.Timestamptz(6)
-  pinFailedAttempts     Int        @default(0) @map("pin_failed_attempts")
-  pinLockedUntil        DateTime?  @map("pin_locked_until") @db.Timestamptz(6)
-  biometricEnabled      Boolean    @default(false) @map("biometric_enabled")
-  biometricEnabledAt    DateTime?  @map("biometric_enabled_at") @db.Timestamptz(6)
+  pinHash            String?   @map("pin_hash")
+  pinSetAt           DateTime? @map("pin_set_at") @db.Timestamptz(6)
+  pinFailedAttempts  Int       @default(0) @map("pin_failed_attempts")
+  pinLockedUntil     DateTime? @map("pin_locked_until") @db.Timestamptz(6)
+  biometricEnabled   Boolean   @default(false) @map("biometric_enabled")
+  biometricEnabledAt DateTime? @map("biometric_enabled_at") @db.Timestamptz(6)
 
   // Google Sign-In linking (web dashboard + mobile accelerator)
   // Phone remains the primary identity; Google is a linked login method only.
-  googleUid       String?   @unique @map("google_uid")
-  googleEmail     String?   @map("google_email")
-  googleLinkedAt  DateTime? @map("google_linked_at") @db.Timestamptz(6)
+  googleUid      String?   @unique @map("google_uid")
+  googleEmail    String?   @map("google_email")
+  googleLinkedAt DateTime? @map("google_linked_at") @db.Timestamptz(6)
 
   // Phone pairing (Google-first signup). Set when a phone is first paired
   // to this user during onboarding. Null until paired.
-  phonePairedAt   DateTime? @map("phone_paired_at") @db.Timestamptz(6)
+  phonePairedAt DateTime? @map("phone_paired_at") @db.Timestamptz(6)
 
   // Relations
-  devices                 Device[]
-  userDevices             UserDevice[]
-  sessions                Session[]
-  ownedMerchant           Merchant?             @relation("MerchantOwner")
-  subMerchantProfile      SubMerchant?          @relation("SubMerchantUser")
-  uploadedReceipts        Receipt[]             @relation("ReceiptUploader")
-  performedVerifications  Verification[]        @relation("VerificationActor")
-  requestedReviews        VerificationReview[]  @relation("ReviewRequester")
-  resolvedReviews         VerificationReview[]  @relation("ReviewResolver")
-  reviewedBillings        BillingVerification[] @relation("BillingReviewer")
-  notifications           Notification[]
-  exports                 Export[]
-  auditLogs               AuditLog[]
-  creditAdjustments       CreditTransaction[]   @relation("CreditAdjuster")
-  invitedSubMerchants     SubMerchant[]         @relation("SubMerchantInviter")
-  transactions            Transaction[]        @relation("TransactionActor")
+  devices                Device[]
+  userDevices            UserDevice[]
+  sessions               Session[]
+  ownedMerchant          Merchant?             @relation("MerchantOwner")
+  subMerchantProfile     SubMerchant?          @relation("SubMerchantUser")
+  uploadedReceipts       Receipt[]             @relation("ReceiptUploader")
+  performedVerifications Verification[]        @relation("VerificationActor")
+  requestedReviews       VerificationReview[]  @relation("ReviewRequester")
+  resolvedReviews        VerificationReview[]  @relation("ReviewResolver")
+  reviewedBillings       BillingVerification[] @relation("BillingReviewer")
+  notifications          Notification[]
+  exports                Export[]
+  auditLogs              AuditLog[]
+  creditAdjustments      CreditTransaction[]   @relation("CreditAdjuster")
+  invitedSubMerchants    SubMerchant[]         @relation("SubMerchantInviter")
+  transactions           Transaction[]         @relation("TransactionActor")
 
   @@index([role])
   @@index([status])
@@ -318,27 +326,27 @@ model OtpCode {
 
 /// Trusted devices. Max 3 active per user (enforced in service layer).
 model Device {
-  id                String         @id @db.Uuid
-  userId            String         @map("user_id") @db.Uuid
-  deviceFingerprint String         @map("device_fingerprint")
-  platform          DevicePlatform
-  model             String?
-  osVersion         String?        @map("os_version")
-  appVersion        String?        @map("app_version")
-  pushToken         String?        @map("push_token")
-  pushTokenUpdatedAt DateTime?     @map("push_token_updated_at") @db.Timestamptz(6)
-  lastSeenAt        DateTime?      @map("last_seen_at") @db.Timestamptz(6)
-  revokedAt         DateTime?      @map("revoked_at") @db.Timestamptz(6)
-  createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  id                 String         @id @db.Uuid
+  userId             String         @map("user_id") @db.Uuid
+  deviceFingerprint  String         @map("device_fingerprint")
+  platform           DevicePlatform
+  model              String?
+  osVersion          String?        @map("os_version")
+  appVersion         String?        @map("app_version")
+  pushToken          String?        @map("push_token")
+  pushTokenUpdatedAt DateTime?      @map("push_token_updated_at") @db.Timestamptz(6)
+  lastSeenAt         DateTime?      @map("last_seen_at") @db.Timestamptz(6)
+  revokedAt          DateTime?      @map("revoked_at") @db.Timestamptz(6)
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   // Biometric per device (Step 11)
-  biometricEnabled    Boolean    @default(false) @map("biometric_enabled")
+  biometricEnabled   Boolean        @default(false) @map("biometric_enabled")
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   sessions Session[]
 
+  @@unique([userId, deviceFingerprint])
   @@index([userId])
   @@index([pushToken])
-  @@unique([userId, deviceFingerprint])
   @@map("devices")
 }
 
@@ -346,17 +354,17 @@ model Device {
 /// paired to which device fingerprints. Max 2 accounts per device
 /// (enforced in service layer). Phone remains the business identity.
 model UserDevice {
-  id                String     @id @db.Uuid
-  userId            String     @map("user_id") @db.Uuid
-  deviceFingerprint String     @map("device_fingerprint")
-  pairedAt          DateTime   @default(now()) @map("paired_at") @db.Timestamptz(6)
-  lastActiveAt      DateTime?  @map("last_active_at") @db.Timestamptz(6)
+  id                String    @id @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  deviceFingerprint String    @map("device_fingerprint")
+  pairedAt          DateTime  @default(now()) @map("paired_at") @db.Timestamptz(6)
+  lastActiveAt      DateTime? @map("last_active_at") @db.Timestamptz(6)
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, deviceFingerprint])
   @@index([userId])
   @@index([deviceFingerprint])
-  @@unique([userId, deviceFingerprint])
   @@map("user_devices")
 }
 
@@ -385,40 +393,40 @@ model Session {
 /// The tenant. One merchant = one business.
 /// credits_balance is a CACHE — source of truth is credit_transactions.
 model Merchant {
-  id                 String         @id @db.Uuid
-  ownerUserId        String         @unique @map("owner_user_id") @db.Uuid
-  businessName       String         @map("business_name")
-  businessType       String?        @map("business_type")
-  tin                String?
-  address            String?
-  city               String?
-  region             String?
-  status             MerchantStatus @default(PENDING)
-  creditsBalance     BigInt         @default(0) @map("credits_balance")
-  creditsUpdatedAt   DateTime?      @map("credits_updated_at") @db.Timestamptz(6)
-  currentPackageCode PackageCode?   @map("current_package_code")
-  subscriptionId     String?        @map("subscription_id") @db.Uuid
+  id                   String         @id @db.Uuid
+  ownerUserId          String         @unique @map("owner_user_id") @db.Uuid
+  businessName         String         @map("business_name")
+  businessType         String?        @map("business_type")
+  tin                  String?
+  address              String?
+  city                 String?
+  region               String?
+  status               MerchantStatus @default(PENDING)
+  creditsBalance       BigInt         @default(0) @map("credits_balance")
+  creditsUpdatedAt     DateTime?      @map("credits_updated_at") @db.Timestamptz(6)
+  currentPackageCode   PackageCode?   @map("current_package_code")
+  subscriptionId       String?        @map("subscription_id") @db.Uuid
   /// Bank account identifiers used by adapters that need them, e.g.
   /// { "cbe": { "last8": "12345678" }, "abyssinia": { "last5": "12345" } }.
-  verificationAccounts Json         @default("{}") @map("verification_accounts")
-  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt          DateTime?      @map("deleted_at") @db.Timestamptz(6)
+  verificationAccounts Json           @default("{}") @map("verification_accounts")
+  createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt            DateTime?      @map("deleted_at") @db.Timestamptz(6)
 
-  owner         User                  @relation("MerchantOwner", fields: [ownerUserId], references: [id])
-  currentSubscription Subscription?     @relation("CurrentMerchantSubscription", fields: [subscriptionId], references: [id], onDelete: SetNull)
-  subMerchants  SubMerchant[]
-  subscriptions Subscription[]
-  creditTxs     CreditTransaction[]
-  billingVerifs BillingVerification[]
-  receipts      Receipt[]
-  verifications Verification[]
-  transactions  Transaction[]
-  reviews       VerificationReview[]
-  notifications Notification[]
-  exports       Export[]
-  auditLogs     AuditLog[]
-  snapshots     AnalyticsSnapshot[]
+  owner                 User                   @relation("MerchantOwner", fields: [ownerUserId], references: [id])
+  currentSubscription   Subscription?          @relation("CurrentMerchantSubscription", fields: [subscriptionId], references: [id], onDelete: SetNull)
+  subMerchants          SubMerchant[]
+  subscriptions         Subscription[]
+  creditTxs             CreditTransaction[]
+  billingVerifs         BillingVerification[]
+  receipts              Receipt[]
+  verifications         Verification[]
+  transactions          Transaction[]
+  reviews               VerificationReview[]
+  notifications         Notification[]
+  exports               Export[]
+  auditLogs             AuditLog[]
+  snapshots             AnalyticsSnapshot[]
   duplicateFingerprints DuplicateFingerprint[]
 
   @@index([status])
@@ -442,9 +450,9 @@ model SubMerchant {
   updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt       DateTime?         @map("deleted_at") @db.Timestamptz(6)
 
-  merchant  Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
-  user      User     @relation("SubMerchantUser", fields: [userId], references: [id])
-  invitedBy User?    @relation("SubMerchantInviter", fields: [invitedByUserId], references: [id])
+  merchant     Merchant      @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  user         User          @relation("SubMerchantUser", fields: [userId], references: [id])
+  invitedBy    User?         @relation("SubMerchantInviter", fields: [invitedByUserId], references: [id])
   transactions Transaction[]
 
   @@index([merchantId])
@@ -489,11 +497,11 @@ model Subscription {
   createdAt             DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  merchant      Merchant              @relation(fields: [merchantId], references: [id], onDelete: Cascade)
-  currentForMerchants Merchant[]      @relation("CurrentMerchantSubscription")
-  package       Package               @relation(fields: [packageCode], references: [code])
-  creditTxs     CreditTransaction[]
-  billingVerifs BillingVerification[]
+  merchant            Merchant              @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  currentForMerchants Merchant[]            @relation("CurrentMerchantSubscription")
+  package             Package               @relation(fields: [packageCode], references: [code])
+  creditTxs           CreditTransaction[]
+  billingVerifs       BillingVerification[]
 
   @@index([merchantId])
   @@index([packageCode])
@@ -560,7 +568,7 @@ model BillingVerification {
   status               BillingStatus @default(PENDING)
   reviewerUserId       String?       @map("reviewer_user_id") @db.Uuid
   reviewedAt           DateTime?     @map("reviewed_at") @db.Timestamptz(6)
-  reviewNote           String?       @map("review_note")  // NOT unique: one extended (renewed) subscription is the target of
+  reviewNote           String?       @map("review_note") // NOT unique: one extended (renewed) subscription is the target of
   // several approved billing rows — a renewal billing links the SAME
   // subscription id again. Uniqueness here made the second approval
   // throw U-2350; multiple billings → one subscription, one merchant.
@@ -568,13 +576,13 @@ model BillingVerification {
   createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt            DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  merchant      Merchant            @relation(fields: [merchantId], references: [id])
-  package       Package             @relation(fields: [packageCode], references: [code])
-  receipt       Receipt?            @relation(fields: [receiptId], references: [id])
-  verification  Verification?       @relation(fields: [verificationId], references: [id])
-  reviewer      User?               @relation("BillingReviewer", fields: [reviewerUserId], references: [id])
-  subscription  Subscription?       @relation(fields: [subscriptionId], references: [id])
-  creditTxs     CreditTransaction[]
+  merchant     Merchant            @relation(fields: [merchantId], references: [id])
+  package      Package             @relation(fields: [packageCode], references: [code])
+  receipt      Receipt?            @relation(fields: [receiptId], references: [id])
+  verification Verification?       @relation(fields: [verificationId], references: [id])
+  reviewer     User?               @relation("BillingReviewer", fields: [reviewerUserId], references: [id])
+  subscription Subscription?       @relation(fields: [subscriptionId], references: [id])
+  creditTxs    CreditTransaction[]
 
   @@index([merchantId])
   @@index([status])
@@ -650,13 +658,13 @@ model Verification {
   createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  merchant        Merchant             @relation(fields: [merchantId], references: [id])
-  verifiedBy      User                 @relation("VerificationActor", fields: [verifiedByUserId], references: [id])
-  receipt         Receipt              @relation(fields: [receiptId], references: [id])
-  transaction     Transaction?
-  review          VerificationReview?
-  creditTxs       CreditTransaction[]
-  billingVerif    BillingVerification?
+  merchant             Merchant              @relation(fields: [merchantId], references: [id])
+  verifiedBy           User                  @relation("VerificationActor", fields: [verifiedByUserId], references: [id])
+  receipt              Receipt               @relation(fields: [receiptId], references: [id])
+  transaction          Transaction?
+  review               VerificationReview?
+  creditTxs            CreditTransaction[]
+  billingVerif         BillingVerification?
   duplicateFingerprint DuplicateFingerprint?
 
   @@index([merchantId])
@@ -807,21 +815,43 @@ model Notification {
   @@map("notifications")
 }
 
+/// Admin-composed broadcast. One row per send; the per-recipient
+/// Notification rows carry its id in data.adminNotificationId.
+/// Delivery counts are derived from those rows at read time so a
+/// fire-and-forget push that lands later is never missed.
+model AdminNotification {
+  id             String               @id @db.Uuid
+  title          String
+  body           String
+  /// info | warning | system — inbox rows are written as SYSTEM type.
+  type           String               @db.VarChar(16)
+  targetType     AdminBroadcastTarget @map("target_type")
+  targetRole     UserRole?            @map("target_role")
+  targetUserId   String?              @map("target_user_id") @db.Uuid
+  targetLabel    String               @map("target_label")
+  recipientCount Int                  @map("recipient_count")
+  sentByUserId   String               @map("sent_by_user_id") @db.Uuid
+  createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt(sort: Desc)])
+  @@map("admin_notifications")
+}
+
 /// Async export jobs (CSV / PDF).
 model Export {
-  id               String       @id @db.Uuid
-  merchantId       String       @map("merchant_id") @db.Uuid
-  requestedByUserId String      @map("requested_by_user_id") @db.Uuid
-  format           ExportFormat
-  params           Json
-  status           ExportStatus @default(QUEUED)
-  storageKey       String?      @map("storage_key")
-  fileSizeBytes    Int?         @map("file_size_bytes")
-  rowCount         Int?         @map("row_count")
-  errorMessage     String?      @map("error_message")
-  expiresAt        DateTime?    @map("expires_at") @db.Timestamptz(6)
-  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                String       @id @db.Uuid
+  merchantId        String       @map("merchant_id") @db.Uuid
+  requestedByUserId String       @map("requested_by_user_id") @db.Uuid
+  format            ExportFormat
+  params            Json
+  status            ExportStatus @default(QUEUED)
+  storageKey        String?      @map("storage_key")
+  fileSizeBytes     Int?         @map("file_size_bytes")
+  rowCount          Int?         @map("row_count")
+  errorMessage      String?      @map("error_message")
+  expiresAt         DateTime?    @map("expires_at") @db.Timestamptz(6)
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   merchant    Merchant @relation(fields: [merchantId], references: [id])
   requestedBy User     @relation(fields: [requestedByUserId], references: [id])

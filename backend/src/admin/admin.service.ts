@@ -6,6 +6,7 @@
 
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -30,6 +31,10 @@ import { AuditService } from '../audit/audit.service';
 import { RedisService } from '../redis/redis.service';
 import { CreditsService } from '../credits/credits.service';
 import { LOW_CREDITS_WARNING_THRESHOLD } from '../credits/credits.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { StorageService } from '../storage/storage.service';
+import { TransactionProjector } from '../verification/verifications/transaction-projector';
+import { newId } from '../common/utils/id.util';
 import { FIREBASE_ADMIN } from '../common/firebase/firebase-admin.provider';
 
 const ADMIN_RATE_LIMIT_TTL_SECONDS = 60 * 60; // 1 hour
@@ -83,6 +88,9 @@ export class AdminService {
     private readonly audit: AuditService,
     private readonly redis: RedisService,
     private readonly credits: CreditsService,
+    private readonly notifications: NotificationsService,
+    private readonly storage: StorageService,
+    private readonly projector: TransactionProjector,
     @Inject(FIREBASE_ADMIN) private readonly firebaseAdmin: admin.app.App,
   ) {}
 
@@ -342,16 +350,10 @@ export class AdminService {
 
     const search = dto.search?.trim();
 
-    // Package and business-name filtering both live on the owned merchant.
-    const merchantFilter: Prisma.MerchantWhereInput = {};
+    // Package filtering lives on the owned merchant; business-name matching is
+    // part of the search OR below, otherwise it would AND away email/phone hits.
     if (dto.package) {
-      merchantFilter.currentPackageCode = dto.package;
-    }
-    if (search) {
-      merchantFilter.businessName = { contains: search, mode: 'insensitive' };
-    }
-    if (Object.keys(merchantFilter).length > 0) {
-      where.ownedMerchant = merchantFilter;
+      where.ownedMerchant = { currentPackageCode: dto.package };
     }
 
     if (search) {
@@ -1503,6 +1505,694 @@ export class AdminService {
     };
   }
 
+  // ── Phase C: broadcast notifications ────────────────────────────────────
+
+  /** Active non-admin accounts that can receive a broadcast, by target. */
+  async getNotificationAudience() {
+    const base: Prisma.UserWhereInput = {
+      status: UserStatus.ACTIVE,
+      deletedAt: null,
+      role: { in: [UserRole.MERCHANT, UserRole.SUB_MERCHANT] },
+    };
+    const [all, merchant, subMerchant] = await this.prisma.$transaction([
+      this.prisma.user.count({ where: base }),
+      this.prisma.user.count({ where: { ...base, role: UserRole.MERCHANT } }),
+      this.prisma.user.count({ where: { ...base, role: UserRole.SUB_MERCHANT } }),
+    ]);
+    return { all, merchant, subMerchant };
+  }
+
+  /**
+   * Compose-once, fan-out broadcast. Per-recipient inbox rows go through
+   * NotificationsService.notify() (the single creation choke point) and
+   * carry the campaign id in data.adminNotificationId; each row then pushes
+   * fire-and-forget as usual. The campaign row is the history record.
+   */
+  async sendNotification(input: {
+    targetType: 'ALL' | 'ROLE' | 'USER';
+    role?: 'MERCHANT' | 'SUB_MERCHANT';
+    userId?: string;
+    title: string;
+    body: string;
+    type: 'info' | 'warning' | 'system';
+    actorUserId: string;
+    ip?: string;
+    userAgent?: string;
+  }) {
+    const { recipients, targetLabel } = await this.resolveBroadcastRecipients(input);
+
+    if (recipients.length === 0) {
+      throw new BadRequestException('No active accounts match this target.');
+    }
+
+    const campaignId = newId();
+    await this.prisma.adminNotification.create({
+      data: {
+        id: campaignId,
+        title: input.title,
+        body: input.body,
+        type: input.type,
+        targetType: input.targetType,
+        targetRole: input.targetType === 'ROLE' ? (input.role as UserRole) : null,
+        targetUserId: input.targetType === 'USER' ? input.userId : null,
+        targetLabel,
+        recipientCount: recipients.length,
+        sentByUserId: input.actorUserId,
+      },
+    });
+
+    let written = 0;
+    const CHUNK = 20;
+    for (let i = 0; i < recipients.length; i += CHUNK) {
+      const chunk = recipients.slice(i, i + CHUNK);
+      const results = await Promise.all(
+        chunk.map((user) =>
+          this.notifications
+            .notify({
+              userId: user.id,
+              type: 'SYSTEM',
+              title: input.title,
+              body: input.body,
+              data: {
+                adminNotificationId: campaignId,
+                adminType: input.type,
+                targetType: input.targetType,
+              },
+            })
+            .then(() => true)
+            .catch((err: unknown) => {
+              this.logger.error(
+                `admin.notification.fanout_failed campaignId=${campaignId} userId=${user.id} error=${err instanceof Error ? err.message : String(err)}`,
+              );
+              return false;
+            }),
+        ),
+      );
+      written += results.filter(Boolean).length;
+    }
+
+    this.audit.log({
+      actorType: 'ADMIN',
+      actorUserId: input.actorUserId,
+      action: 'admin.notification.sent',
+      targetType: 'admin_notification',
+      targetId: campaignId,
+      ip: input.ip,
+      userAgent: input.userAgent,
+      metadata: {
+        targetType: input.targetType,
+        targetRole: input.targetType === 'ROLE' ? input.role : null,
+        targetUserId: input.targetType === 'USER' ? input.userId : null,
+        recipientCount: recipients.length,
+        rowsWritten: written,
+        type: input.type,
+        title: input.title,
+      },
+    });
+
+    return {
+      id: campaignId,
+      recipientCount: recipients.length,
+      rowsWritten: written,
+      targetLabel,
+    };
+  }
+
+  /**
+   * Delivery counts are derived from the recipient rows, not stored on the
+   * campaign: pushes settle after the send returns, and a cached count would
+   * understate delivery forever.
+   */
+  async getNotificationHistory(dto: { page?: number; pageSize?: number }) {
+    const page = Math.max(1, dto.page ?? 1);
+    const pageSize = Math.min(50, Math.max(1, dto.pageSize ?? 20));
+
+    const [rows, countRows] = await Promise.all([
+      this.prisma.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          body: string;
+          type: string;
+          targetType: 'ALL' | 'ROLE' | 'USER';
+          targetRole: string | null;
+          targetLabel: string;
+          recipientCount: number;
+          sentByName: string | null;
+          sentByEmail: string | null;
+          createdAt: Date;
+          rowsWritten: number;
+          delivered: number;
+          failed: number;
+          read: number;
+        }>
+      >`
+        SELECT a.id,
+               a.title,
+               a.body,
+               a.type,
+               a.target_type::text AS "targetType",
+               a.target_role::text AS "targetRole",
+               a.target_label AS "targetLabel",
+               a.recipient_count::int AS "recipientCount",
+               u.full_name AS "sentByName",
+               u.google_email AS "sentByEmail",
+               a.created_at AS "createdAt",
+               COALESCE(s.total, 0)::int AS "rowsWritten",
+               COALESCE(s.delivered, 0)::int AS "delivered",
+               COALESCE(s.failed, 0)::int AS "failed",
+               COALESCE(s.read, 0)::int AS "read"
+        FROM admin_notifications a
+        LEFT JOIN users u ON u.id = a.sent_by_user_id
+        LEFT JOIN LATERAL (
+          SELECT count(*)::int AS total,
+                 count(*) FILTER (WHERE n.pushed_at IS NOT NULL)::int AS delivered,
+                 count(*) FILTER (WHERE n.push_error IS NOT NULL)::int AS failed,
+                 count(*) FILTER (WHERE n.read_at IS NOT NULL)::int AS read
+          FROM notifications n
+          WHERE n.data->>'adminNotificationId' = a.id::text
+        ) s ON true
+        ORDER BY a.created_at DESC
+        LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}
+      `,
+      this.prisma.$queryRaw<Array<{ count: number }>>`
+        SELECT COUNT(*)::int AS count FROM admin_notifications
+      `,
+    ]);
+
+    const total = countRows[0]?.count ?? 0;
+
+    return {
+      notifications: rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        body: row.body,
+        type: row.type,
+        targetType: row.targetType,
+        targetRole: row.targetRole,
+        targetLabel: row.targetLabel,
+        recipientCount: row.recipientCount,
+        sentBy: row.sentByName ?? row.sentByEmail ?? 'Admin',
+        sentAt: row.createdAt.toISOString(),
+        rowsWritten: row.rowsWritten,
+        delivered: row.delivered,
+        failed: row.failed,
+        read: row.read,
+        status: broadcastStatus(row.rowsWritten, row.delivered, row.failed),
+      })),
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  /** One campaign plus a per-recipient delivery breakdown. */
+  async getNotificationDetail(id: string) {
+    const campaign = await this.prisma.adminNotification.findUnique({
+      where: { id },
+    });
+    if (!campaign) throw new NotFoundException('Notification not found.');
+
+    const sender = await this.prisma.user.findUnique({
+      where: { id: campaign.sentByUserId },
+      select: { fullName: true, googleEmail: true },
+    });
+
+    const recipients = await this.prisma.$queryRaw<
+      Array<{
+        userId: string;
+        fullName: string | null;
+        googleEmail: string | null;
+        phone: string;
+        pushedAt: Date | null;
+        pushError: string | null;
+        readAt: Date | null;
+        createdAt: Date;
+      }>
+    >`
+      SELECT n.user_id AS "userId",
+             u.full_name AS "fullName",
+             u.google_email AS "googleEmail",
+             u.phone,
+             n.pushed_at AS "pushedAt",
+             n.push_error AS "pushError",
+             n.read_at AS "readAt",
+             n.created_at AS "createdAt"
+      FROM notifications n
+      JOIN users u ON u.id = n.user_id
+      WHERE n.data->>'adminNotificationId' = ${id}
+      ORDER BY n.created_at ASC
+      LIMIT 500
+    `;
+
+    const delivered = recipients.filter((r) => r.pushedAt).length;
+    const failed = recipients.filter((r) => r.pushError).length;
+
+    return {
+      notification: {
+        id: campaign.id,
+        title: campaign.title,
+        body: campaign.body,
+        type: campaign.type,
+        targetType: campaign.targetType,
+        targetRole: campaign.targetRole,
+        targetUserId: campaign.targetUserId,
+        targetLabel: campaign.targetLabel,
+        recipientCount: campaign.recipientCount,
+        sentBy: sender?.fullName ?? sender?.googleEmail ?? 'Admin',
+        sentAt: campaign.createdAt.toISOString(),
+        rowsWritten: recipients.length,
+        delivered,
+        failed,
+        read: recipients.filter((r) => r.readAt).length,
+        status: broadcastStatus(recipients.length, delivered, failed),
+      },
+      recipients: recipients.map((r) => ({
+        userId: r.userId,
+        fullName: r.fullName,
+        googleEmail: r.googleEmail,
+        phone: r.phone,
+        pushedAt: r.pushedAt ? r.pushedAt.toISOString() : null,
+        pushError: r.pushError,
+        readAt: r.readAt ? r.readAt.toISOString() : null,
+        createdAt: r.createdAt.toISOString(),
+      })),
+    };
+  }
+
+  private async resolveBroadcastRecipients(input: {
+    targetType: 'ALL' | 'ROLE' | 'USER';
+    role?: 'MERCHANT' | 'SUB_MERCHANT';
+    userId?: string;
+  }): Promise<{
+    recipients: Array<{ id: string }>;
+    targetLabel: string;
+  }> {
+    if (input.targetType === 'USER') {
+      const user = await this.prisma.user.findUnique({
+        where: { id: input.userId },
+        select: { id: true, fullName: true, googleEmail: true, role: true, status: true, deletedAt: true },
+      });
+      if (!user || user.deletedAt) throw new NotFoundException('User not found.');
+      if (user.role === UserRole.ADMIN) {
+        throw new BadRequestException('Admin accounts cannot receive broadcast notifications.');
+      }
+      return {
+        recipients: [{ id: user.id }],
+        targetLabel: user.fullName || user.googleEmail || 'Selected user',
+      };
+    }
+
+    const where: Prisma.UserWhereInput = {
+      status: UserStatus.ACTIVE,
+      deletedAt: null,
+      role: input.targetType === 'ROLE' ? (input.role as UserRole) : { not: UserRole.ADMIN },
+    };
+    if (input.targetType === 'ALL') {
+      where.role = { in: [UserRole.MERCHANT, UserRole.SUB_MERCHANT] };
+    }
+
+    const recipients = await this.prisma.user.findMany({ where, select: { id: true } });
+
+    return {
+      recipients,
+      targetLabel:
+        input.targetType === 'ALL'
+          ? 'All merchants'
+          : input.role === 'SUB_MERCHANT'
+            ? 'All sub-merchants'
+            : 'All merchants (owners)',
+    };
+  }
+
+  // ── Phase C: verification review queue ──────────────────────────────────
+
+  /**
+   * NEEDS_REVIEW verifications awaiting an admin decision. Billing
+   * verifications are excluded: their resolution drives credit purchases
+   * and belongs to the billing flow, not this console.
+   */
+  async getReviewQueue(dto: { page?: number; pageSize?: number; search?: string }) {
+    const page = Math.max(1, dto.page ?? 1);
+    const pageSize = Math.min(50, Math.max(1, dto.pageSize ?? 20));
+    const search = dto.search?.trim();
+
+    const where: Prisma.VerificationWhereInput = {
+      status: 'NEEDS_REVIEW',
+      source: 'TRANSACTION',
+      ...(search
+        ? {
+            OR: [
+              { bankReference: { contains: search, mode: 'insensitive' } },
+              { merchant: { businessName: { contains: search, mode: 'insensitive' } } },
+            ],
+          }
+        : {}),
+    };
+
+    const [rows, total] = await Promise.all([
+      this.prisma.verification.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: {
+          id: true,
+          createdAt: true,
+          bankCode: true,
+          bankReference: true,
+          amountMinor: true,
+          errorCode: true,
+          errorMessage: true,
+          merchant: { select: { id: true, businessName: true } },
+          verifiedBy: { select: { fullName: true, googleEmail: true } },
+          review: {
+            select: {
+              id: true,
+              status: true,
+              reason: true,
+              requestedBy: { select: { fullName: true } },
+            },
+          },
+        },
+      }),
+      this.prisma.verification.count({ where }),
+    ]);
+
+    return {
+      verifications: rows.map((row) => ({
+        id: row.id,
+        createdAt: row.createdAt.toISOString(),
+        bankCode: row.bankCode,
+        bankReference: row.bankReference,
+        amountMinor: row.amountMinor !== null ? row.amountMinor.toString() : null,
+        reason: row.review?.reason ?? row.errorMessage ?? row.errorCode ?? 'Flagged for review',
+        errorCode: row.errorCode,
+        reviewStatus: row.review?.status ?? null,
+        requestedBy: row.review?.requestedBy?.fullName ?? null,
+        merchant: row.merchant,
+        submittedBy: row.verifiedBy?.fullName ?? row.verifiedBy?.googleEmail ?? null,
+      })),
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  /** Everything an admin needs to decide: receipt, OCR text, adapter result. */
+  async getReviewDetail(id: string) {
+    const row = await this.prisma.verification.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        status: true,
+        source: true,
+        bankCode: true,
+        bankReference: true,
+        referenceNormalized: true,
+        amountMinor: true,
+        senderName: true,
+        receiverName: true,
+        paidAt: true,
+        ocrRawText: true,
+        ocrConfidence: true,
+        clientOcrText: true,
+        clientOcrConfidence: true,
+        qrContent: true,
+        qrType: true,
+        adapterMetadata: true,
+        errorCode: true,
+        errorMessage: true,
+        durationMs: true,
+        attemptCount: true,
+        startedAt: true,
+        completedAt: true,
+        createdAt: true,
+        merchant: {
+          select: { id: true, businessName: true, creditsBalance: true },
+        },
+        verifiedBy: { select: { id: true, fullName: true, phone: true, googleEmail: true } },
+        receipt: {
+          select: {
+            id: true,
+            mimeType: true,
+            sizeBytes: true,
+            width: true,
+            height: true,
+            createdAt: true,
+            expiresAt: true,
+          },
+        },
+        review: {
+          select: {
+            id: true,
+            status: true,
+            reason: true,
+            resolution: true,
+            resolvedAt: true,
+            createdAt: true,
+            requestedBy: { select: { fullName: true } },
+            resolvedBy: { select: { fullName: true, googleEmail: true } },
+          },
+        },
+      },
+    });
+
+    if (!row) throw new NotFoundException('Verification not found.');
+
+    return {
+      verification: {
+        id: row.id,
+        status: row.status,
+        source: row.source,
+        bankCode: row.bankCode,
+        bankReference: row.bankReference,
+        referenceNormalized: row.referenceNormalized,
+        amountMinor: row.amountMinor !== null ? row.amountMinor.toString() : null,
+        senderName: row.senderName,
+        receiverName: row.receiverName,
+        paidAt: row.paidAt ? row.paidAt.toISOString() : null,
+        ocrRawText: row.ocrRawText,
+        ocrConfidence: row.ocrConfidence !== null ? Number(row.ocrConfidence) : null,
+        clientOcrText: row.clientOcrText,
+        clientOcrConfidence:
+          row.clientOcrConfidence !== null ? Number(row.clientOcrConfidence) : null,
+        qrContent: row.qrContent,
+        qrType: row.qrType,
+        adapterMetadata: (row.adapterMetadata as Record<string, unknown> | null) ?? null,
+        errorCode: row.errorCode,
+        errorMessage: row.errorMessage,
+        durationMs: row.durationMs,
+        attemptCount: row.attemptCount,
+        startedAt: row.startedAt.toISOString(),
+        completedAt: row.completedAt ? row.completedAt.toISOString() : null,
+        createdAt: row.createdAt.toISOString(),
+      },
+      merchant: {
+        id: row.merchant.id,
+        businessName: row.merchant.businessName,
+        creditsBalance: row.merchant.creditsBalance.toString(),
+      },
+      submittedBy: row.verifiedBy,
+      receipt: row.receipt
+        ? {
+            ...row.receipt,
+            createdAt: row.receipt.createdAt.toISOString(),
+            expiresAt: row.receipt.expiresAt ? row.receipt.expiresAt.toISOString() : null,
+          }
+        : null,
+      review: row.review
+        ? {
+            ...row.review,
+            resolvedAt: row.review.resolvedAt ? row.review.resolvedAt.toISOString() : null,
+            createdAt: row.review.createdAt.toISOString(),
+          }
+        : null,
+    };
+  }
+
+  /** Raw receipt bytes for the admin image viewer (driver-agnostic). */
+  async getVerificationReceipt(id: string): Promise<{ body: Buffer; mimeType: string }> {
+    const row = await this.prisma.verification.findUnique({
+      where: { id },
+      select: { receipt: { select: { storageKey: true, mimeType: true, deletedAt: true } } },
+    });
+    if (!row) throw new NotFoundException('Verification not found.');
+    if (!row.receipt || row.receipt.deletedAt) {
+      throw new NotFoundException('This verification has no stored receipt image.');
+    }
+
+    const body = await this.storage.getObject(row.receipt.storageKey);
+    return { body, mimeType: row.receipt.mimeType };
+  }
+
+  /**
+   * Admin decision on a NEEDS_REVIEW verification.
+   *
+   * APPROVE promotes to VERIFIED, projects the Transaction row when the
+   * receipt carries the fields, and charges the credit the merchant never
+   * paid for the review (CREDIT_COST.VERIFIED) — best effort, exactly like
+   * the worker: a billing failure never invalidates a verdict.
+   * REJECT marks FAKE; it removes nothing because NEEDS_REVIEW is never
+   * projected or charged.
+   */
+  async reviewVerification(input: {
+    verificationId: string;
+    decision: 'APPROVE' | 'REJECT';
+    note: string;
+    actorUserId: string;
+    ip?: string;
+    userAgent?: string;
+  }) {
+    const row = await this.prisma.verification.findUnique({
+      where: { id: input.verificationId },
+      select: {
+        id: true,
+        status: true,
+        source: true,
+        merchantId: true,
+        verifiedByUserId: true,
+        bankCode: true,
+        bankReference: true,
+        amountMinor: true,
+        senderName: true,
+        receiverName: true,
+        paidAt: true,
+      },
+    });
+
+    if (!row) throw new NotFoundException('Verification not found.');
+    if (row.source === 'BILLING') {
+      throw new BadRequestException(
+        'Billing verifications are resolved by the billing flow, not the review queue.',
+      );
+    }
+    if (row.status !== 'NEEDS_REVIEW') {
+      throw new ConflictException(
+        `This verification is no longer in the review queue (status ${row.status}).`,
+      );
+    }
+
+    const approve = input.decision === 'APPROVE';
+    const nextStatus = approve ? 'VERIFIED' : 'FAKE';
+    const reviewResolution = approve ? 'APPROVED' : 'REJECTED';
+    const resolvedAt = new Date();
+
+    const reviewId = await this.prisma.$transaction(async (tx) => {
+      await tx.verification.update({
+        where: { id: row.id },
+        data: {
+          status: nextStatus,
+          errorCode: approve ? null : 'VERIFICATION_ADMIN_REJECTED',
+          errorMessage: approve ? null : input.note,
+        },
+      });
+
+      const review = await tx.verificationReview.upsert({
+        where: { verificationId: row.id },
+        update: {
+          status: 'RESOLVED',
+          resolution: `${reviewResolution}: ${input.note}`,
+          resolvedByUserId: input.actorUserId,
+          resolvedAt,
+        },
+        create: {
+          id: newId(),
+          verificationId: row.id,
+          merchantId: row.merchantId,
+          reason: input.note,
+          status: 'RESOLVED',
+          resolution: `${reviewResolution}: ${input.note}`,
+          resolvedByUserId: input.actorUserId,
+          resolvedAt,
+        },
+      });
+
+      if (approve && row.amountMinor && row.bankCode && row.bankReference && row.paidAt) {
+        await this.projector.project(tx, row.id, {
+          status: 'VERIFIED',
+          bankCode: row.bankCode,
+          bankReference: row.bankReference,
+          amountMinor: row.amountMinor,
+          senderName: row.senderName ?? undefined,
+          receiverName: row.receiverName ?? undefined,
+          paidAt: row.paidAt,
+        });
+      }
+
+      return review.id;
+    });
+
+    let creditsConsumed: string | null = null;
+    if (approve) {
+      try {
+        const consume = await this.credits.consume({
+          merchantId: row.merchantId,
+          verificationId: row.id,
+          verificationStatus: 'VERIFIED',
+        });
+        creditsConsumed = consume.consumed.toString();
+      } catch (err) {
+        this.logger.error(
+          `admin.review.consume_failed verificationId=${row.id} merchantId=${row.merchantId} error=${err instanceof Error ? err.message : String(err)}`,
+        );
+        this.audit.log({
+          actorType: 'ADMIN',
+          actorUserId: input.actorUserId,
+          action: 'credits.consume_failed',
+          targetType: 'verification',
+          targetId: row.id,
+          metadata: {
+            merchantId: row.merchantId,
+            verificationStatus: 'VERIFIED',
+            reason: err instanceof Error ? err.message : String(err),
+          },
+        });
+      }
+    }
+
+    this.notifications
+      .notify({
+        userId: row.verifiedByUserId,
+        merchantId: row.merchantId,
+        type: 'VERIFICATION_RESULT',
+        title: approve ? 'Verification approved' : 'Verification rejected',
+        body: approve
+          ? 'An admin reviewed your receipt and confirmed it as verified.'
+          : 'An admin reviewed your receipt and could not verify it against bank records.',
+        data: { verificationId: row.id, status: nextStatus, review: reviewResolution },
+      })
+      .catch(() => undefined);
+
+    this.audit.log({
+      actorType: 'ADMIN',
+      actorUserId: input.actorUserId,
+      action: `admin.verification.${approve ? 'approved' : 'rejected'}`,
+      targetType: 'verification',
+      targetId: row.id,
+      ip: input.ip,
+      userAgent: input.userAgent,
+      metadata: {
+        merchantId: row.merchantId,
+        previousStatus: row.status,
+        status: nextStatus,
+        reviewId,
+        note: input.note,
+        creditsConsumed,
+      },
+    });
+
+    return {
+      id: row.id,
+      status: nextStatus,
+      decision: input.decision,
+      reviewId,
+      creditsConsumed,
+    };
+  }
+
   /**
    * Verify a Google ID token. Separate method so tests can stub it.
    *
@@ -1579,8 +2269,7 @@ export class AdminService {
     return `+2519000000${String(index + 1).padStart(2, '0')}`;
   }
 
-  private parseTtl(ttl: string): number {
-    const match = ttl.match(/^(\d+)([smhd])$/);
+  private parseTtl(ttl: string): number {    const match = ttl.match(/^(\d+)([smhd])$/);
     if (!match) return 15 * 60 * 1000;
     const value = parseInt(match[1], 10);
     switch (match[2]) {
@@ -1596,4 +2285,21 @@ export class AdminService {
         return 15 * 60 * 1000;
     }
   }
+}
+
+/**
+ * Broadcast delivery state, derived from recipient rows:
+ *   DELIVERED   every inbox row's push was accepted
+ *   PARTIAL     some pushed, some failed or still pending
+ *   FAILED      rows exist and not one push succeeded
+ *   IN_APP_ONLY no recipient had a push target (no devices / mock push)
+ */
+function broadcastStatus(
+  rowsWritten: number,
+  delivered: number,
+  failed: number,
+): 'DELIVERED' | 'PARTIAL' | 'FAILED' | 'IN_APP_ONLY' {
+  if (rowsWritten === 0) return 'FAILED';
+  if (delivered === 0) return failed > 0 ? 'FAILED' : 'IN_APP_ONLY';
+  return delivered >= rowsWritten ? 'DELIVERED' : 'PARTIAL';
 }
